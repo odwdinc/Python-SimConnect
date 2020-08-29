@@ -114,7 +114,6 @@ class SIMCONNECT_RECV_ID(CtypesEnum):
 	SIMCONNECT_RECV_ID_EVENT_RACE_END = 25
 	SIMCONNECT_RECV_ID_EVENT_RACE_LAP = 26
 
-
 # Data data types
 class SIMCONNECT_DATATYPE(CtypesEnum):
 	SIMCONNECT_DATATYPE_INVALID = 0        # invalid data type
@@ -728,6 +727,14 @@ class SIMCONNECT_DATA_XYZ(Structure):  #
 	]
 
 
+class Request():
+	def __init__(self, _DATA_DEFINITION_ID=SIMCONNECT_DATA_DEFINITION_ID, _DATA_REQUEST_ID=SIMCONNECT_DATA_REQUEST_ID, _outputData=None):
+		self.DATA_DEFINITION_ID = _DATA_DEFINITION_ID
+		self.DATA_REQUEST_ID = _DATA_REQUEST_ID
+		self.definitions = []
+		self.outputData = _outputData
+
+
 class PythonSimConnect():
 
 	# TODO: update callbackfunction to expand functions.
@@ -743,13 +750,12 @@ class PythonSimConnect():
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE:
 			pObjData = cast(pData, POINTER(SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE)).contents
 			dwRequestID = pObjData.dwRequestID
-			if dwRequestID == DATA_REQUEST_ID.REQUEST_1:
-				self.out_struct_data = cast(pObjData.dwData, POINTER(self.out_struct)).contents
-			#self.RequestData()
+			for _request in self.Requests:
+				if dwRequestID == _request.DATA_REQUEST_ID:
+					self.out_data[_request.DATA_REQUEST_ID] = cast(pObjData.dwData, POINTER(_request.outputData)).contents
 
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
 			print("SIM OPEN")
-			#self.RequestData()
 
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_QUIT:
 			self.quit = 1
@@ -759,7 +765,6 @@ class PythonSimConnect():
 
 	def __init__(
 		self,
-		_out,
 		_CLIENT_EVENT_ID=SIMCONNECT_CLIENT_EVENT_ID,
 		_NOTIFICATION_GROUP_ID=SIMCONNECT_NOTIFICATION_GROUP_ID,
 		_DATA_DEFINITION_ID=SIMCONNECT_DATA_DEFINITION_ID,
@@ -768,7 +773,6 @@ class PythonSimConnect():
 		_CLIENT_DATA_ID=SIMCONNECT_CLIENT_DATA_ID,
 		_CLIENT_DATA_DEFINITION_ID=SIMCONNECT_CLIENT_DATA_DEFINITION_ID
 	):
-		self.out_struct = _out
 
 		self.EventID = _CLIENT_EVENT_ID
 		self.DATA_DEFINITION_ID = _DATA_DEFINITION_ID
@@ -777,7 +781,8 @@ class PythonSimConnect():
 		self.INPUT_GROUP_ID = _INPUT_GROUP_ID
 		self.CLIENT_DATA_ID = _CLIENT_DATA_ID
 		self.CLIENT_DATA_DEFINITION_ID = _CLIENT_DATA_DEFINITION_ID
-		self.out_struct_data = None
+		self.Requests = []
+		self.out_data = {}
 
 		SimConnect = cdll.LoadLibrary("./SimConnect.dll")
 		#SIMCONNECTAPI SimConnect_Open(
@@ -893,7 +898,7 @@ class PythonSimConnect():
 		#   SIMCONNECT_STATE dwState);
 		self.SetSystemEventState = SimConnect.SimConnect_SetSystemEventState
 		self.SetSystemEventState.restype = HRESULT
-		self.SetSystemEventState.argtypes = [HANDLE, SIMCONNECT_STATE]
+		self.SetSystemEventState.argtypes = [HANDLE, self.EventID, SIMCONNECT_STATE]
 
 		# SIMCONNECTAPI SimConnect_AddClientEventToNotificationGroup(
 		#   HANDLE hSimConnect,
@@ -902,7 +907,7 @@ class PythonSimConnect():
 		#   BOOL bMaskable = FALSE);
 		self.AddClientEventToNotificationGroup = SimConnect.SimConnect_AddClientEventToNotificationGroup
 		self.AddClientEventToNotificationGroup.restype = HRESULT
-		self.AddClientEventToNotificationGroup.argtypes = [HANDLE, self.GROUP_ID, self.EventID]
+		self.AddClientEventToNotificationGroup.argtypes = [HANDLE, self.GROUP_ID, self.EventID, c_bool]
 
 		# SIMCONNECTAPI SimConnect_RemoveClientEvent(
 		#   HANDLE hSimConnect,
@@ -1584,21 +1589,25 @@ class PythonSimConnect():
 			exit(0)
 
 	def run(self):
-		self.out_struct_data = None
+		for deff in self.out_data:
+			self.out_data[deff] = None
 		self.CallDispatch(self.hSimConnect, self.MyDispatchProcRD, None)
 
 	def exit(self):
 		self.Close(self.hSimConnect)
 
-	def Add_Definition(self, name, dattype, loc=0):
-		self.AddToDataDefinition(
-			self.hSimConnect,
-			loc,
-			name, dattype,
-			SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_FLOAT64,
-			0,
-			SIMCONNECT_UNUSED
-		)
+	def Add_Definition(self, _Request):
+		self.Requests.append(_Request)
+		self.out_data[_Request.DATA_REQUEST_ID] = None
+		for deff in _Request.definitions:
+			self.AddToDataDefinition(
+				self.hSimConnect,
+				_Request.DATA_DEFINITION_ID,
+				deff[0], deff[1],
+				SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_FLOAT64,
+				0,
+				SIMCONNECT_UNUSED
+			)
 
 	def MapToSimEvent(self, name, evnt):
 		err = self.MapClientEventToSimEvent(self.hSimConnect, evnt, name)
@@ -1610,10 +1619,11 @@ class PythonSimConnect():
 	def AddToNotificationGroup(self, group, evnt, bMaskable=False):
 		self.AddClientEventToNotificationGroup(self.hSimConnect, group, evnt, bMaskable)
 
-	def RequestData(self):
+	def RequestData(self, _Request):
+		self.out_data[_Request.DATA_REQUEST_ID] = None
 		self.RequestDataOnSimObjectType(
-			self.hSimConnect, DATA_REQUEST_ID.REQUEST_1,
-			DATA_DEFINE_ID.DEFINITION_1,
+			self.hSimConnect, _Request.DATA_REQUEST_ID,
+			_Request.DATA_DEFINITION_ID,
 			0,
 			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER
 		)

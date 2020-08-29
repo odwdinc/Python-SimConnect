@@ -1,15 +1,36 @@
 from PythonSimConnect import *
-from serial import Serial
-# ser = Serial('COM29', 115200)
-# data = b"Lat=%f\nLon=%f\r" % (0.0, 0.0)
-# ser.write(data)
 
 
-class EVENT_ID(CtypesEnum):
+class INPUT_GROUP_ID(SIMCONNECT_INPUT_GROUP_ID):  # client-defined input group ID
+	pass
+
+
+class CLIENT_DATA_ID(SIMCONNECT_CLIENT_DATA_ID):  # client-defined client data ID
+	pass
+
+
+class CLIENT_DATA_DEFINITION_ID(SIMCONNECT_CLIENT_DATA_DEFINITION_ID):  # client-defined client data definition ID
+	pass
+
+
+class EVENT_ID(SIMCONNECT_CLIENT_EVENT_ID):  # client-defined client event ID
 	EVENT_SIM_START = 1
 	GEAR_Down = 2
 	GEAR_Up = 3
 	GEAR_TOGGLE = 4
+
+
+class GROUP_ID(SIMCONNECT_NOTIFICATION_GROUP_ID):  # client-defined notification group ID
+	GROUP_A = 0
+
+
+class DATA_DEFINE_ID(SIMCONNECT_DATA_DEFINITION_ID):  # client-defined data definition ID
+	DEFINITION_1 = 0
+
+
+class DATA_REQUEST_ID(SIMCONNECT_DATA_REQUEST_ID):   # client-defined request data ID
+	REQUEST_1 = 1
+	REQUEST_2 = 2
 
 
 class outputData(Structure):
@@ -23,7 +44,14 @@ class outputData(Structure):
 	]
 
 
-sm = PythonSimConnect(outputData, EVENT_ID)
+sm = PythonSimConnect(
+	_out=outputData,
+	_CLIENT_EVENT_ID=EVENT_ID,
+	_NOTIFICATION_GROUP_ID=GROUP_ID,
+	_DATA_DEFINITION_ID=DATA_DEFINE_ID,
+	_DATA_REQUEST_ID=DATA_REQUEST_ID
+)
+
 sm.setup()
 sm.Add_Definition(b'Plane Altitude', b'feet')
 sm.Add_Definition(b'Plane Latitude', b'degrees')
@@ -54,12 +82,10 @@ while sm.quit == 0:
 			data.kohlsmann,
 			data.GEAR
 		))
-		data = b"Lat=%f\nLon=%f\r" % (data.latitude, data.longitude)
-		if ser:
-			ser.write(data)
-	# if ct_g + 10000 < millis():
-	#	sm.SendData(EVENT_ID.GEAR_TOGGLE)
-	#	print("GEAR TOGGLE")
-	#	ct_g = millis()
+
+	if ct_g + 10000 < millis():
+		sm.SendData(EVENT_ID.GEAR_TOGGLE)
+		print("GEAR TOGGLE")
+		ct_g = millis()
 
 sm.exit()

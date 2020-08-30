@@ -733,14 +733,25 @@ class SIMCONNECT_DATA_XYZ(Structure):  #
 	]
 
 
+class sData(dict):
+	__getattr__ = dict.__getitem__
+	__setattr__ = dict.__setitem__
+	__delattr__ = dict.__delitem__
+
+
 class Request():
-	def __init__(self, _outputData, _DATA_DEFINITION_ID=SIMCONNECT_DATA_DEFINITION_ID, _DATA_REQUEST_ID=SIMCONNECT_DATA_REQUEST_ID, _time=None):
+	def __init__(self, _name, _time=None, _DATA_DEFINITION_ID=SIMCONNECT_DATA_DEFINITION_ID, _DATA_REQUEST_ID=SIMCONNECT_DATA_REQUEST_ID):
 		self.DATA_DEFINITION_ID = _DATA_DEFINITION_ID
 		self.DATA_REQUEST_ID = _DATA_REQUEST_ID
 		self.definitions = []
-		self.outputData = _outputData
 		self.time = _time
 		self.timeout = millis()
+		self.name = _name
+		self.outData = {}
+
+	def append(self, name, deff):
+		self.definitions.append(deff)
+		self.outData[name] = len(self.outData)
 
 
 class PythonSimConnect():
@@ -759,9 +770,8 @@ class PythonSimConnect():
 			pObjData = cast(pData, POINTER(SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE)).contents
 			dwRequestID = pObjData.dwRequestID
 			for _request in self.Requests:
-				if dwRequestID == _request.DATA_REQUEST_ID:
-					self.out_data[_request.DATA_REQUEST_ID] = cast(pObjData.dwData, POINTER(_request.outputData)).contents
-
+				if dwRequestID == _request.DATA_REQUEST_ID.value:
+					self.out_data[_request.DATA_REQUEST_ID] = cast(pObjData.dwData, POINTER(c_double * 200)).contents
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
 			print("SIM OPEN")
 
@@ -771,23 +781,16 @@ class PythonSimConnect():
 			print("Received:", dwID)
 		return
 
-	def __init__(
-		self,
-		_NOTIFICATION_GROUP_ID=SIMCONNECT_NOTIFICATION_GROUP_ID,
-		_DATA_DEFINITION_ID=SIMCONNECT_DATA_DEFINITION_ID,
-		_DATA_REQUEST_ID=SIMCONNECT_DATA_REQUEST_ID,
-		_INPUT_GROUP_ID=SIMCONNECT_INPUT_GROUP_ID,
-		_CLIENT_DATA_ID=SIMCONNECT_CLIENT_DATA_ID,
-		_CLIENT_DATA_DEFINITION_ID=SIMCONNECT_CLIENT_DATA_DEFINITION_ID
-	):
+	def __init__(self, _NOTIFICATION_GROUP_ID):
 
 		self.EventID = SIMCONNECT_CLIENT_EVENT_ID
-		self.DATA_DEFINITION_ID = _DATA_DEFINITION_ID
-		self.DATA_REQUEST_ID = _DATA_REQUEST_ID
+		self.DATA_DEFINITION_ID = SIMCONNECT_DATA_DEFINITION_ID
+		self.DATA_REQUEST_ID = SIMCONNECT_DATA_REQUEST_ID
 		self.GROUP_ID = _NOTIFICATION_GROUP_ID
-		self.INPUT_GROUP_ID = _INPUT_GROUP_ID
-		self.CLIENT_DATA_ID = _CLIENT_DATA_ID
-		self.CLIENT_DATA_DEFINITION_ID = _CLIENT_DATA_DEFINITION_ID
+		self.INPUT_GROUP_ID = SIMCONNECT_INPUT_GROUP_ID
+		self.CLIENT_DATA_ID = SIMCONNECT_CLIENT_DATA_ID
+		self.CLIENT_DATA_DEFINITION_ID = SIMCONNECT_CLIENT_DATA_DEFINITION_ID
+
 		self.Requests = []
 		self.out_data = {}
 
@@ -1608,19 +1611,6 @@ class PythonSimConnect():
 	def Exit(self):
 		self.__Close(self.hSimConnect)
 
-	def Add_Definition(self, _Request):
-		self.Requests.append(_Request)
-		self.out_data[_Request.DATA_REQUEST_ID] = None
-		for deff in _Request.definitions:
-			self.__AddToDataDefinition(
-				self.hSimConnect,
-				_Request.DATA_DEFINITION_ID,
-				deff[0], deff[1],
-				SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_FLOAT64,
-				0,
-				SIMCONNECT_UNUSED
-			)
-
 	def MapToSimEvent(self, name):
 		for m in self.EventID:
 			if name.decode() == m.name:
@@ -1643,14 +1633,19 @@ class PythonSimConnect():
 	def RequestData(self, _Request):
 		self.out_data[_Request.DATA_REQUEST_ID] = None
 		self.__RequestDataOnSimObjectType(
-			self.hSimConnect, _Request.DATA_REQUEST_ID,
-			_Request.DATA_DEFINITION_ID,
+			self.hSimConnect, _Request.DATA_REQUEST_ID.value,
+			_Request.DATA_DEFINITION_ID.value,
 			0,
 			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER
 		)
 
 	def GetData(self, _Request):
-		return self.out_data[_Request.DATA_REQUEST_ID]
+		if self.out_data[_Request.DATA_REQUEST_ID] is None:
+			return None
+		map = sData
+		for od in _Request.outData:
+			setattr(sData, od, self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]])
+		return map
 
 	def SendData(self, evnt, data=DWORD(0)):
 		err = self.__TransmitClientEvent(
@@ -1663,3 +1658,33 @@ class PythonSimConnect():
 		)
 		if IsHR(err, 0):
 			print("Event Sent")
+
+	def Add_Definition(self, _Request):
+		self.out_data[_Request.DATA_REQUEST_ID] = None
+		for deff in _Request.definitions:
+			self.__AddToDataDefinition(
+				self.hSimConnect,
+				_Request.DATA_DEFINITION_ID.value,
+				deff[0], deff[1],
+				SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_FLOAT64,
+				0,
+				SIMCONNECT_UNUSED
+			)
+
+	def newRequest(self, name, time=None):
+		for m in self.Requests:
+			if name == m.name:
+				print("Allrady have request: ", m)
+				return m
+
+		names = [m.name for m in self.DATA_DEFINITION_ID] + [name]
+		self.DATA_DEFINITION_ID = Enum(self.DATA_DEFINITION_ID.__name__, names)
+		DEFINITION_ID = list(self.DATA_DEFINITION_ID)[-1]
+
+		names = [m.name for m in self.DATA_REQUEST_ID] + [name]
+		self.DATA_REQUEST_ID = Enum(self.DATA_REQUEST_ID.__name__, names)
+		REQUEST_ID = list(self.DATA_REQUEST_ID)[-1]
+
+		_Request = Request(_DATA_DEFINITION_ID=DEFINITION_ID, _DATA_REQUEST_ID=REQUEST_ID, _time=time, _name=name)
+		self.Requests.append(_Request)
+		return _Request

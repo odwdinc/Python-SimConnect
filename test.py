@@ -1,90 +1,33 @@
 from PythonSimConnect import *
 
 
-class INPUT_GROUP_ID(SIMCONNECT_INPUT_GROUP_ID):  # client-defined input group ID
-	pass
-
-
-class CLIENT_DATA_ID(SIMCONNECT_CLIENT_DATA_ID):  # client-defined client data ID
-	pass
-
-
-class CLIENT_DATA_DEFINITION_ID(SIMCONNECT_CLIENT_DATA_DEFINITION_ID):  # client-defined client data definition ID
-	pass
-
-
 class GROUP_ID(SIMCONNECT_NOTIFICATION_GROUP_ID):  # client-defined notification group ID
 	GROUP_A = auto()
 
 
-# user date deffintion override
-class DATA_DEFINE_ID(SIMCONNECT_DATA_DEFINITION_ID):  # client-defined data definition ID
-	DEFINITION_1 = auto()
-	DEFINITION_2 = auto()
-
-
-# user output event class override
-class DATA_REQUEST_ID(SIMCONNECT_DATA_REQUEST_ID):   # client-defined request data ID
-	REQUEST_1 = auto()
-	REQUEST_2 = auto()
-
-
-# Data output structure for myRequest
-class outputData(Structure):
-	_fields_ = [
-		("altitude", c_double),
-		("latitude", c_double),
-		("longitude", c_double),
-		("kohlsmann", c_double),
-	]
-
-
-# creat Request
-myRequest = Request(
-	_DATA_DEFINITION_ID=DATA_DEFINE_ID.DEFINITION_1,
-	_DATA_REQUEST_ID=DATA_REQUEST_ID.REQUEST_1,
-	_outputData=outputData,
-	_time=2000  # set auto data collection time @ 2s
-)
-# add instreaded definitions
-myRequest.definitions.append((b'Plane Altitude', b'feet'))
-myRequest.definitions.append((b'Plane Latitude', b'degrees'))
-myRequest.definitions.append((b'Plane Longitude', b'degrees'))
-myRequest.definitions.append((b'Kohlsman setting hg', b'inHg'))
-
-
-# Data output structure for myRequest2
-class outData2(Structure):
-	_fields_ = [
-		("altitude", c_double),
-		("gear", c_double)
-	]
-
-
-# creat Request
-myRequest2 = Request(
-	_DATA_DEFINITION_ID=DATA_DEFINE_ID.DEFINITION_2,
-	_DATA_REQUEST_ID=DATA_REQUEST_ID.REQUEST_2,
-	_outputData=outData2,
-)
-
-# add instreaded definitions
-myRequest2.definitions.append((b'PRESSURE ALTITUDE', b'feet'))
-myRequest2.definitions.append((b'GEAR HANDLE POSITION', b'bool'))
-
-
 # creat simconnection and pass used user classes
-sm = PythonSimConnect(
-	_NOTIFICATION_GROUP_ID=GROUP_ID,
-	_DATA_DEFINITION_ID=DATA_DEFINE_ID,
-	_DATA_REQUEST_ID=DATA_REQUEST_ID
-)
-
+sm = PythonSimConnect(_NOTIFICATION_GROUP_ID=GROUP_ID)
 # Start up Sim and check for connection.
 sm.setup()
 
+# creat Request
+myRequest = sm.newRequest("request1", time=2000)  # set auto data collection time @ 2s
+# add instreaded definitions output data name, definition form SDK
+myRequest.append('altitude', (b'Plane Altitude', b'feet'))
+myRequest.append('Latitude', (b'Plane Latitude', b'degrees'))
+myRequest.append('Longitude', (b'Plane Longitude', b'degrees'))
+myRequest.append('Kohlsman', (b'Kohlsman setting hg', b'inHg'))
+
 # add data request Definition
 sm.Add_Definition(myRequest)
+
+# creat Request
+myRequest2 = sm.newRequest("request2")
+# add instreaded definitions output data name, definition form SDK
+myRequest2.append('ALTITUDE', (b'PRESSURE ALTITUDE', b'feet'))
+myRequest2.append('GEAR', (b'GEAR HANDLE POSITION', b'bool'))
+
+# add data request Definition
 sm.Add_Definition(myRequest2)
 
 
@@ -117,18 +60,18 @@ while sm.quit == 0:
 	data = sm.GetData(myRequest)
 	if data is not None:
 		print("Lat=%f  Lon=%f  Alt=%f Kohlsman=%.2f" % (
-			data.latitude,
-			data.longitude,
+			data.Latitude,
+			data.Longitude,
 			data.altitude,
-			data.kohlsmann,
+			data.Kohlsman
 		))
 
 	# check for data from myRequest2
 	data = sm.GetData(myRequest2)
 	if data is not None:
 		print("Alt=%f GEAR=%d" % (
-			data.altitude,
-			data.gear
+			data.ALTITUDE,
+			data.GEAR
 		))
 
 sm.Exit()

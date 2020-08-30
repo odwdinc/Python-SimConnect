@@ -84,6 +84,11 @@ class CtypesEn(Enum):
 		return int(obj)
 
 
+class AutoName(CtypesEnum):
+	def _generate_next_value_(name, start, count, last_values):
+		return count
+
+
 # Receive data types
 class SIMCONNECT_RECV_ID(CtypesEnum):
 	SIMCONNECT_RECV_ID_NULL = 0
@@ -348,31 +353,32 @@ class SIMCONNECT_PICK_FLAGS(CtypesEn):
 #----------------------------------------------------------------------------
 #        User-defined enums
 #----------------------------------------------------------------------------
-class SIMCONNECT_NOTIFICATION_GROUP_ID(CtypesEnum):  # client-defined notification group ID
+class SIMCONNECT_NOTIFICATION_GROUP_ID(AutoName):  # client-defined notification group ID
 	pass
 
 
-class SIMCONNECT_INPUT_GROUP_ID(CtypesEnum):  # client-defined input group ID
+class SIMCONNECT_INPUT_GROUP_ID(AutoName):  # client-defined input group ID
 	pass
 
 
-class SIMCONNECT_DATA_DEFINITION_ID(CtypesEnum):  # client-defined data definition ID
+class SIMCONNECT_DATA_DEFINITION_ID(AutoName):  # client-defined data definition ID
 	pass
 
 
-class SIMCONNECT_DATA_REQUEST_ID(CtypesEnum):  # client-defined request data ID
+class SIMCONNECT_DATA_REQUEST_ID(AutoName):  # client-defined request data ID
 	pass
 
 
-class SIMCONNECT_CLIENT_EVENT_ID(CtypesEnum):  # client-defined client event ID
+class SIMCONNECT_CLIENT_EVENT_ID(AutoName):  # client-defined client event ID
+	EVENT_SIM_START = auto()
 	pass
 
 
-class SIMCONNECT_CLIENT_DATA_ID(CtypesEnum):  # client-defined client data ID
+class SIMCONNECT_CLIENT_DATA_ID(AutoName):  # client-defined client data ID
 	pass
 
 
-class SIMCONNECT_CLIENT_DATA_DEFINITION_ID(CtypesEnum):  # client-defined client data definition ID
+class SIMCONNECT_CLIENT_DATA_DEFINITION_ID(AutoName):  # client-defined client data definition ID
 	pass
 
 
@@ -767,7 +773,6 @@ class PythonSimConnect():
 
 	def __init__(
 		self,
-		_CLIENT_EVENT_ID=SIMCONNECT_CLIENT_EVENT_ID,
 		_NOTIFICATION_GROUP_ID=SIMCONNECT_NOTIFICATION_GROUP_ID,
 		_DATA_DEFINITION_ID=SIMCONNECT_DATA_DEFINITION_ID,
 		_DATA_REQUEST_ID=SIMCONNECT_DATA_REQUEST_ID,
@@ -776,7 +781,7 @@ class PythonSimConnect():
 		_CLIENT_DATA_DEFINITION_ID=SIMCONNECT_CLIENT_DATA_DEFINITION_ID
 	):
 
-		self.EventID = _CLIENT_EVENT_ID
+		self.EventID = SIMCONNECT_CLIENT_EVENT_ID
 		self.DATA_DEFINITION_ID = _DATA_DEFINITION_ID
 		self.DATA_REQUEST_ID = _DATA_REQUEST_ID
 		self.GROUP_ID = _NOTIFICATION_GROUP_ID
@@ -1616,12 +1621,21 @@ class PythonSimConnect():
 				SIMCONNECT_UNUSED
 			)
 
-	def MapToSimEvent(self, name, evnt):
-		err = self.__MapClientEventToSimEvent(self.hSimConnect, evnt, name)
+	def MapToSimEvent(self, name):
+		for m in self.EventID:
+			if name.decode() == m.name:
+				print("Allrady have event: ", m)
+				return m
+
+		names = [m.name for m in self.EventID] + [name.decode()]
+		self.EventID = Enum(self.EventID.__name__, names)
+		evnt = list(self.EventID)[-1]
+		err = self.__MapClientEventToSimEvent(self.hSimConnect, evnt.value, name)
 		if IsHR(err, 0):
-			pass
+			return evnt
 		else:
 			print("Error: MapToSimEvent")
+			return None
 
 	def AddToNotificationGroup(self, group, evnt, bMaskable=False):
 		self.__AddClientEventToNotificationGroup(self.hSimConnect, group, evnt, bMaskable)
@@ -1642,7 +1656,7 @@ class PythonSimConnect():
 		err = self.__TransmitClientEvent(
 			self.hSimConnect,
 			SIMCONNECT_OBJECT_ID_USER,
-			evnt,
+			evnt.value,
 			data,
 			SIMCONNECT_GROUP_PRIORITY_HIGHEST,
 			DWORD(16)

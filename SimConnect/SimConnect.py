@@ -768,7 +768,6 @@ class Request():
 
 
 class SimConnect():
-
 	# TODO: update callbackfunction to expand functions.
 	def MyDispatchProc(self, pData, cbData, pContext):
 		dwID = pData.contents.dwID
@@ -794,7 +793,15 @@ class SimConnect():
 			LOGGER.debug(f"Received: {dwID}" )
 		return
 
-	def __init__(self, libraryPath = None):
+	def __init__(self, library_path = None, testing_mock_dll=None):
+		"""
+		Initialize a python wrapper to SimConnect SDK.
+
+		Parameter:
+			library_path Str: Set a custom path to the SimConnect.dll
+			testing_mock_dll CDLL: Set a Class, which mockup the dll calls to test. This disables the lookup for library_path.
+		"""
+		
 		self.EventID = SIMCONNECT_CLIENT_EVENT_ID
 		self.DATA_DEFINITION_ID = SIMCONNECT_DATA_DEFINITION_ID
 		self.DATA_REQUEST_ID = SIMCONNECT_DATA_REQUEST_ID
@@ -806,10 +813,13 @@ class SimConnect():
 		self.Requests = []
 		self.out_data = {}
 
-		if libraryPath is not None:
-			SimConnect = cdll.LoadLibrary(libraryPath)
+		if testing_mock_dll is not None:
+			SimConnect = testing_mock_dll
 		else:
-			SimConnect = cdll.LoadLibrary("./SimConnect.dll")
+			if library_path is not None:
+				SimConnect = cdll.LoadLibrary(library_path)
+			else:
+				SimConnect = cdll.LoadLibrary("./SimConnect.dll")
 
 		#SIMCONNECTAPI SimConnect_Open(
 		#	HANDLE * phSimConnect,

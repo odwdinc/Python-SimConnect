@@ -1,56 +1,51 @@
 from PythonSimConnect import *
 
-
-class GROUP_ID(SIMCONNECT_NOTIFICATION_GROUP_ID):  # client-defined notification group ID
-	GROUP_A = auto()
-
-
 # creat simconnection and pass used user classes
-sm = PythonSimConnect(_NOTIFICATION_GROUP_ID=GROUP_ID)
-# Start up Sim and check for connection.
-sm.setup()
+sm = PythonSimConnect()
 
 # creat Request
-myRequest = sm.newRequest("request1", time=2000)  # set auto data collection time @ 2s
+myRequest = sm.newRequest(time=2000)  # set auto data collection time @ 2s
 # add instreaded definitions output data name, definition form SDK
-myRequest.append('altitude', (b'Plane Altitude', b'feet'))
-myRequest.append('Latitude', (b'Plane Latitude', b'degrees'))
-myRequest.append('Longitude', (b'Plane Longitude', b'degrees'))
-myRequest.append('Kohlsman', (b'Kohlsman setting hg', b'inHg'))
-
-# add data request Definition
-sm.Add_Definition(myRequest)
+myRequest.add('Altitude', (b'Plane Altitude', b'feet'))
+myRequest.add('Latitude', (b'Plane Latitude', b'degrees'))
+myRequest.add('Longitude', (b'Plane Longitude', b'degrees'))
+myRequest.add('Kohlsman', (b'Kohlsman setting hg', b'inHg'))
 
 # creat Request
-myRequest2 = sm.newRequest("request2")
+myRequest2 = sm.newRequest()
 # add instreaded definitions output data name, definition form SDK
-myRequest2.append('ALTITUDE', (b'PRESSURE ALTITUDE', b'feet'))
-myRequest2.append('GEAR', (b'GEAR HANDLE POSITION', b'bool'))
+myRequest2.add('ALTITUDE', (b'PRESSURE ALTITUDE', b'feet'))
+myRequest2.add('GEAR', (b'GEAR HANDLE POSITION', b'bool'))
+# Add data request Definition
 
-# add data request Definition
-sm.Add_Definition(myRequest2)
+
+# creat Request
+AUTOPILOTRequest = sm.newRequest(time=5000)  # set auto data collection time @ 5s
+# add instreaded definitions output data name, definition form SDK
+AUTOPILOTRequest.add('AUTOPILOT_MASTER', (b'AUTOPILOT MASTER', b'Bool'))
 
 
 # add input events
 GEAR_DOWN = sm.MapToSimEvent(b'GEAR_DOWN')
 GEAR_UP = sm.MapToSimEvent(b'GEAR_UP')
 GEAR_TOGGLE = sm.MapToSimEvent(b'GEAR_TOGGLE')
+AP_MASTER = sm.MapToSimEvent(b'AP_MASTER')
+
 
 # time holder for inline commands
 ct_r2 = millis()
 ct_g = millis()
 
-while sm.quit == 0:
-
+while not sm.quit:
 	# send request for new data inine @ 10s
 	if (ct_r2 + 10000) < millis():
 		sm.RequestData(myRequest2)
 		ct_r2 = millis()
 
-	# send input Data @ 15s
+	# send request for new data inine @ 15s
 	if ct_g + 15000 < millis():
+		print("TOGGLE GEAR")
 		sm.SendData(GEAR_TOGGLE)
-		print("GEAR TOGGLE")
 		ct_g = millis()
 
 	# updated system
@@ -62,7 +57,7 @@ while sm.quit == 0:
 		print("Lat=%f  Lon=%f  Alt=%f Kohlsman=%.2f" % (
 			data.Latitude,
 			data.Longitude,
-			data.altitude,
+			data.Altitude,
 			data.Kohlsman
 		))
 
@@ -72,6 +67,13 @@ while sm.quit == 0:
 		print("Alt=%f GEAR=%d" % (
 			data.ALTITUDE,
 			data.GEAR
+		))
+
+	# check for data from AUTOPILOTRequest
+	data = sm.GetData(AUTOPILOTRequest)
+	if data is not None:
+		print("AUTOPILOT_MASTER: %d" % (
+			data.AUTOPILOT_MASTER
 		))
 
 sm.Exit()

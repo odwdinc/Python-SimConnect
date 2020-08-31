@@ -12,5 +12,6 @@ VERSION = tuple(map(int_or_str, __version__.split(".")))
 
 __all__ = [
     "SimConnect",
-    "Request"
+    "Request",
+    "millis"
 ]

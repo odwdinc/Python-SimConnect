@@ -900,12 +900,12 @@ class SimConnect():
 		try:
 			err = self.__Open(byref(self.hSimConnect), LPCSTR(b"Request Data"), None, 0, 0, 0)
 			if IsHR(err, 0):
-				LOGGER.debug("Connected to Flight Simulator!")
+				LOGGER.info("Connected to Flight Simulator!")
 				# Set up the data definition, but do not yet do anything with itd
 				# Request an event when the simulation starts
 				self.__SubscribeToSystemEvent(self.hSimConnect, self.EventID.EVENT_SIM_START, b'SimStart')
 		except OSError:
-			LOGGER.debug("Did not find Flight Simulator running.")
+			LOGGER.error("Did not find Flight Simulator running.")
 			exit(0)
 
 	def Run(self):
@@ -934,7 +934,7 @@ class SimConnect():
 		if IsHR(err, 0):
 			return evnt
 		else:
-			LOGGER.debug("Error: MapToSimEvent")
+			LOGGER.error("Error: MapToSimEvent")
 			return None
 
 	def AddToNotificationGroup(self, group, evnt, bMaskable=False):

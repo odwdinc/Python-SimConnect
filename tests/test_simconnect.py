@@ -2,8 +2,13 @@ from SimConnect import *
 
 from unittest import TestCase
 
+import logging
+
+LOGGER = logging.getLogger(__name__)
+
 class TestSimple(TestCase):
 	def test_first_test(self):
+		LOGGER.info("START")
 		# creat simconnection and pass used user classes
 		sm = SimConnect()
 
@@ -48,7 +53,7 @@ class TestSimple(TestCase):
 
 			# send request for new data inine @ 15s
 			if ct_g + 15000 < millis():
-				print("TOGGLE GEAR")
+				LOGGER.info("TOGGLE GEAR")
 				sm.SendData(GEAR_TOGGLE)
 				ct_g = millis()
 
@@ -58,7 +63,7 @@ class TestSimple(TestCase):
 			# check for data from myRequest
 			data = sm.GetData(myRequest)
 			if data is not None:
-				print("Lat=%f  Lon=%f  Alt=%f Kohlsman=%.2f" % (
+				LOGGER.info("Lat=%f  Lon=%f  Alt=%f Kohlsman=%.2f" % (
 					data.Latitude,
 					data.Longitude,
 					data.Altitude,
@@ -68,7 +73,7 @@ class TestSimple(TestCase):
 			# check for data from myRequest2
 			data = sm.GetData(myRequest2)
 			if data is not None:
-				print("Alt=%f GEAR=%d" % (
+				LOGGER.info("Alt=%f GEAR=%d" % (
 					data.ALTITUDE,
 					data.GEAR
 				))
@@ -76,7 +81,7 @@ class TestSimple(TestCase):
 			# check for data from AUTOPILOTRequest
 			data = sm.GetData(AUTOPILOTRequest)
 			if data is not None:
-				print("AUTOPILOT_MASTER: %d" % (
+				LOGGER.info("AUTOPILOT_MASTER: %d" % (
 					data.AUTOPILOT_MASTER
 				))
 

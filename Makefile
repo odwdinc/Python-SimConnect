@@ -7,6 +7,9 @@ install:
 install-dev:
 	pip install -r requirements_dev.txt
 
+test-sim:
+	python example.py
+
 test: install install-dev
 	python -m pytest --cov=SimConnect --cov-report xml
 

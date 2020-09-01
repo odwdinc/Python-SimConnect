@@ -1,4 +1,4 @@
-name: Redis container testing environment
+name: Test and Publish
 on: push
 
 jobs:
@@ -6,32 +6,14 @@ jobs:
     name: coverage
     runs-on: ubuntu-latest
     # Service containers to run with `container-job`
-    services:
-      # Label used to access the service container
-      redis:
-        # Docker Hub image
-        image: redis
-        # Set health checks to wait until redis has started
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          # Maps port 6379 on service container to the host
-          - 6379:6379
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@master
         with:
-          python-version: "3.6"
+          python-version: "3.8"
       - uses: paambaati/codeclimate-action@v2.5.3
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CodeClimate }}
-          # The hostname used to communicate with the Redis service container
-          REDIS_HOST: localhost
-          # The default Redis port
-          REDIS_PORT: 6379
         with:
           coverageCommand: make test
 
@@ -41,10 +23,10 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@master
-      - name: Set up Python 3.6
+      - name: Set up Python 3.8
         uses: actions/setup-python@v1
         with:
-          python-version: 3.6
+          python-version: 3.8
       - name: Install dependencies
         run: python3 -m pip install --user --upgrade setuptools wheel twine
       - name: Build source

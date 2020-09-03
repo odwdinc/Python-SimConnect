@@ -1648,12 +1648,18 @@ class PythonSimConnect():
 			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER
 		)
 
-	def GetData(self, _Request):
+	def GetData(self, _Request, _format=False):
 		if self.out_data[_Request.DATA_REQUEST_ID] is None:
 			return None
-		map = sData
+		if _format:
+			map = {}
+		else:
+			map = sData
 		for od in _Request.outData:
-			setattr(sData, od, self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]])
+			if _format:
+				map[od] = self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]]
+			else:
+				setattr(sData, od, self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]])
 		return map
 
 	def SendData(self, evnt, data=DWORD(0)):
@@ -1667,6 +1673,9 @@ class PythonSimConnect():
 		)
 		if IsHR(err, 0):
 			print("Event Sent")
+			return True
+		else:
+			return False
 
 	def newRequest(self, time=None):
 		name = "Request" + str(len(self.Requests))

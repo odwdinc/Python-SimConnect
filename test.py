@@ -20,9 +20,9 @@ myRequest2.add('GEAR', (b'GEAR HANDLE POSITION', b'bool'))
 
 
 # creat Request
-AUTOPILOTRequest = sm.newRequest(time=5000)  # set auto data collection time @ 5s
+THROTTLERequest = sm.newRequest(time=5000)  # set auto data collection time @ 5s
 # add instreaded definitions output data name, definition form SDK
-AUTOPILOTRequest.add('AUTOPILOT_MASTER', (b'AUTOPILOT MASTER', b'Bool'))
+THROTTLERequest.add('THROTTLE', (b'GENERAL ENG THROTTLE LEVER POSITION:1', b'Percent'))
 
 
 # add input events
@@ -30,11 +30,13 @@ GEAR_DOWN = sm.MapToSimEvent(b'GEAR_DOWN')
 GEAR_UP = sm.MapToSimEvent(b'GEAR_UP')
 GEAR_TOGGLE = sm.MapToSimEvent(b'GEAR_TOGGLE')
 AP_MASTER = sm.MapToSimEvent(b'AP_MASTER')
-
+THROTTLE1_SET = sm.MapToSimEvent(b'THROTTLE1_SET')
 
 # time holder for inline commands
 ct_r2 = millis()
 ct_g = millis()
+
+temp_THROTTLE = 0
 
 while not sm.quit:
 	# send request for new data inine @ 10s
@@ -43,9 +45,10 @@ while not sm.quit:
 		ct_r2 = millis()
 
 	# send request for new data inine @ 15s
-	if ct_g + 15000 < millis():
-		print("TOGGLE GEAR")
-		sm.SendData(GEAR_TOGGLE)
+	if ct_g + 5000 < millis():
+		print("THROTTLE1_SET")
+		sm.SendData(THROTTLE1_SET, DWORD(temp_THROTTLE))
+		temp_THROTTLE += 100
 		ct_g = millis()
 
 	# updated system
@@ -69,11 +72,11 @@ while not sm.quit:
 			data.GEAR
 		))
 
-	# check for data from AUTOPILOTRequest
-	data = sm.GetData(AUTOPILOTRequest)
+	# check for data from THROTTLERequest
+	data = sm.GetData(THROTTLERequest)
 	if data is not None:
-		print("AUTOPILOT_MASTER: %d" % (
-			data.AUTOPILOT_MASTER
+		print("THROTTLE: %f" % (
+			data.THROTTLE
 		))
 
 sm.Exit()

@@ -1,7 +1,6 @@
 from SimConnect import *
 
 from unittest import TestCase
-from ctypes.wintypes import DWORD
 
 
 import logging

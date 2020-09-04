@@ -1,6 +1,6 @@
 #!flask/bin/python
 from flask import Flask, jsonify, make_response, abort, request, url_for
-from PythonSimConnect import *
+from SimConnect import *
 
 # creat simconnection and pass used user classes
 
@@ -62,7 +62,7 @@ events = [
 ]
 
 
-sm = PythonSimConnect()
+sm = SimConnect()
 requests_map = {}
 events_map = {}
 

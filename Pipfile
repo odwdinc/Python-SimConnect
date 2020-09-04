@@ -7,6 +7,7 @@ verify_ssl = true
 pytest-cov = "*"
 
 [packages]
+flask = "*"
 
 [requires]
 python_version = "3.8"

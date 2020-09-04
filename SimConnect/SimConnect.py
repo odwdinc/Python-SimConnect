@@ -2,10 +2,16 @@ from ctypes import *
 from ctypes.wintypes import *
 from .Constants import *
 from .Enum import *
+import logging
 
-import time, logging
+
 
 LOGGER = logging.getLogger(__name__)
+
+from ctypes import *
+from ctypes.wintypes import *
+from enum import IntEnum, Enum, auto
+import time
 
 
 SIMCONNECT_OBJECT_ID = DWORD
@@ -18,7 +24,6 @@ def IsHR(hr, value):
 
 def millis():
 	return int(round(time.time() * 1000))
-
 
 
 class sData(dict):
@@ -53,6 +58,7 @@ class Request():
 
 
 class SimConnect():
+
 	# TODO: update callbackfunction to expand functions.
 	def MyDispatchProc(self, pData, cbData, pContext):
 		dwID = pData.contents.dwID
@@ -61,7 +67,7 @@ class SimConnect():
 			evt = cast(pData, POINTER(SIMCONNECT_RECV_EVENT))
 			uEventID = evt.contents.uEventID
 			if uEventID == self.EventID.EVENT_SIM_START:
-				LOGGER.debug("SIM START")
+				logger.info("SIM START")
 
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE:
 			pObjData = cast(pData, POINTER(SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE)).contents
@@ -70,23 +76,16 @@ class SimConnect():
 				if dwRequestID == _request.DATA_REQUEST_ID.value:
 					self.out_data[_request.DATA_REQUEST_ID] = cast(pObjData.dwData, POINTER(c_double * 200)).contents
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
-			LOGGER.debug("SIM OPEN")
+			logger.info("SIM OPEN")
 
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_QUIT:
 			self.quit = 1
 		else:
-			LOGGER.debug(f"Received: {dwID}" )
+			logger.debug("Received:", dwID)
 		return
 
 	def __init__(self, auto_connect = True, library_path = None):
-		"""
-		Initialize a python wrapper to SimConnect SDK.
 
-		Parameter:
-			library_path Str: Set a custom path to the SimConnect.dll
-			testing_mock_dll CDLL: Set a Class, which mockup the dll calls to test. This disables the lookup for library_path.
-		"""
-		
 		self.EventID = SIMCONNECT_CLIENT_EVENT_ID
 		self.DATA_DEFINITION_ID = SIMCONNECT_DATA_DEFINITION_ID
 		self.DATA_REQUEST_ID = SIMCONNECT_DATA_REQUEST_ID
@@ -107,6 +106,10 @@ class SimConnect():
 		
 		if auto_connect:
 			self.connect()
+
+		SimConnect = cdll.LoadLibrary("./SimConnect.dll")
+
+		self.setAttributes()
 
 	def setAttributes(self):
 		#SIMCONNECTAPI SimConnect_Open(
@@ -904,15 +907,15 @@ class SimConnect():
 		try:
 			err = self.__Open(byref(self.hSimConnect), LPCSTR(b"Request Data"), None, 0, 0, 0)
 			if IsHR(err, 0):
-				LOGGER.info("Connected to Flight Simulator!")
+				logger.debug("Connected to Flight Simulator!")
 				# Set up the data definition, but do not yet do anything with itd
 				# Request an event when the simulation starts
 				self.__SubscribeToSystemEvent(self.hSimConnect, self.EventID.EVENT_SIM_START, b'SimStart')
 		except OSError:
-			LOGGER.error("Did not find Flight Simulator running.")
+			logger.debug("Did not find Flight Simulator running.")
 			exit(0)
 
-	def run(self):
+	def Run(self):
 		for _request in self.Requests:
 			self.out_data[_request.DATA_REQUEST_ID] = None
 			if _request.time is not None:
@@ -922,13 +925,13 @@ class SimConnect():
 
 		self.__CallDispatch(self.hSimConnect, self.MyDispatchProcRD, None)
 
-	def exit(self):
+	def Exit(self):
 		self.__Close(self.hSimConnect)
 
-	def mapToSimEvent(self, name):
+	def MapToSimEvent(self, name):
 		for m in self.EventID:
 			if name.decode() == m.name:
-				LOGGER.debug(f"Allrady have event: {m}")
+				logger.debug("Already have event: ", m)
 				return m
 
 		names = [m.name for m in self.EventID] + [name.decode()]
@@ -938,13 +941,13 @@ class SimConnect():
 		if IsHR(err, 0):
 			return evnt
 		else:
-			LOGGER.error("Error: MapToSimEvent")
+			logger.error("Error: MapToSimEvent")
 			return None
 
-	def addToNotificationGroup(self, group, evnt, bMaskable=False):
+	def AddToNotificationGroup(self, group, evnt, bMaskable=False):
 		self.__AddClientEventToNotificationGroup(self.hSimConnect, group, evnt, bMaskable)
 
-	def requestData(self, _Request):
+	def RequestData(self, _Request):
 		self.out_data[_Request.DATA_REQUEST_ID] = None
 		self.__RequestDataOnSimObjectType(
 			self.hSimConnect, _Request.DATA_REQUEST_ID.value,
@@ -953,15 +956,21 @@ class SimConnect():
 			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER
 		)
 
-	def getData(self, _Request):
+	def GetData(self, _Request, _format=False):
 		if self.out_data[_Request.DATA_REQUEST_ID] is None:
 			return None
-		map = sData
+		if _format:
+			map = {}
+		else:
+			map = sData
 		for od in _Request.outData:
-			setattr(sData, od, self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]])
+			if _format:
+				map[od] = self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]]
+			else:
+				setattr(sData, od, self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]])
 		return map
 
-	def sendData(self, evnt, data=DWORD(0)):
+	def SendData(self, evnt, data=DWORD(0)):
 		err = self.__TransmitClientEvent(
 			self.hSimConnect,
 			SIMCONNECT_OBJECT_ID_USER,
@@ -971,7 +980,10 @@ class SimConnect():
 			DWORD(16)
 		)
 		if IsHR(err, 0):
-			LOGGER.debug("Event Sent")
+			logger.debug("Event Sent")
+			return True
+		else:
+			return False
 
 	def newRequest(self, time=None):
 		name = "Request" + str(len(self.Requests))

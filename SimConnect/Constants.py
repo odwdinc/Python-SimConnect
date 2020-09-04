@@ -4,6 +4,11 @@ from ctypes import *
 
 LOGGER = logging.getLogger(__name__)
 
+
+#//----------------------------------------------------------------------------
+#//        Constants
+#//----------------------------------------------------------------------------
+
 DWORD_MAX = DWORD(0xFFFFFFFF)
 SIMCONNECT_UNUSED = DWORD_MAX
 SIMCONNECT_OBJECT_ID_USER = DWORD(0)  	# proxy value for User vehicle ObjectID

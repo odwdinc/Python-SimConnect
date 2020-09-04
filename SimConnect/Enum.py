@@ -7,6 +7,11 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
+#----------------------------------------------------------------------------
+#        Enum definitions
+#----------------------------------------------------------------------------
+
+
 # Define the types we need.
 class CtypesEnum(IntEnum):
 	"""A ctypes-compatible IntEnum superclass."""

@@ -78,7 +78,7 @@ class SimConnect():
 			LOGGER.debug(f"Received: {dwID}" )
 		return
 
-	def __init__(self, library_path = None, testing_mock_dll=None):
+	def __init__(self, auto_connect = True, library_path = None):
 		"""
 		Initialize a python wrapper to SimConnect SDK.
 
@@ -98,14 +98,17 @@ class SimConnect():
 		self.Requests = []
 		self.out_data = {}
 
-		if testing_mock_dll is not None:
-			SimConnect = testing_mock_dll
+		if library_path is not None:
+			SimConnect = cdll.LoadLibrary(library_path)
 		else:
-			if library_path is not None:
-				SimConnect = cdll.LoadLibrary(library_path)
-			else:
-				SimConnect = cdll.LoadLibrary("./SimConnect.dll")
+			SimConnect = cdll.LoadLibrary("./SimConnect.dll")
+				
+		self.setAttributes()
+		
+		if auto_connect:
+			self.connect()
 
+	def setAttributes(self):
 		#SIMCONNECTAPI SimConnect_Open(
 		#	HANDLE * phSimConnect,
 		#	LPCSTR szName,
@@ -897,6 +900,7 @@ class SimConnect():
 		self.MyDispatchProcRD = DispatchProc(self.MyDispatchProc)
 		#self.haveData = False
 
+	def connect(self):
 		try:
 			err = self.__Open(byref(self.hSimConnect), LPCSTR(b"Request Data"), None, 0, 0, 0)
 			if IsHR(err, 0):
@@ -908,7 +912,7 @@ class SimConnect():
 			LOGGER.error("Did not find Flight Simulator running.")
 			exit(0)
 
-	def Run(self):
+	def run(self):
 		for _request in self.Requests:
 			self.out_data[_request.DATA_REQUEST_ID] = None
 			if _request.time is not None:
@@ -918,10 +922,10 @@ class SimConnect():
 
 		self.__CallDispatch(self.hSimConnect, self.MyDispatchProcRD, None)
 
-	def Exit(self):
+	def exit(self):
 		self.__Close(self.hSimConnect)
 
-	def MapToSimEvent(self, name):
+	def mapToSimEvent(self, name):
 		for m in self.EventID:
 			if name.decode() == m.name:
 				LOGGER.debug(f"Allrady have event: {m}")
@@ -937,10 +941,10 @@ class SimConnect():
 			LOGGER.error("Error: MapToSimEvent")
 			return None
 
-	def AddToNotificationGroup(self, group, evnt, bMaskable=False):
+	def addToNotificationGroup(self, group, evnt, bMaskable=False):
 		self.__AddClientEventToNotificationGroup(self.hSimConnect, group, evnt, bMaskable)
 
-	def RequestData(self, _Request):
+	def requestData(self, _Request):
 		self.out_data[_Request.DATA_REQUEST_ID] = None
 		self.__RequestDataOnSimObjectType(
 			self.hSimConnect, _Request.DATA_REQUEST_ID.value,
@@ -949,7 +953,7 @@ class SimConnect():
 			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER
 		)
 
-	def GetData(self, _Request):
+	def getData(self, _Request):
 		if self.out_data[_Request.DATA_REQUEST_ID] is None:
 			return None
 		map = sData
@@ -957,7 +961,7 @@ class SimConnect():
 			setattr(sData, od, self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]])
 		return map
 
-	def SendData(self, evnt, data=DWORD(0)):
+	def sendData(self, evnt, data=DWORD(0)):
 		err = self.__TransmitClientEvent(
 			self.hSimConnect,
 			SIMCONNECT_OBJECT_ID_USER,

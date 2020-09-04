@@ -53,7 +53,7 @@ class Request():
 class SimConnect():
 
 	# TODO: update callbackfunction to expand functions.
-	def MyDispatchProc(self, pData, cbData, pContext):
+	def my_dispatch_proc(self, pData, cbData, pContext):
 		dwID = pData.contents.dwID
 		self.pS = None
 		if dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EVENT:
@@ -95,13 +95,13 @@ class SimConnect():
 		else:
 			self.SimConnect = cdll.LoadLibrary("./SimConnect.dll")
 				
-		self.setAttributes()
+		self.set_attributes()
 		
 		if auto_connect:
 			self.connect()
 
 
-	def setAttributes(self):
+	def set_attributes(self):
 		#SIMCONNECTAPI SimConnect_Open(
 		#	HANDLE * phSimConnect,
 		#	LPCSTR szName,
@@ -890,7 +890,7 @@ class SimConnect():
 
 		self.hSimConnect = HANDLE()
 		self.quit = 0
-		self.MyDispatchProcRD = DispatchProc(self.MyDispatchProc)
+		self.my_dispatch_proc_rd = DispatchProc(self.my_dispatch_proc)
 		#self.haveData = False
 
 	def connect(self):
@@ -905,20 +905,20 @@ class SimConnect():
 			LOGGER.debug("Did not find Flight Simulator running.")
 			exit(0)
 
-	def Run(self):
+	def run(self):
 		for _request in self.Requests:
 			self.out_data[_request.DATA_REQUEST_ID] = None
 			if _request.time is not None:
 				if (_request.timeout + _request.time) < millis():
-					self.RequestData(_request)
+					self.request_data(_request)
 					_request.timeout = millis()
 
-		self.__CallDispatch(self.hSimConnect, self.MyDispatchProcRD, None)
+		self.__CallDispatch(self.hSimConnect, self.my_dispatch_proc_rd, None)
 
-	def Exit(self):
+	def exit(self):
 		self.__Close(self.hSimConnect)
 
-	def MapToSimEvent(self, name):
+	def map_to_sim_event(self, name):
 		for m in self.EventID:
 			if name.decode() == m.name:
 				LOGGER.debug("Already have event: ", m)
@@ -934,10 +934,10 @@ class SimConnect():
 			LOGGER.error("Error: MapToSimEvent")
 			return None
 
-	def AddToNotificationGroup(self, group, evnt, bMaskable=False):
+	def add_to_notification_group(self, group, evnt, bMaskable=False):
 		self.__AddClientEventToNotificationGroup(self.hSimConnect, group, evnt, bMaskable)
 
-	def RequestData(self, _Request):
+	def request_data(self, _Request):
 		self.out_data[_Request.DATA_REQUEST_ID] = None
 		self.__RequestDataOnSimObjectType(
 			self.hSimConnect, _Request.DATA_REQUEST_ID.value,
@@ -946,7 +946,7 @@ class SimConnect():
 			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER
 		)
 
-	def GetData(self, _Request, _format=False):
+	def get_data(self, _Request, _format=False):
 		if self.out_data[_Request.DATA_REQUEST_ID] is None:
 			return None
 		if _format:
@@ -960,7 +960,7 @@ class SimConnect():
 				setattr(sData, od, self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]])
 		return map
 
-	def SendData(self, evnt, data=DWORD(0)):
+	def send_data(self, evnt, data=DWORD(0)):
 		err = self.__TransmitClientEvent(
 			self.hSimConnect,
 			SIMCONNECT_OBJECT_ID_USER,
@@ -975,7 +975,7 @@ class SimConnect():
 		else:
 			return False
 
-	def newRequest(self, time=None):
+	def new_request(self, time=None):
 		name = "Request" + str(len(self.Requests))
 		names = [m.name for m in self.DATA_DEFINITION_ID] + [name]
 		self.DATA_DEFINITION_ID = Enum(self.DATA_DEFINITION_ID.__name__, names)

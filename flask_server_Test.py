@@ -68,14 +68,14 @@ events_map = {}
 
 
 def mapResuest(_id, _time, _definitions):
-	requests_map[_id] = sm.newRequest(_time)
+	requests_map[_id] = sm.new_request(_time)
 	for deff in _definitions:
 		print(deff)
 		requests_map[_id].add("request_%d" % (_definitions.index(deff)), (deff['definition'].encode(), deff['format'].encode()))
 
 
 def mapEvent(_id, _event):
-	events_map[_id] = sm.MapToSimEvent(_event.encode())
+	events_map[_id] = sm.map_to_sim_event(_event.encode())
 
 
 for rq in requests:
@@ -106,12 +106,12 @@ def get_request(task_id):
 	if len(request) == 0:
 		abort(404)
 	request[0]['haveData'] = False
-	sm.RequestData(requests_map[task_id])
-	sm.Run()
-	data = sm.GetData(requests_map[task_id], True)
+	sm.request_data(requests_map[task_id])
+	sm.run()
+	data = sm.get_data(requests_map[task_id], True)
 	while data is None:
-		sm.Run()
-		data = sm.GetData(requests_map[task_id], True)
+		sm.run()
+		data = sm.get_data(requests_map[task_id], True)
 	request[0]['haveData'] = True
 	for dd in request[0]['definitions']:
 		dd['data'] = data["request_%d" % (request[0]['definitions'].index(dd))]
@@ -171,8 +171,8 @@ def update_events(task_id):
 		abort(404)
 	if request.json:
 		val = request.json.get('value', 0)
-	rs = sm.SendData(events_map[task_id], DWORD(val))
-	sm.Run()
+	rs = sm.send_data(events_map[task_id], DWORD(val))
+	sm.run()
 	return jsonify({'result': rs, 'val': val})
 
 

@@ -228,7 +228,7 @@ def json_add_data():
     while data is None and attempts < 20:
         sm.RequestData(myRequest)
         sm.Run()
-        data = sm.GetData(myRequest)
+        data = sm.GetData(myRequest, True)
         if data is None:
             sleep(0.5)
         attempts = attempts + 1
@@ -240,12 +240,8 @@ def json_add_data():
     else:
         data_dictionary = {
             "Status": "success",
-            "Altitude": data.Altitude,
-            "Latitude": data.Latitude,
-            "Longitude": data.Longitude,
-            "Kohlsman": data.Kohlsman
         }
-
+        data_dictionary.update(data)
         return jsonify(data_dictionary)
 
 

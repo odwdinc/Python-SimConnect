@@ -47,7 +47,7 @@ class Plane(Entity):
 
     def add_attribute(self, attr):
         def func(fn):
-        def inner_func():
+            def inner_func():
                 return fn(attr)
 
             return inner_func

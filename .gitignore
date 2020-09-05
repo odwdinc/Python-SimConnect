@@ -137,3 +137,5 @@ dmypy.json
 .idea/Python-SimConnect.iml
 .idea/vcs.xml
 .idea/workspace.xml
+.DS_Store
+.idea/inspectionProfiles/Project_Default.xml

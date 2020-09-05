@@ -18,15 +18,19 @@ while 1:
 	sm.Run()
 	data = sm.GetData(myRequest)
 
+
+
 	if data is not None:
-		print("Lat=%f  Lon=%f  Alt=%f Kohlsman=%.2f" % (
-			data.Latitude,
-			data.Longitude,
-			data.Altitude,
-			data.Kohlsman
-		))
-		print (data)
-		
+
+		data_dictionary = {
+			"Altitude": data.Altitude,
+			"Latitude": data.Latitude,
+			"Longitude": data.Longitude,
+			"Kohlsman": data.Kohlsman
+		}
+
+		print (data_dictionary)
+
 	sleep (1)
 
 sm.Exit()

@@ -1,4 +1,4 @@
-from Flask import flask
+from flask import Flask, jsonify
 from SimConnect import *
 from time import sleep
 
@@ -20,6 +20,15 @@ def json_add_data():
     sm.RequestData(myRequest)
     sm.Run()
     data = sm.GetData(myRequest)
+
+    data_dictionary = {
+        "Altitude": data.Altitude,
+        "Latitude": data.Latitude,
+        "Longitude": data.Longitude,
+        "Kohlsman": data.Kohlsman
+    }
+
+    return jsonify(data_dictionary)
 
 
 

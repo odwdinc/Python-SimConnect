@@ -13,7 +13,7 @@ class Plane(Entity):
     request_attr_kohlsman = ("Kohlsman", (b"Kohlsman setting hg", b"inHg"))
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(Plane, self).__init__(*args, **kwargs)
 
         attributes = [
             self.request_attr_altitude,
@@ -26,5 +26,5 @@ class Plane(Entity):
             setattr(
                 self,
                 attr[0].lower(),
-                property(self.__get_attr_request(attr)),
+                property(self._get_attr_request(attr)).fget(),
             )

@@ -8,4 +8,5 @@ LOGGER = logging.getLogger(__name__)
 
 class TestSimple(TestCase):
 	def test_init_request(self):
+		# TODO
 		self.assertTrue(True)

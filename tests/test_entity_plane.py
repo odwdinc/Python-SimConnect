@@ -58,7 +58,6 @@ class TestPlane(TestCase):
         self.assertEqual(400, pl.kohlsman)
 
     def test_no_default_attributes_in_init(self):
-
         sm = create_autospec(SimConnect.SimConnect)
 
         pl = SimConnect.Plane(sm=sm, default=False)

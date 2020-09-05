@@ -30,7 +30,9 @@ while 1:
 		}
 
 		print (data_dictionary)
-
+	else:
+		print ("Data is none")
+		
 	sleep (1)
 
 sm.Exit()

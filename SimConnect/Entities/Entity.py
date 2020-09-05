@@ -48,5 +48,8 @@ class Entity:
 
         return getattr(data, attribute[0])
 
+    async def async_get(self, *args, **kwargs):
+        return self.get(*args, **kwargs)
+
     def send(self, event, value=DWORD(0)):
         self._send_data(event, value)

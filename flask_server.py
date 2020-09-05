@@ -22,19 +22,30 @@ myRequest.add('Kohlsman', (b'Kohlsman setting hg', b'inHg'))
 @app.route('/json/all')
 def json_add_data():
 
+    attempts = 0
     data = None
-    while data is None:
+
+    while data is None and attempts < 20:
         sm.RequestData(myRequest)
         sm.Run()
         data = sm.GetData(myRequest)
+        if data == None:
+            sleep (0.5)
+        attempts = attempts + 1
 
-    data_dictionary = {
-        "Altitude": data.Altitude,
-        "Latitude": data.Latitude,
-        "Longitude": data.Longitude,
-        "Kohlsman": data.Kohlsman
-    }
+    if data is None:
+        data_dictionary = {
+            "Status": "failed to access simulator despite repeated attempts"
+        }
+    else:
+        data_dictionary = {
+            "Status": "success",
+            "Altitude": data.Altitude,
+            "Latitude": data.Latitude,
+            "Longitude": data.Longitude,
+            "Kohlsman": data.Kohlsman
+        }
 
-    return jsonify(data_dictionary)
+        return jsonify(data_dictionary)
 
 app.run(host='0.0.0.0', port=5000, debug=True)

@@ -14,8 +14,6 @@ LOGGER.info("START")
 
 pl = Plane()
 
-LOGGER.debug("kawomm")
-
 tasks = [Measurement.altitude, Measurement.longitude]
 while not pl.sm.quit:
     alt1 = pl.get(tasks[0])

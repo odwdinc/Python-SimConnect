@@ -3,10 +3,10 @@ from .Entities import Plane
 
 
 def int_or_str(value):
-    try:
-        return int(value)
-    except TypeError:
-        return value
+	try:
+		return int(value)
+	except TypeError:
+		return value
 
 
 __version__ = "0.1"

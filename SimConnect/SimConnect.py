@@ -86,7 +86,7 @@ class SimConnect:
         elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_QUIT:
             self.quit = 1
         else:
-            LOGGER.debug("Received:", dwID)
+            LOGGER.debug("Received: {}".format(dwID))
         return
 
     def __init__(self, auto_connect=True, library_path="./SimConnect.dll"):
@@ -1088,7 +1088,7 @@ class SimConnect:
     def map_to_sim_event(self, name):
         for m in self.EventID:
             if name.decode() == m.name:
-                LOGGER.debug("Already have event: ", m)
+                LOGGER.debug("Already have event: {}".format(m))
                 return m
 
         names = [m.name for m in self.EventID] + [name.decode()]
@@ -1117,21 +1117,25 @@ class SimConnect:
         )
 
     def get_data(self, _Request, _format=False):
+        LOGGER.debug("try to get data")
+
         if self.out_data[_Request.DATA_REQUEST_ID] is None:
+            LOGGER.debug("no data found")
             return None
+
         if _format:
             map = {}
         else:
             map = sData
+
         for od in _Request.outData:
+            data = self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]]
+            LOGGER.debug("got key {}, value {}".format(od, data))
             if _format:
-                map[od] = self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]]
+                map[od] = data
             else:
-                setattr(
-                    sData,
-                    od,
-                    self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]],
-                )
+                setattr(map, od, data)
+
         return map
 
     def send_data(self, evnt, data=DWORD(0)):

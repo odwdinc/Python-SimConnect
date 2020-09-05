@@ -46,9 +46,12 @@ class Plane(Entity):
             self.add_attribute(attr)
 
     def add_attribute(self, attr):
+        def inner_func():
+            return self.get(attr)
+
         attr = attr.value
         setattr(
             self,
             attr[0].lower(),
-            property(self._get_attr_request(attr)).fget(),
+            property(inner_func).fget(),
         )

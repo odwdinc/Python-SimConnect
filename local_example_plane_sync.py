@@ -22,4 +22,6 @@ while not pl.sm.quit:
         data = pl.get(t)
         LOGGER.info("{}: {}".format(t.value[0], data))
 
+    LOGGER.info("{}: {}".format("altitude", pl.altitude))
+
 pl.sm.exit()

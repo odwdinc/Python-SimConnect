@@ -1,4 +1,4 @@
-from SimConnect import SimConnect
+from SimConnect import SimConnect, DWORD
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -25,3 +25,12 @@ class Entity:
             return getattr(data, attribute[0], default)
 
         return inner_func
+
+    def _send_data(self, event, value):
+        self.sm.send_data(self.sm.map_to_sim_event(event.value.encode("utf-8")), value)
+
+    def get(self, attribute, request=None, default=None):
+        return self._get_attr_request(attribute, request=request, default=default)()
+
+    def send(self, event, value=DWORD(0)):
+        self._send_data(event, value)

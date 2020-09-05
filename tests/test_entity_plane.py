@@ -29,10 +29,6 @@ class sData(dict):
 
 
 class TestPlane(TestCase):
-    def test_init(self):
-        # SimConnect.Plane()
-        self.assertTrue(True)
-
     def test_values(self):
 
         sm = create_autospec(SimConnect.SimConnect)
@@ -60,3 +56,22 @@ class TestPlane(TestCase):
         self.assertEqual(200, pl.latitude)
         self.assertEqual(300, pl.longitude)
         self.assertEqual(400, pl.kohlsman)
+
+    def test_no_default_attributes_in_init(self):
+
+        sm = create_autospec(SimConnect.SimConnect)
+
+        pl = SimConnect.Plane(sm=sm, default=False)
+        with self.assertRaises(AttributeError):
+            pl.altitude
+
+    def test_send_event(self):
+        sm = create_autospec(SimConnect.SimConnect)
+
+        pl1 = SimConnect.Plane(sm=sm)
+        pl1.send(SimConnect.Event.GEAR_DOWN)
+        pl1.gear_up
+
+        pl2 = SimConnect.Plane(sm=sm, default=False)
+        with self.assertRaises(AttributeError):
+            pl2.gear_up

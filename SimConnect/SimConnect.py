@@ -90,11 +90,7 @@ class SimConnect():
 		self.Requests = []
 		self.out_data = {}
 
-		if library_path is not None:
 			self.SimConnect = cdll.LoadLibrary(library_path)
-		else:
-			self.SimConnect = cdll.LoadLibrary("./SimConnect.dll")
-				
 		self.set_attributes()
 		
 		if auto_connect:

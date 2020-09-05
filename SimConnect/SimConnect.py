@@ -82,7 +82,8 @@ class SimConnect:
 					).contents
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
 			LOGGER.info("SIM OPEN")
-
+		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EXCEPTION:
+			LOGGER.warn("ID EXCEPTION")
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_QUIT:
 			self.quit = 1
 		else:
@@ -189,19 +190,6 @@ class SimConnect:
 			DWORD,
 			SIMCONNECT_SIMOBJECT_TYPE,
 		]
-
-		# SIMCONNECTAPI SimConnect_SetDataOnSimObject(
-		# 	HANDLE hSimConnect,
-		# 	SIMCONNECT_DATA_DEFINITION_ID DefineID,
-		# 	SIMCONNECT_OBJECT_ID ObjectID,
-		# 	SIMCONNECT_DATA_SET_FLAG Flags,
-		# 	DWORD ArrayCount,
-		# 	DWORD cbUnitSize,
-		# 	void * pDataSet);
-
-		# self.SetDataOnSimObject = self.SimConnect.SimConnect_SetDataOnSimObject
-		# self.SetDataOnSimObject.restype = HRESULT
-		# self.SetDataOnSimObject.argtypes = [HANDLE, DATA_DEFINE_ID, SIMCONNECT_OBJECT_ID, SIMCONNECT_DATA_SET_FLAG, DWORD, DWORD, ibbuf]
 
 		# SIMCONNECTAPI SimConnect_TransmitClientEvent(
 		# 	HANDLE hSimConnect,
@@ -1114,6 +1102,22 @@ class SimConnect:
 			_Request.DATA_DEFINITION_ID.value,
 			0,
 			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER,
+		)
+
+	def set_data(self, _Request, _data):
+		pyarr = list(_data.values())
+		dataarray = (ctypes.c_double * len(pyarr))(*pyarr)
+		pObjData = cast(
+			dataarray, c_void_p
+		)
+		self.__SetDataOnSimObject(
+			self.hSimConnect,
+			_Request.DATA_DEFINITION_ID.value,
+			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER,
+			0,
+			0,
+			sizeof(ctypes.c_double) * len(pyarr),
+			pObjData
 		)
 
 	def get_data(self, _Request, _format=False):

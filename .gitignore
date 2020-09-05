@@ -131,3 +131,11 @@ dmypy.json
 
 #vscode
 .vscode
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/Python-SimConnect.iml
+.idea/vcs.xml
+.idea/workspace.xml
+.DS_Store
+.idea/inspectionProfiles/Project_Default.xml

@@ -60,7 +60,7 @@ class TestPlane(TestCase):
     def test_no_default_attributes_in_init(self):
         sm = create_autospec(SimConnect.SimConnect)
 
-        pl = SimConnect.Plane(sm=sm, default=False)
+        pl = SimConnect.Plane(sm=sm, add_default=False)
         with self.assertRaises(AttributeError):
             pl.altitude
 
@@ -71,6 +71,6 @@ class TestPlane(TestCase):
         pl1.send(SimConnect.Event.GEAR_DOWN)
         pl1.gear_up
 
-        pl2 = SimConnect.Plane(sm=sm, default=False)
+        pl2 = SimConnect.Plane(sm=sm, add_default=False)
         with self.assertRaises(AttributeError):
             pl2.gear_up

@@ -14,11 +14,11 @@ class Plane(Entity):
         Initialie a plane entity.
 
         Parameters: (inherit from Entity)
-            default (bool): If False, then no standard attributes will be loaded. Default True.
+            add_default (bool): If False, then no standard attributes will be loaded. Default True.
         """
-        add_default = kwargs.get("default", True)
-        if "default" in kwargs:
-            del kwargs["default"]
+        add_default = kwargs.get("add_default", True)
+        if "add_default" in kwargs:
+            del kwargs["add_default"]
 
         super(Plane, self).__init__(*args, **kwargs)
 

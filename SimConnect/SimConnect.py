@@ -78,7 +78,7 @@ class SimConnect:
 			for _request in self.Requests:
 				if dwRequestID == _request.DATA_REQUEST_ID.value:
 					self.out_data[_request.DATA_REQUEST_ID] = cast(
-						pObjData.dwData, POINTER(c_double * 200)
+						pObjData.dwData, POINTER(c_double * len(_request.definitions))
 					).contents
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
 			LOGGER.info("SIM OPEN")

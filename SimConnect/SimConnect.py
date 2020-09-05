@@ -1138,7 +1138,7 @@ class SimConnect:
 				)
 		return map
 
-	def send_data(self, evnt, data=DWORD(0)):
+	def send_event(self, evnt, data=DWORD(0)):
 		err = self.__TransmitClientEvent(
 			self.hSimConnect,
 			SIMCONNECT_OBJECT_ID_USER,

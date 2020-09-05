@@ -56,7 +56,7 @@ while not sm.quit:
 	# send request for new data inine @ 15s
 	if ct_g + 5000 < millis():
 		print("THROTTLE1_SET")
-		sm.send_data(THROTTLE1_SET, DWORD(temp_THROTTLE))
+		sm.send_event(THROTTLE1_SET, DWORD(temp_THROTTLE))
 		temp_THROTTLE += 100
 		ct_g = millis()
 

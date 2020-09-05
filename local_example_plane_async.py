@@ -15,8 +15,6 @@ LOGGER.info("START")
 
 pl = Plane()
 
-LOGGER.debug("kawomm")
-
 while not pl.sm.quit:
     loop = asyncio.get_event_loop()
     tasks = [pl.async_get(Measurement.altitude), pl.async_get(Measurement.longitude)]

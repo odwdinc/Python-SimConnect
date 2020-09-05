@@ -18,7 +18,6 @@ myRequest.add('Latitude', (b'Plane Latitude', b'degrees'))
 myRequest.add('Longitude', (b'Plane Longitude', b'degrees'))
 myRequest.add('Kohlsman', (b'Kohlsman setting hg', b'inHg'))
 
-
 @app.route('/json/')
 @app.route('/json/all')
 def json_add_data():
@@ -37,12 +36,5 @@ def json_add_data():
     }
 
     return jsonify(data_dictionary)
-
-
-
-
-
-
-
 
 app.run(host='0.0.0.0', port=5000, debug=True)

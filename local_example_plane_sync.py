@@ -18,10 +18,10 @@ LOGGER.debug("kawomm")
 
 tasks = [Measurement.altitude, Measurement.longitude]
 while not pl.sm.quit:
-    for t in tasks:
-        data = pl.get(t)
-        LOGGER.info("{}: {}".format(t.value[0], data))
+    alt1 = pl.get(tasks[0])
+    long = pl.get(tasks[1])
+    alt2 = pl.altitude
 
-    LOGGER.info("{}: {}".format("altitude", pl.altitude))
+    LOGGER.info("alt1={alt1}, alt2={alt2}, long()={long}".format(**vars()))
 
 pl.sm.exit()

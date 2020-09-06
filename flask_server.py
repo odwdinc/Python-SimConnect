@@ -276,11 +276,6 @@ def get_data(data_type):
     return data_dictionary
 
 
-@app.route('/ajaxtest')
-def ajax_test:
-    return render_template("ajaxtest.html")
-
-
 @app.route('/ui')
 def output_ui_variables():
     data_dictionary = get_data("ui")
@@ -307,6 +302,25 @@ def output_ui_variables():
 
         ui_friendly_dictionary["MAGNETIC_COMPASS"] = round(data_dictionary.get("MAGNETIC_COMPASS"))
         ui_friendly_dictionary["VERTICAL_SPEED"] = round(data_dictionary.get("VERTICAL_SPEED"))
+
+        ui_friendly_dictionary["AUTOPILOT_MASTER"] = data_dictionary.get("AUTOPILOT_MASTER")
+        ui_friendly_dictionary["AUTOPILOT_NAV_SELECTED"] = data_dictionary.get("AUTOPILOT_NAV_SELECTED")
+        ui_friendly_dictionary["AUTOPILOT_WING_LEVELER"] = data_dictionary.get("AUTOPILOT_WING_LEVELER")
+        ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK"] = data_dictionary.get("AUTOPILOT_HEADING_LOCK")
+        ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK_DIR"] = data_dictionary.get("AUTOPILOT_HEADING_LOCK_DIR")
+        ui_friendly_dictionary["AUTOPILOT_ALTITUDE_LOCK"] = data_dictionary.get("AUTOPILOT_ALTITUDE_LOCK")
+        ui_friendly_dictionary["AUTOPILOT_ALTITUDE_LOCK_VAR"] = data_dictionary.get("AUTOPILOT_ALTITUDE_LOCK_VAR")
+        ui_friendly_dictionary["AUTOPILOT_ATTITUDE_HOLD"] = data_dictionary.get("AUTOPILOT_ATTITUDE_HOLD")
+        ui_friendly_dictionary["AUTOPILOT_GLIDESLOPE_HOLD"] = data_dictionary.get("AUTOPILOT_GLIDESLOPE_HOLD")
+        ui_friendly_dictionary["AUTOPILOT_PITCH_HOLD_REF"] = data_dictionary.get("AUTOPILOT_PITCH_HOLD_REF")
+        ui_friendly_dictionary["AUTOPILOT_APPROACH_HOLD"] = data_dictionary.get("AUTOPILOT_APPROACH_HOLD")
+        ui_friendly_dictionary["AUTOPILOT_BACKCOURSE_HOLD"] = data_dictionary.get("AUTOPILOT_BACKCOURSE_HOLD")
+        ui_friendly_dictionary["AUTOPILOT_VERTICAL_HOLD"] = data_dictionary.get("AUTOPILOT_VERTICAL_HOLD")
+        ui_friendly_dictionary["AUTOPILOT_VERTICAL_HOLD_VAR"] = data_dictionary.get("AUTOPILOT_VERTICAL_HOLD_VAR")
+        ui_friendly_dictionary["AUTOPILOT_PITCH_HOLD"] = data_dictionary.get("AUTOPILOT_PITCH_HOLD")
+        ui_friendly_dictionary["AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE"] = data_dictionary.get("AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE")
+        ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD"] = data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD")
+        ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD_VAR"] = data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD_VAR")
 
     return jsonify(ui_friendly_dictionary)
 

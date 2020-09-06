@@ -268,12 +268,11 @@ def get_data(data_type):
     sm.request_data(request_to_action)
     while data is None and attempts < 20:
         sm.run()
-        data = sm.get_data(request_to_action)
-        if data is None:
+        if sm.get_data(request_to_action):
             sleep(0.5)
         attempts = attempts + 1
 
-    if data is None:
+    if request_to_action.outData is None:
         data_dictionary = {
             "STATUS": "failed to access simulator despite repeated attempts"
         }
@@ -281,7 +280,7 @@ def get_data(data_type):
         data_dictionary = {
             "STATUS": "success"
         }
-        data_dictionary.update(data)
+        data_dictionary.update(request_to_action.outData)
     return data_dictionary
 
 

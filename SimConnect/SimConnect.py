@@ -1098,7 +1098,8 @@ class SimConnect:
 			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER,
 		)
 
-	def set_data(self, _Request, _data):
+	def set_data(self, _Request):
+		_data = _Request.outData
 		pyarr = list(_data.values())
 		dataarray = (ctypes.c_double * len(pyarr))(*pyarr)
 		pObjData = cast(
@@ -1116,11 +1117,13 @@ class SimConnect:
 
 	def get_data(self, _Request):
 		if self.out_data[_Request.DATA_REQUEST_ID] is None:
-			return None
-		map = {}
+			return False
+		newData = self.out_data[_Request.DATA_REQUEST_ID]
 		for od in _Request.outData:
-			map[od] = self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]]
-		return map
+			index = list(_Request.outData.keys()).index(od)
+			_Request.outData[od] = newData[index]
+		self.out_data[_Request.DATA_REQUEST_ID] = None
+		return True
 
 	def send_event(self, evnt, data=DWORD(0)):
 		err = self.__TransmitClientEvent(

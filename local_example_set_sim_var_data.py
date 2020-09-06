@@ -22,7 +22,7 @@ while not sm.quit:
 	sm.run()
 
 	# check for data from THROTTLERequest
-	data = sm.get_data(ThrottleRequest, True)
+	data = sm.get_data(ThrottleRequest)
 	if data is not None:
 		print("THROTTLE 1: %f" % (
 			data['ThrL_p1']

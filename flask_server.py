@@ -281,7 +281,7 @@ def output_ui_variables():
 
     # calculate fuel percentage
     fuel_quantity = data_dictionary.get("FUEL_TOTAL_QUANTITY")
-    fuel_capacity = data.dictionary.get("FUEL_TOTAL_CAPACITY")
+    fuel_capacity = data_dictionary.get("FUEL_TOTAL_CAPACITY")
     fuel_percentage = fuel_quantity / fuel_capacity
 
     data_dictionary["FUEL_PERCENTAGE"] = fuel_percentage

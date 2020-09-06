@@ -288,7 +288,7 @@ def output_ui_variables():
         fuel_percentage = (data_dictionary.get("FUEL_TOTAL_QUANTITY") / data_dictionary.get("FUEL_TOTAL_CAPACITY")) * 100
         ui_friendly_dictionary["FUEL_PERCENTAGE"] = round(fuel_percentage)
         ui_friendly_dictionary["AIRSPEED_INDICATE"] = round(data_dictionary.get("AIRSPEED_INDICATE"))
-        ui_friendly_dictionary["ALTITUDE"] = round(data_dictionary.get("ALTITUDE"))
+        ui_friendly_dictionary["Altitude"] = round(data_dictionary.get("Altitude"))
         ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(data_dictionary["FLAPS_HANDLE_PERCENT"]*100)
 
         if data_dictionary["GEAR_HANDLE_POSITION"] == 1:

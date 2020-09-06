@@ -265,11 +265,11 @@ def get_data(data_type):
 
     if data is None:
         data_dictionary = {
-            "Status": "failed to access simulator despite repeated attempts"
+            "STATUS": "failed to access simulator despite repeated attempts"
         }
     else:
         data_dictionary = {
-            "Status": "success"
+            "STATUS": "success"
         }
         data_dictionary.update(data)
     return data_dictionary
@@ -279,13 +279,30 @@ def get_data(data_type):
 def output_ui_variables():
     data_dictionary = get_data("ui")
 
-    # calculate fuel percentage
-    fuel_quantity = data_dictionary.get("FUEL_TOTAL_QUANTITY")
-    fuel_capacity = data_dictionary.get("FUEL_TOTAL_CAPACITY")
-    fuel_percentage = fuel_quantity / fuel_capacity
+    ui_friendly_dictionary = {}
+    if data_dictionary.get("STATUS") != "success"
+        ui_friendly_dictionary["STATUS"] = data_dictionary.get("STATUS")
+    else:
+        ui_friendly_dictionary["STATUS"] = "success"
 
-    data_dictionary["FUEL_PERCENTAGE"] = fuel_percentage
-    return jsonify(data_dictionary)
+        fuel_percentage = (data_dictionary.get("FUEL_TOTAL_QUANTITY") / data_dictionary.get("FUEL_TOTAL_CAPACITY")) * 100
+        ui_friendly_dictionary["FUEL_PERCENTAGE"] = round(fuel_percentage)
+        ui_friendly_dictionary["AIRSPEED_INDICATE"] = round(data_dictionary.get("AIRSPEED_INDICATE"))
+        ui_friendly_dictionary["ALTITUDE"] = round(data_dictionary.get("ALTITUDE"))
+        ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(data_dictionary["FLAPS_HANDLE_PERCENT"]*100)
+
+        if data_dictionary["GEAR_HANDLE_POSITION"] == 1:
+            ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "Down"
+        else:
+            ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "Up"
+
+        ui_friendly_dictionary["Latitude"] = data_dictionary.get("Latitude")
+        ui_friendly_dictionary["Longitude"] = data_dictionary.get("Longitude")
+
+        ui_friendly_dictionary["MAGNETIC_COMPASS"] = round(data_dictionary.get("MAGNETIC_COMPASS"))
+        ui_friendly_dictionary["VERTICAL_SPEED"] = round(data_dictionary.get("VERTICAL_SPEED"))
+
+    return jsonify(ui_friendly_dictionary)
 
 
 @app.route('/data/<data_type>/')

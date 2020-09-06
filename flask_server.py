@@ -276,7 +276,7 @@ def get_data(data_type):
 
 
 @app.route('/ui/')
-def output_ui_variables()
+def output_ui_variables():
     data_dictionary = get_data("ui")
 
     # calculate fuel percentage

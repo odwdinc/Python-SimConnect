@@ -16,14 +16,14 @@ request_navigation.add('Latitude', (b'Plane Latitude', b'degrees'))
 request_navigation.add('Longitude', (b'Plane Longitude', b'degrees'))
 request_navigation.add('Kohlsman', (b'Kohlsman setting hg', b'inHg'))
 
-request_airspeed = sm.newRequest()
+request_airspeed = sm.new_request()
 request_airspeed.add('AIRSPEED_TRUE', (b'AIRSPEED TRUE', b'Knots'))
 request_airspeed.add('AIRSPEED_INDICATE', (b'AIRSPEED INDICATED', b'Knots'))
 request_airspeed.add('AIRSPEED_TRUE CALIBRATE', (b'AIRSPEED TRUE CALIBRATE', b'Degrees'))
 request_airspeed.add('AIRSPEED_BARBER POLE', (b'AIRSPEED BARBER POLE', b'Knots'))
 request_airspeed.add('AIRSPEED_MACH', (b'AIRSPEED MACH', b'Mach'))
 
-request_compass = sm.newRequest()
+request_compass = sm.new_request()
 request_compass.add('WISKEY_COMPASS_INDICATION_DEGREES', (b'WISKEY COMPASS INDICATION DEGREES', b'Degrees'))
 request_compass.add('PARTIAL_PANEL_COMPASS', (b'PARTIAL PANEL COMPASS', b'Enum'))  # Gauge fail flag (0 = ok, 1 = fail, 2 = blank)
 request_compass.add('ADF_CARD', (b'ADF CARD', b'Degrees'))  # ADF compass rose setting
@@ -31,13 +31,13 @@ request_compass.add('MAGNETIC_COMPASS', (b'MAGNETIC COMPASS', b'Degrees'))  # Co
 request_compass.add('INDUCTOR_COMPASS_PERCENT_DEVIATION', (b'INDUCTOR COMPASS PERCENT DEVIATION', b'Percent over 100'))  # Inductor compass deviation reading
 request_compass.add('INDUCTOR_COMPASS_HEADING_REF', (b'INDUCTOR COMPASS HEADING REF', b'Radians'))  # Inductor compass heading
 
-request_vertical_speed = sm.newRequest()
+request_vertical_speed = sm.new_request()
 request_vertical_speed.add('VELOCITY_BODY_Y', (b'VELOCITY BODY Y', b'Feet per second'))  # True vertical speed, relative to aircraft axis
 request_vertical_speed.add('RELATIVE_WIND_VELOCITY_BODY_Y', (b'RELATIVE WIND VELOCITY BODY Y', b'Feet per second'))  # Vertical speed relative to wind
 request_vertical_speed.add('VERTICAL_SPEED', (b'VERTICAL SPEED', b'Feet per second'))  # Vertical speed indication
 request_vertical_speed.add('GPS_WP_VERTICAL_SPEED', (b'GPS WP VERTICAL SPEED', b'Meters per second'))  # Vertical speed to waypoint
 
-request_fuel = sm.newRequest()
+request_fuel = sm.new_request()
 request_fuel.add('FUEL_TANK_CENTER_LEVEL', (b'FUEL TANK CENTER LEVEL', b'Percent Over 100'))  # Percent of maximum capacity
 request_fuel.add('FUEL_TANK_CENTER2_LEVEL', (b'FUEL TANK CENTER2 LEVEL', b'Percent Over 100'))  # Percent of maximum capacity
 request_fuel.add('FUEL_TANK_CENTER3_LEVEL', (b'FUEL TANK CENTER3 LEVEL', b'Percent Over 100'))  # Percent of maximum capacity
@@ -85,7 +85,7 @@ request_fuel.add('NUM_FUEL_SELECTORS', (b'NUM FUEL SELECTORS', b'Number'))  # Nu
 request_fuel.add('UNLIMITED_FUEL', (b'UNLIMITED FUEL', b'Bool'))  # Unlimited fuel flag
 request_fuel.add('ESTIMATED_FUEL_FLOW', (b'ESTIMATED FUEL FLOW', b'Pounds per hour'))  # Estimated fuel flow at cruise
 
-request_flaps = sm.newRequest()
+request_flaps = sm.new_request()
 request_flaps.add('FLAPS_HANDLE_PERCENT', (b'FLAPS HANDLE PERCENT', b'Percent Over 100'))  # Percent flap handle extended
 request_flaps.add('FLAPS_HANDLE_INDEX', (b'FLAPS HANDLE INDEX', b'Number'))  # Index of current flap position
 request_flaps.add('FLAPS_NUM_HANDLE_POSITIONS', (b'FLAPS NUM HANDLE POSITIONS', b'Number'))  # Number of flap positions
@@ -101,7 +101,7 @@ request_flaps.add('FLAPS_AVAILABLE', (b'FLAPS AVAILABLE', b'Bool'))  # True if f
 request_flaps.add('FLAP_DAMAGE_BY_SPEED', (b'FLAP DAMAGE BY SPEED', b'Bool'))  # True if flagps are damaged by excessive speed
 request_flaps.add('FLAP_SPEED_EXCEEDED', (b'FLAP SPEED EXCEEDED', b'Bool'))  # True if safe speed limit for flaps exceeded
 
-request_throttle = sm.newRequest()
+request_throttle = sm.new_request()
 request_throttle.add('AUTOPILOT_THROTTLE_ARM', (b'AUTOPILOT THROTTLE ARM', b'Bool'))  # Autothrottle armed
 request_throttle.add('AUTOPILOT_TAKEOFF_POWER_ACTIVE', (b'AUTOPILOT TAKEOFF POWER ACTIVE', b'Bool'))  # Takeoff / Go Around power mode active
 request_throttle.add('AUTOTHROTTLE_ACTIVE', (b'AUTOTHROTTLE ACTIVE', b'Bool'))  # Auto-throttle active
@@ -112,7 +112,7 @@ request_throttle.add('AUTOPILOT_THROTTLE_ARM', (b'AUTOPILOT THROTTLE ARM', b'Boo
 request_throttle.add('AUTOTHROTTLE_ACTIVE', (b'AUTOTHROTTLE ACTIVE', b'Bool'))  # Auto-throttle active
 request_throttle.add('FULL_THROTTLE_THRUST_TO_WEIGHT_RATIO', (b'FULL THROTTLE THRUST TO WEIGHT RATIO', b'Number'))  # Full throttle thrust to weight ratio
 
-request_gear = sm.newRequest()
+request_gear = sm.new_request()
 request_gear.add('IS_GEAR_RETRACTABLE', (b'IS GEAR RETRACTABLE', b'Bool'))  # True if gear can be retracted
 request_gear.add('IS_GEAR_SKIS', (b'IS GEAR SKIS', b'Bool'))  # True if landing gear is skis
 request_gear.add('IS_GEAR_FLOATS', (b'IS GEAR FLOATS', b'Bool'))  # True if landing gear is floats
@@ -161,7 +161,7 @@ request_gear.add('GEAR_DAMAGE_BY_SPEED', (b'GEAR DAMAGE BY SPEED', b'Bool'))  # 
 request_gear.add('GEAR_SPEED_EXCEEDED', (b'GEAR SPEED EXCEEDED', b'Bool'))  # True if safe speed limit for gear exceeded
 request_gear.add('NOSEWHEEL_LOCK_ON', (b'NOSEWHEEL LOCK ON', b'Bool'))  # True if the nosewheel lock is engaged.
 
-request_trim = sm.newRequest()
+request_trim = sm.new_request()
 request_trim.add('ROTOR_LATERAL_TRIM_PCT', (b'ROTOR LATERAL TRIM PCT', b'Percent Over 100'))  # Trim percent
 request_trim.add('ELEVATOR_TRIM_POSITION', (b'ELEVATOR TRIM POSITION', b'Radians'))  # Elevator trim deflection
 request_trim.add('ELEVATOR_TRIM_INDICATOR', (b'ELEVATOR TRIM INDICATOR', b'Position (-16K to 0) -16K = full down'))  # Percent elevator trim (for indication)
@@ -171,7 +171,7 @@ request_trim.add('AILERON_TRIM_PCT', (b'AILERON TRIM PCT', b'Float. Percent over
 request_trim.add('RUDDER_TRIM_PCT', (b'RUDDER TRIM PCT', b'Float. Percent over 100'))  # The trim position of the rudder. Zero is no trim.
 request_trim.add('RUDDER_TRIM', (b'RUDDER TRIM', b'Radians'))  # Angle deflection
 
-request_autopilot = sm.newRequest()
+request_autopilot = sm.new_request()
 request_autopilot.add('AUTOPILOT_MASTER', (b'AUTOPILOT MASTER', b'Bool'))
 request_autopilot.add('AUTOPILOT_AVAILABLE', (b'AUTOPILOT AVAILABLE', b'Bool'))
 request_autopilot.add('AUTOPILOT_NAV_SELECTED', (b'AUTOPILOT NAV SELECTED', b'Number'))

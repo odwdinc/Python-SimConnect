@@ -312,7 +312,7 @@ def output_ui_variables():
             ui_friendly_dictionary["AUTOPILOT_MASTER"] = False
         else:
             ui_friendly_dictionary["AUTOPILOT_MASTER"] = True
-            
+
         ui_friendly_dictionary["AUTOPILOT_NAV_SELECTED"] = data_dictionary.get("AUTOPILOT_NAV_SELECTED")
         ui_friendly_dictionary["AUTOPILOT_WING_LEVELER"] = data_dictionary.get("AUTOPILOT_WING_LEVELER")
         ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK"] = data_dictionary.get("AUTOPILOT_HEADING_LOCK")

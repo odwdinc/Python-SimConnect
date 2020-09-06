@@ -1,9 +1,9 @@
 from ctypes import *
 from ctypes.wintypes import *
-from .Constants import *
-from .Enum import *
 import logging
 import time
+from .Enum import *
+from .Constants import *
 
 LOGGER = logging.getLogger(__name__)
 
@@ -25,8 +25,15 @@ class sData(dict):
 	__delattr__ = dict.__delitem__
 
 
-class Request():
-	def __init__(self, _name, _time=None, _DATA_DEFINITION_ID=SIMCONNECT_DATA_DEFINITION_ID, _DATA_REQUEST_ID=SIMCONNECT_DATA_REQUEST_ID, _psc=None):
+class Request:
+	def __init__(
+		self,
+		_name,
+		_time=None,
+		_DATA_DEFINITION_ID=SIMCONNECT_DATA_DEFINITION_ID,
+		_DATA_REQUEST_ID=SIMCONNECT_DATA_REQUEST_ID,
+		_psc=None,
+	):
 		self.DATA_DEFINITION_ID = _DATA_DEFINITION_ID
 		self.DATA_REQUEST_ID = _DATA_REQUEST_ID
 		self.definitions = []
@@ -43,17 +50,18 @@ class Request():
 		self.psc.AddToDataDefinition(
 			self.psc.hSimConnect,
 			self.DATA_DEFINITION_ID.value,
-			deff[0], deff[1],
+			deff[0],
+			deff[1],
 			SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_FLOAT64,
 			0,
-			SIMCONNECT_UNUSED
+			SIMCONNECT_UNUSED,
 		)
 
 
-class SimConnect():
+class SimConnect:
 
 	# TODO: update callbackfunction to expand functions.
-	def MyDispatchProc(self, pData, cbData, pContext):
+	def my_dispatch_proc(self, pData, cbData, pContext):
 		dwID = pData.contents.dwID
 		self.pS = None
 		if dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EVENT:
@@ -63,21 +71,26 @@ class SimConnect():
 				LOGGER.info("SIM START")
 
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE:
-			pObjData = cast(pData, POINTER(SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE)).contents
+			pObjData = cast(
+				pData, POINTER(SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE)
+			).contents
 			dwRequestID = pObjData.dwRequestID
 			for _request in self.Requests:
 				if dwRequestID == _request.DATA_REQUEST_ID.value:
-					self.out_data[_request.DATA_REQUEST_ID] = cast(pObjData.dwData, POINTER(c_double * 200)).contents
+					self.out_data[_request.DATA_REQUEST_ID] = cast(
+						pObjData.dwData, POINTER(c_double * len(_request.definitions))
+					).contents
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
 			LOGGER.info("SIM OPEN")
-
+		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EXCEPTION:
+			LOGGER.warn("ID EXCEPTION")
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_QUIT:
 			self.quit = 1
 		else:
 			LOGGER.debug("Received:", dwID)
 		return
 
-	def __init__(self, auto_connect = True, library_path = None):
+	def __init__(self, auto_connect=True, library_path="./SimConnect.dll"):
 
 		self.EventID = SIMCONNECT_CLIENT_EVENT_ID
 		self.DATA_DEFINITION_ID = SIMCONNECT_DATA_DEFINITION_ID
@@ -90,63 +103,68 @@ class SimConnect():
 		self.Requests = []
 		self.out_data = {}
 
-		if library_path is not None:
-			self.SimConnect = cdll.LoadLibrary(library_path)
-		else:
-			self.SimConnect = cdll.LoadLibrary("./SimConnect.dll")
-				
-		self.setAttributes()
-		
+		self.SimConnect = cdll.LoadLibrary(library_path)
+		self.set_attributes()
+
 		if auto_connect:
 			self.connect()
 
-
-	def setAttributes(self):
-		#SIMCONNECTAPI SimConnect_Open(
-		#	HANDLE * phSimConnect,
-		#	LPCSTR szName,
-		#	HWND hWnd,
-		#	DWORD UserEventWin32,
-		#	HANDLE hEventHandle,
-		#	DWORD ConfigIndex)
+	def set_attributes(self):
+		# SIMCONNECTAPI SimConnect_Open(
+		# 	HANDLE * phSimConnect,
+		# 	LPCSTR szName,
+		# 	HWND hWnd,
+		# 	DWORD UserEventWin32,
+		# 	HANDLE hEventHandle,
+		# 	DWORD ConfigIndex)
 
 		self.__Open = self.SimConnect.SimConnect_Open
 		self.__Open.restype = HRESULT
 		self.__Open.argtypes = [POINTER(HANDLE), LPCSTR, HWND, DWORD, HANDLE, DWORD]
 
-		#SIMCONNECTAPI SimConnect_Close(
-		#	HANDLE hSimConnect);
+		# SIMCONNECTAPI SimConnect_Close(
+		# 	HANDLE hSimConnect);
 
 		self.__Close = self.SimConnect.SimConnect_Close
 		self.__Close.restype = HRESULT
 		self.__Close.argtypes = [HANDLE]
 
-		#SIMCONNECTAPI SimConnect_AddToDataDefinition(
-		#	HANDLE hSimConnect,
-		#	SIMCONNECT_DATA_DEFINITION_ID DefineID,
-		#	const char * DatumName,
-		#	const char * UnitsName,
-		#	SIMCONNECT_DATATYPE DatumType = SIMCONNECT_DATATYPE_FLOAT64,
-		#	float fEpsilon = 0,
-		#	DWORD DatumID = SIMCONNECT_UNUSED);
+		# SIMCONNECTAPI SimConnect_AddToDataDefinition(
+		# 	HANDLE hSimConnect,
+		# 	SIMCONNECT_DATA_DEFINITION_ID DefineID,
+		# 	const char * DatumName,
+		# 	const char * UnitsName,
+		# 	SIMCONNECT_DATATYPE DatumType = SIMCONNECT_DATATYPE_FLOAT64,
+		# 	float fEpsilon = 0,
+		# 	DWORD DatumID = SIMCONNECT_UNUSED);
 
 		self.AddToDataDefinition = self.SimConnect.SimConnect_AddToDataDefinition
 		self.AddToDataDefinition.restype = HRESULT
-		self.AddToDataDefinition.argtypes = [HANDLE, self.DATA_DEFINITION_ID, c_char_p, c_char_p, SIMCONNECT_DATATYPE, c_float, DWORD]
+		self.AddToDataDefinition.argtypes = [
+			HANDLE,
+			self.DATA_DEFINITION_ID,
+			c_char_p,
+			c_char_p,
+			SIMCONNECT_DATATYPE,
+			c_float,
+			DWORD,
+		]
 
-		#SIMCONNECTAPI SimConnect_SubscribeToSystemEvent(
-		#	HANDLE hSimConnect,
-		#	SIMCONNECT_CLIENT_EVENT_ID EventID,
-		#	const char * SystemEventName);
+		# SIMCONNECTAPI SimConnect_SubscribeToSystemEvent(
+		# 	HANDLE hSimConnect,
+		# 	SIMCONNECT_CLIENT_EVENT_ID EventID,
+		# 	const char * SystemEventName);
 
-		self.__SubscribeToSystemEvent = self.SimConnect.SimConnect_SubscribeToSystemEvent
+		self.__SubscribeToSystemEvent = (
+			self.SimConnect.SimConnect_SubscribeToSystemEvent
+		)
 		self.__SubscribeToSystemEvent.restype = HRESULT
 		self.__SubscribeToSystemEvent.argtypes = [HANDLE, self.EventID, c_char_p]
 
-		#SIMCONNECTAPI SimConnect_CallDispatch(
-		#	HANDLE hSimConnect,
-		#	DispatchProc pfcnDispatch,
-		#	void * pContext);
+		# SIMCONNECTAPI SimConnect_CallDispatch(
+		# 	HANDLE hSimConnect,
+		# 	DispatchProc pfcnDispatch,
+		# 	void * pContext);
 
 		DispatchProc = CFUNCTYPE(c_void_p, POINTER(SIMCONNECT_RECV), DWORD, c_void_p)
 
@@ -154,60 +172,71 @@ class SimConnect():
 		self.__CallDispatch.restype = HRESULT
 		self.__CallDispatch.argtypes = [HANDLE, DispatchProc, c_void_p]
 
-		#SIMCONNECTAPI SimConnect_RequestDataOnSimObjectType(
-		#	HANDLE hSimConnect,
-		#	SIMCONNECT_DATA_REQUEST_ID RequestID,
-		#	SIMCONNECT_DATA_DEFINITION_ID DefineID,
-		#	DWORD dwRadiusMeters,
-		#	SIMCONNECT_SIMOBJECT_TYPE type);
+		# SIMCONNECTAPI SimConnect_RequestDataOnSimObjectType(
+		# 	HANDLE hSimConnect,
+		# 	SIMCONNECT_DATA_REQUEST_ID RequestID,
+		# 	SIMCONNECT_DATA_DEFINITION_ID DefineID,
+		# 	DWORD dwRadiusMeters,
+		# 	SIMCONNECT_SIMOBJECT_TYPE type);
 
-		self.__RequestDataOnSimObjectType = self.SimConnect.SimConnect_RequestDataOnSimObjectType
+		self.__RequestDataOnSimObjectType = (
+			self.SimConnect.SimConnect_RequestDataOnSimObjectType
+		)
 		self.__RequestDataOnSimObjectType.restype = HRESULT
-		self.__RequestDataOnSimObjectType.argtypes = [HANDLE, self.DATA_REQUEST_ID, self.DATA_DEFINITION_ID, DWORD, SIMCONNECT_SIMOBJECT_TYPE]
+		self.__RequestDataOnSimObjectType.argtypes = [
+			HANDLE,
+			self.DATA_REQUEST_ID,
+			self.DATA_DEFINITION_ID,
+			DWORD,
+			SIMCONNECT_SIMOBJECT_TYPE,
+		]
 
-		#SIMCONNECTAPI SimConnect_SetDataOnSimObject(
-		#	HANDLE hSimConnect,
-		#	SIMCONNECT_DATA_DEFINITION_ID DefineID,
-		#	SIMCONNECT_OBJECT_ID ObjectID,
-		#	SIMCONNECT_DATA_SET_FLAG Flags,
-		#	DWORD ArrayCount,
-		#	DWORD cbUnitSize,
-		#	void * pDataSet);
-
-		#self.SetDataOnSimObject = self.SimConnect.SimConnect_SetDataOnSimObject
-		#self.SetDataOnSimObject.restype = HRESULT
-		#self.SetDataOnSimObject.argtypes = [HANDLE, DATA_DEFINE_ID, SIMCONNECT_OBJECT_ID, SIMCONNECT_DATA_SET_FLAG, DWORD, DWORD, ibbuf]
-
-		#SIMCONNECTAPI SimConnect_TransmitClientEvent(
-		#	HANDLE hSimConnect,
-		#	SIMCONNECT_OBJECT_ID ObjectID,
-		#	SIMCONNECT_CLIENT_EVENT_ID EventID,
-		#	DWORD dwData,
-		#	SIMCONNECT_NOTIFICATION_GROUP_ID GroupID,
-		#	SIMCONNECT_EVENT_FLAG Flags);
+		# SIMCONNECTAPI SimConnect_TransmitClientEvent(
+		# 	HANDLE hSimConnect,
+		# 	SIMCONNECT_OBJECT_ID ObjectID,
+		# 	SIMCONNECT_CLIENT_EVENT_ID EventID,
+		# 	DWORD dwData,
+		# 	SIMCONNECT_NOTIFICATION_GROUP_ID GroupID,
+		# 	SIMCONNECT_EVENT_FLAG Flags);
 
 		self.__TransmitClientEvent = self.SimConnect.SimConnect_TransmitClientEvent
 		self.__TransmitClientEvent.restype = HRESULT
-		self.__TransmitClientEvent.argtypes = [HANDLE, SIMCONNECT_OBJECT_ID, self.EventID, DWORD, DWORD, DWORD]
+		self.__TransmitClientEvent.argtypes = [
+			HANDLE,
+			SIMCONNECT_OBJECT_ID,
+			self.EventID,
+			DWORD,
+			DWORD,
+			DWORD,
+		]
 
-		#SIMCONNECTAPI SimConnect_MapClientEventToSimEvent(
-		#	HANDLE hSimConnect,
-		#	SIMCONNECT_CLIENT_EVENT_ID EventID,
-		#	const char * EventName = "");
+		# SIMCONNECTAPI SimConnect_MapClientEventToSimEvent(
+		# 	HANDLE hSimConnect,
+		# 	SIMCONNECT_CLIENT_EVENT_ID EventID,
+		# 	const char * EventName = "");
 
-		self.__MapClientEventToSimEvent = self.SimConnect.SimConnect_MapClientEventToSimEvent
+		self.__MapClientEventToSimEvent = (
+			self.SimConnect.SimConnect_MapClientEventToSimEvent
+		)
 		self.__MapClientEventToSimEvent.restype = HRESULT
 		self.__MapClientEventToSimEvent.argtypes = [HANDLE, self.EventID, c_char_p]
 
-		#SIMCONNECTAPI SimConnect_AddClientEventToNotificationGroup(
-		#	HANDLE hSimConnect,
-		#	SIMCONNECT_NOTIFICATION_GROUP_ID GroupID,
-		#	SIMCONNECT_CLIENT_EVENT_ID EventID,
-		#	BOOL bMaskable = FALSE);
+		# SIMCONNECTAPI SimConnect_AddClientEventToNotificationGroup(
+		# 	HANDLE hSimConnect,
+		# 	SIMCONNECT_NOTIFICATION_GROUP_ID GroupID,
+		# 	SIMCONNECT_CLIENT_EVENT_ID EventID,
+		# 	BOOL bMaskable = FALSE);
 
-		self.__AddClientEventToNotificationGroup = self.SimConnect.SimConnect_AddClientEventToNotificationGroup
+		self.__AddClientEventToNotificationGroup = (
+			self.SimConnect.SimConnect_AddClientEventToNotificationGroup
+		)
 		self.__AddClientEventToNotificationGroup.restype = HRESULT
-		self.__AddClientEventToNotificationGroup.argtypes = [HANDLE, self.GROUP_ID, self.EventID, c_bool]
+		self.__AddClientEventToNotificationGroup.argtypes = [
+			HANDLE,
+			self.GROUP_ID,
+			self.EventID,
+			c_bool,
+		]
 
 		# SIMCONNECTAPI SimConnect_SetSystemEventState(
 		#   HANDLE hSimConnect,
@@ -222,9 +251,16 @@ class SimConnect():
 		#   SIMCONNECT_NOTIFICATION_GROUP_ID GroupID
 		#   SIMCONNECT_CLIENT_EVENT_ID EventID
 		#   BOOL bMaskable = FALSE);
-		self.__AddClientEventToNotificationGroup = self.SimConnect.SimConnect_AddClientEventToNotificationGroup
+		self.__AddClientEventToNotificationGroup = (
+			self.SimConnect.SimConnect_AddClientEventToNotificationGroup
+		)
 		self.__AddClientEventToNotificationGroup.restype = HRESULT
-		self.__AddClientEventToNotificationGroup.argtypes = [HANDLE, self.GROUP_ID, self.EventID, c_bool]
+		self.__AddClientEventToNotificationGroup.argtypes = [
+			HANDLE,
+			self.GROUP_ID,
+			self.EventID,
+			c_bool,
+		]
 
 		# SIMCONNECTAPI SimConnect_RemoveClientEvent(
 		#   HANDLE hSimConnect,
@@ -238,14 +274,18 @@ class SimConnect():
 		#   HANDLE hSimConnect,
 		#   SIMCONNECT_NOTIFICATION_GROUP_ID GroupID
 		#   DWORD uPriority);
-		self.__SetNotificationGroupPriority = self.SimConnect.SimConnect_SetNotificationGroupPriority
+		self.__SetNotificationGroupPriority = (
+			self.SimConnect.SimConnect_SetNotificationGroupPriority
+		)
 		self.__SetNotificationGroupPriority.restype = HRESULT
 		self.__SetNotificationGroupPriority.argtypes = [HANDLE, self.GROUP_ID, DWORD]
 
 		# SIMCONNECTAPI SimConnect_ClearNotificationGroup(
 		#   HANDLE hSimConnect,
 		#   SIMCONNECT_NOTIFICATION_GROUP_ID GroupID);
-		self.__ClearNotificationGroup = self.SimConnect.SimConnect_ClearNotificationGroup
+		self.__ClearNotificationGroup = (
+			self.SimConnect.SimConnect_ClearNotificationGroup
+		)
 		self.__ClearNotificationGroup.restype = HRESULT
 		self.__ClearNotificationGroup.argtypes = [HANDLE, self.GROUP_ID]
 
@@ -254,7 +294,9 @@ class SimConnect():
 		#   SIMCONNECT_NOTIFICATION_GROUP_ID GroupID
 		#   DWORD dwReserved = 0
 		#   DWORD Flags = 0);
-		self.__RequestNotificationGroup = self.SimConnect.SimConnect_RequestNotificationGroup
+		self.__RequestNotificationGroup = (
+			self.SimConnect.SimConnect_RequestNotificationGroup
+		)
 		self.__RequestNotificationGroup.restype = HRESULT
 		self.__RequestNotificationGroup.argtypes = [HANDLE, self.GROUP_ID, DWORD, DWORD]
 
@@ -275,13 +317,16 @@ class SimConnect():
 		#   DWORD origin = 0
 		#   DWORD interval = 0
 		#   DWORD limit = 0);
-		self.__RequestDataOnSimObject = self.SimConnect.SimConnect_RequestDataOnSimObject
+		self.__RequestDataOnSimObject = (
+			self.SimConnect.SimConnect_RequestDataOnSimObject
+		)
 		self.__RequestDataOnSimObject.restype = HRESULT
 		self.__RequestDataOnSimObject.argtypes = [
 			HANDLE,
 			self.DATA_REQUEST_ID,
 			self.DATA_DEFINITION_ID,
-			SIMCONNECT_OBJECT_ID, SIMCONNECT_PERIOD,
+			SIMCONNECT_OBJECT_ID,
+			SIMCONNECT_PERIOD,
 			SIMCONNECT_DATA_REQUEST_FLAG,
 			DWORD,
 			DWORD,
@@ -305,7 +350,7 @@ class SimConnect():
 			SIMCONNECT_DATA_SET_FLAG,
 			DWORD,
 			DWORD,
-			c_void_p
+			c_void_p,
 		]
 
 		# SIMCONNECTAPI SimConnect_MapInputEventToClientEvent(
@@ -317,7 +362,9 @@ class SimConnect():
 		#   SIMCONNECT_CLIENT_EVENT_ID UpEventID = (SIMCONNECT_CLIENT_EVENT_ID)SIMCONNECT_UNUSED
 		#   DWORD UpValue = 0
 		#   BOOL bMaskable = FALSE);
-		self.__MapInputEventToClientEvent = self.SimConnect.SimConnect_MapInputEventToClientEvent
+		self.__MapInputEventToClientEvent = (
+			self.SimConnect.SimConnect_MapInputEventToClientEvent
+		)
 		self.__MapInputEventToClientEvent.restype = HRESULT
 		self.__MapInputEventToClientEvent.argtypes = [
 			HANDLE,
@@ -327,7 +374,7 @@ class SimConnect():
 			DWORD,
 			self.EventID,
 			DWORD,
-			c_bool
+			c_bool,
 		]
 
 		# SIMCONNECTAPI SimConnect_SetInputGroupPriority(
@@ -369,12 +416,20 @@ class SimConnect():
 		#   const char * szKeyChoice3 = "");
 		self.__RequestReservedKey = self.SimConnect.SimConnect_RequestReservedKey
 		self.__RequestReservedKey.restype = HRESULT
-		self.__RequestReservedKey.argtypes = [HANDLE, self.EventID, c_char_p, c_char_p, c_char_p]
+		self.__RequestReservedKey.argtypes = [
+			HANDLE,
+			self.EventID,
+			c_char_p,
+			c_char_p,
+			c_char_p,
+		]
 
 		# SIMCONNECTAPI SimConnect_UnsubscribeFromSystemEvent(
 		#   HANDLE hSimConnect,
 		#   SIMCONNECT_CLIENT_EVENT_ID EventID);
-		self.__UnsubscribeFromSystemEvent = self.SimConnect.SimConnect_UnsubscribeFromSystemEvent
+		self.__UnsubscribeFromSystemEvent = (
+			self.SimConnect.SimConnect_UnsubscribeFromSystemEvent
+		)
 		self.__UnsubscribeFromSystemEvent.restype = HRESULT
 		self.__UnsubscribeFromSystemEvent.argtypes = [HANDLE, self.EventID]
 
@@ -384,26 +439,47 @@ class SimConnect():
 		#   float lat
 		#   float lon
 		#   float alt);
-		self.__WeatherRequestInterpolatedObservation = self.SimConnect.SimConnect_WeatherRequestInterpolatedObservation
+		self.__WeatherRequestInterpolatedObservation = (
+			self.SimConnect.SimConnect_WeatherRequestInterpolatedObservation
+		)
 		self.__WeatherRequestInterpolatedObservation.restype = HRESULT
-		self.__WeatherRequestInterpolatedObservation.argtypes = [HANDLE, self.DATA_REQUEST_ID, c_float, c_float, c_float]
+		self.__WeatherRequestInterpolatedObservation.argtypes = [
+			HANDLE,
+			self.DATA_REQUEST_ID,
+			c_float,
+			c_float,
+			c_float,
+		]
 
 		# SIMCONNECTAPI SimConnect_WeatherRequestObservationAtStation(
 		#   HANDLE hSimConnect,
 		#   SIMCONNECT_DATA_REQUEST_ID RequestID
 		#   const char * szICAO);
-		self.__WeatherRequestObservationAtStation = self.SimConnect.SimConnect_WeatherRequestObservationAtStation
+		self.__WeatherRequestObservationAtStation = (
+			self.SimConnect.SimConnect_WeatherRequestObservationAtStation
+		)
 		self.__WeatherRequestObservationAtStation.restype = HRESULT
-		self.__WeatherRequestObservationAtStation.argtypes = [HANDLE, self.DATA_REQUEST_ID, c_char_p]
+		self.__WeatherRequestObservationAtStation.argtypes = [
+			HANDLE,
+			self.DATA_REQUEST_ID,
+			c_char_p,
+		]
 
 		# SIMCONNECTAPI SimConnect_WeatherRequestObservationAtNearestStation(
 		#   HANDLE hSimConnect,
 		#   SIMCONNECT_DATA_REQUEST_ID RequestID
 		#   float lat
 		#   float lon);
-		self.__WeatherRequestObservationAtNearestStation = self.SimConnect.SimConnect_WeatherRequestObservationAtNearestStation
+		self.__WeatherRequestObservationAtNearestStation = (
+			self.SimConnect.SimConnect_WeatherRequestObservationAtNearestStation
+		)
 		self.__WeatherRequestObservationAtNearestStation.restype = HRESULT
-		self.__WeatherRequestObservationAtNearestStation.argtypes = [HANDLE, self.DATA_REQUEST_ID, c_float, c_float]
+		self.__WeatherRequestObservationAtNearestStation.argtypes = [
+			HANDLE,
+			self.DATA_REQUEST_ID,
+			c_float,
+			c_float,
+		]
 
 		# SIMCONNECTAPI SimConnect_WeatherCreateStation(
 		#   HANDLE hSimConnect,
@@ -415,7 +491,15 @@ class SimConnect():
 		#   float alt);
 		self.__WeatherCreateStation = self.SimConnect.SimConnect_WeatherCreateStation
 		self.__WeatherCreateStation.restype = HRESULT
-		self.__WeatherCreateStation.argtypes = [HANDLE, self.DATA_REQUEST_ID, c_char_p, c_char_p, c_float, c_float, c_float]
+		self.__WeatherCreateStation.argtypes = [
+			HANDLE,
+			self.DATA_REQUEST_ID,
+			c_char_p,
+			c_char_p,
+			c_float,
+			c_float,
+			c_float,
+		]
 
 		# SIMCONNECTAPI SimConnect_WeatherRemoveStation(
 		#   HANDLE hSimConnect,
@@ -463,7 +547,9 @@ class SimConnect():
 		# SIMCONNECTAPI SimConnect_WeatherSetDynamicUpdateRate(
 		#   HANDLE hSimConnect,
 		#   DWORD dwRate);
-		self.__WeatherSetDynamicUpdateRate = self.SimConnect.SimConnect_WeatherSetDynamicUpdateRate
+		self.__WeatherSetDynamicUpdateRate = (
+			self.SimConnect.SimConnect_WeatherSetDynamicUpdateRate
+		)
 		self.__WeatherSetDynamicUpdateRate.restype = HRESULT
 		self.__WeatherSetDynamicUpdateRate.argtypes = [HANDLE, DWORD]
 
@@ -477,9 +563,21 @@ class SimConnect():
 		#   float maxLon
 		#   float maxAlt
 		#   DWORD dwFlags = 0);
-		self.__WeatherRequestCloudState = self.SimConnect.SimConnect_WeatherRequestCloudState
+		self.__WeatherRequestCloudState = (
+			self.SimConnect.SimConnect_WeatherRequestCloudState
+		)
 		self.__WeatherRequestCloudState.restype = HRESULT
-		self.__WeatherRequestCloudState.argtypes = [HANDLE, self.DATA_REQUEST_ID, c_float, c_float, c_float, c_float, c_float, c_float, DWORD]
+		self.__WeatherRequestCloudState.argtypes = [
+			HANDLE,
+			self.DATA_REQUEST_ID,
+			c_float,
+			c_float,
+			c_float,
+			c_float,
+			c_float,
+			c_float,
+			DWORD,
+		]
 
 		# SIMCONNECTAPI SimConnect_WeatherCreateThermal(
 		#   HANDLE hSimConnect,
@@ -514,7 +612,7 @@ class SimConnect():
 			c_float,
 			c_float,
 			c_float,
-			c_float
+			c_float,
 		]
 
 		# SIMCONNECTAPI SimConnect_WeatherRemoveThermal(
@@ -530,14 +628,16 @@ class SimConnect():
 		#   const char * szTailNumber
 		#   const char * szAirportID
 		#   SIMCONNECT_DATA_REQUEST_ID RequestID);
-		self.__AICreateParkedATCAircraft = self.SimConnect.SimConnect_AICreateParkedATCAircraft
+		self.__AICreateParkedATCAircraft = (
+			self.SimConnect.SimConnect_AICreateParkedATCAircraft
+		)
 		self.__AICreateParkedATCAircraft.restype = HRESULT
 		self.__AICreateParkedATCAircraft.argtypes = [
 			HANDLE,
 			c_char_p,
 			c_char_p,
 			c_char_p,
-			self.DATA_REQUEST_ID
+			self.DATA_REQUEST_ID,
 		]
 
 		# SIMCONNECTAPI SimConnect_AICreateEnrouteATCAircraft(
@@ -549,7 +649,9 @@ class SimConnect():
 		#   double dFlightPlanPosition
 		#   BOOL bTouchAndGo
 		#   SIMCONNECT_DATA_REQUEST_ID RequestID);
-		self.__AICreateEnrouteATCAircraft = self.SimConnect.SimConnect_AICreateEnrouteATCAircraft
+		self.__AICreateEnrouteATCAircraft = (
+			self.SimConnect.SimConnect_AICreateEnrouteATCAircraft
+		)
 		self.__AICreateEnrouteATCAircraft.restype = HRESULT
 		self.__AICreateEnrouteATCAircraft.argtypes = [
 			HANDLE,
@@ -559,7 +661,7 @@ class SimConnect():
 			c_char_p,
 			c_double,
 			c_bool,
-			self.DATA_REQUEST_ID
+			self.DATA_REQUEST_ID,
 		]
 
 		# SIMCONNECTAPI SimConnect_AICreateNonATCAircraft(
@@ -568,14 +670,16 @@ class SimConnect():
 		#   const char * szTailNumber
 		#   SIMCONNECT_DATA_INITPOSITION InitPos
 		#   SIMCONNECT_DATA_REQUEST_ID RequestID);
-		self.__AICreateNonATCAircraft = self.SimConnect.SimConnect_AICreateNonATCAircraft
+		self.__AICreateNonATCAircraft = (
+			self.SimConnect.SimConnect_AICreateNonATCAircraft
+		)
 		self.__AICreateNonATCAircraft.restype = HRESULT
 		self.__AICreateNonATCAircraft.argtypes = [
 			HANDLE,
 			c_double,
 			c_double,
 			SIMCONNECT_DATA_INITPOSITION,
-			self.DATA_REQUEST_ID
+			self.DATA_REQUEST_ID,
 		]
 
 		# SIMCONNECTAPI SimConnect_AICreateSimulatedObject(
@@ -583,13 +687,15 @@ class SimConnect():
 		#   const char * szContainerTitle
 		#   SIMCONNECT_DATA_INITPOSITION InitPos
 		#   SIMCONNECT_DATA_REQUEST_ID RequestID);
-		self.__AICreateSimulatedObject = self.SimConnect.SimConnect_AICreateSimulatedObject
+		self.__AICreateSimulatedObject = (
+			self.SimConnect.SimConnect_AICreateSimulatedObject
+		)
 		self.__AICreateSimulatedObject.restype = HRESULT
 		self.__AICreateSimulatedObject.argtypes = [
 			HANDLE,
 			c_char_p,
 			SIMCONNECT_DATA_INITPOSITION,
-			self.DATA_REQUEST_ID
+			self.DATA_REQUEST_ID,
 		]
 
 		# SIMCONNECTAPI SimConnect_AIReleaseControl(
@@ -601,7 +707,7 @@ class SimConnect():
 		self.__AIReleaseControl.argtypes = [
 			HANDLE,
 			SIMCONNECT_OBJECT_ID,
-			self.DATA_REQUEST_ID
+			self.DATA_REQUEST_ID,
 		]
 
 		# SIMCONNECTAPI SimConnect_AIRemoveObject(
@@ -613,7 +719,7 @@ class SimConnect():
 		self.__AIRemoveObject.argtypes = [
 			HANDLE,
 			SIMCONNECT_OBJECT_ID,
-			self.DATA_REQUEST_ID
+			self.DATA_REQUEST_ID,
 		]
 
 		# SIMCONNECTAPI SimConnect_AISetAircraftFlightPlan(
@@ -621,13 +727,15 @@ class SimConnect():
 		#   SIMCONNECT_OBJECT_ID ObjectID
 		#   const char * szFlightPlanPath
 		#   SIMCONNECT_DATA_REQUEST_ID RequestID);
-		self.__AISetAircraftFlightPlan = self.SimConnect.SimConnect_AISetAircraftFlightPlan
+		self.__AISetAircraftFlightPlan = (
+			self.SimConnect.SimConnect_AISetAircraftFlightPlan
+		)
 		self.__AISetAircraftFlightPlan.restype = HRESULT
 		self.__AISetAircraftFlightPlan.argtypes = [
 			HANDLE,
 			SIMCONNECT_OBJECT_ID,
 			c_char_p,
-			self.DATA_REQUEST_ID
+			self.DATA_REQUEST_ID,
 		]
 
 		# SIMCONNECTAPI SimConnect_ExecuteMissionAction(
@@ -640,7 +748,9 @@ class SimConnect():
 		# SIMCONNECTAPI SimConnect_CompleteCustomMissionAction(
 		#   HANDLE hSimConnect,
 		#   const GUID guidInstanceId);
-		self.__CompleteCustomMissionAction = self.SimConnect.SimConnect_CompleteCustomMissionAction
+		self.__CompleteCustomMissionAction = (
+			self.SimConnect.SimConnect_CompleteCustomMissionAction
+		)
 		self.__CompleteCustomMissionAction.restype = HRESULT
 		self.__CompleteCustomMissionAction.argtypes = []
 
@@ -766,7 +876,12 @@ class SimConnect():
 		#   SIMCONNECT_CREATE_CLIENT_DATA_FLAG Flags);
 		self.__CreateClientData = self.SimConnect.SimConnect_CreateClientData
 		self.__CreateClientData.restype = HRESULT
-		self.__CreateClientData.argtypes = [HANDLE, self.CLIENT_DATA_ID, DWORD, SIMCONNECT_CREATE_CLIENT_DATA_FLAG]
+		self.__CreateClientData.argtypes = [
+			HANDLE,
+			self.CLIENT_DATA_ID,
+			DWORD,
+			SIMCONNECT_CREATE_CLIENT_DATA_FLAG,
+		]
 
 		# SIMCONNECTAPI SimConnect_AddToClientDataDefinition(
 		#   HANDLE hSimConnect,
@@ -775,16 +890,30 @@ class SimConnect():
 		#   DWORD dwSizeOrType
 		#   float fEpsilon = 0
 		#   DWORD DatumID = SIMCONNECT_UNUSED);
-		self.__AddToClientDataDefinition = self.SimConnect.SimConnect_AddToClientDataDefinition
+		self.__AddToClientDataDefinition = (
+			self.SimConnect.SimConnect_AddToClientDataDefinition
+		)
 		self.__AddToClientDataDefinition.restype = HRESULT
-		self.__AddToClientDataDefinition.argtypes = [HANDLE, self.CLIENT_DATA_DEFINITION_ID, DWORD, DWORD, c_float, DWORD]
+		self.__AddToClientDataDefinition.argtypes = [
+			HANDLE,
+			self.CLIENT_DATA_DEFINITION_ID,
+			DWORD,
+			DWORD,
+			c_float,
+			DWORD,
+		]
 
 		# SIMCONNECTAPI SimConnect_ClearClientDataDefinition(
 		#   HANDLE hSimConnect,
 		#   SIMCONNECT_CLIENT_DATA_DEFINITION_ID DefineID);
-		self.__ClearClientDataDefinition = self.SimConnect.SimConnect_ClearClientDataDefinition
+		self.__ClearClientDataDefinition = (
+			self.SimConnect.SimConnect_ClearClientDataDefinition
+		)
 		self.__ClearClientDataDefinition.restype = HRESULT
-		self.__ClearClientDataDefinition.argtypes = [HANDLE, self.CLIENT_DATA_DEFINITION_ID]
+		self.__ClearClientDataDefinition.argtypes = [
+			HANDLE,
+			self.CLIENT_DATA_DEFINITION_ID,
+		]
 
 		# SIMCONNECTAPI SimConnect_RequestClientData(
 		#   HANDLE hSimConnect,
@@ -807,7 +936,7 @@ class SimConnect():
 			SIMCONNECT_CLIENT_DATA_REQUEST_FLAG,
 			DWORD,
 			DWORD,
-			DWORD
+			DWORD,
 		]
 
 		# SIMCONNECTAPI SimConnect_SetClientData(
@@ -827,7 +956,7 @@ class SimConnect():
 			SIMCONNECT_CLIENT_DATA_SET_FLAG,
 			DWORD,
 			DWORD,
-			c_void_p
+			c_void_p,
 		]
 
 		# SIMCONNECTAPI SimConnect_FlightLoad(
@@ -863,7 +992,14 @@ class SimConnect():
 		#   void * pDataSet);
 		self.__Text = self.SimConnect.SimConnect_Text
 		self.__Text.restype = HRESULT
-		self.__Text.argtypes = [HANDLE, SIMCONNECT_TEXT_TYPE, c_float, self.EventID, DWORD, c_void_p]
+		self.__Text.argtypes = [
+			HANDLE,
+			SIMCONNECT_TEXT_TYPE,
+			c_float,
+			self.EventID,
+			DWORD,
+			c_void_p,
+		]
 
 		# SIMCONNECTAPI SimConnect_SubscribeToFacilities(
 		#   HANDLE hSimConnect,
@@ -871,54 +1007,73 @@ class SimConnect():
 		#   SIMCONNECT_DATA_REQUEST_ID RequestID);
 		self.__SubscribeToFacilities = self.SimConnect.SimConnect_SubscribeToFacilities
 		self.__SubscribeToFacilities.restype = HRESULT
-		self.__SubscribeToFacilities.argtypes = [HANDLE, SIMCONNECT_FACILITY_LIST_TYPE, self.DATA_REQUEST_ID]
+		self.__SubscribeToFacilities.argtypes = [
+			HANDLE,
+			SIMCONNECT_FACILITY_LIST_TYPE,
+			self.DATA_REQUEST_ID,
+		]
 
 		# SIMCONNECTAPI SimConnect_UnsubscribeToFacilities(
 		#   HANDLE hSimConnect,
 		#   SIMCONNECT_FACILITY_LIST_TYPE type);
-		self.__UnsubscribeToFacilities = self.SimConnect.SimConnect_UnsubscribeToFacilities
+		self.__UnsubscribeToFacilities = (
+			self.SimConnect.SimConnect_UnsubscribeToFacilities
+		)
 		self.__UnsubscribeToFacilities.restype = HRESULT
-		self.__UnsubscribeToFacilities.argtypes = [HANDLE, SIMCONNECT_FACILITY_LIST_TYPE]
+		self.__UnsubscribeToFacilities.argtypes = [
+			HANDLE,
+			SIMCONNECT_FACILITY_LIST_TYPE,
+		]
 
 		# SIMCONNECTAPI SimConnect_RequestFacilitiesList(
 		#   HANDLE hSimConnect,
 		#   SIMCONNECT_FACILITY_LIST_TYPE type
 		#   SIMCONNECT_DATA_REQUEST_ID RequestID);
-		self.____RequestFacilitiesList = self.SimConnect.SimConnect_RequestFacilitiesList
+		self.____RequestFacilitiesList = (
+			self.SimConnect.SimConnect_RequestFacilitiesList
+		)
 		self.____RequestFacilitiesList.restype = HRESULT
-		self.____RequestFacilitiesList.argtypes = [HANDLE, SIMCONNECT_FACILITY_LIST_TYPE, self.DATA_REQUEST_ID]
+		self.____RequestFacilitiesList.argtypes = [
+			HANDLE,
+			SIMCONNECT_FACILITY_LIST_TYPE,
+			self.DATA_REQUEST_ID,
+		]
 
 		self.hSimConnect = HANDLE()
 		self.quit = 0
-		self.MyDispatchProcRD = DispatchProc(self.MyDispatchProc)
-		#self.haveData = False
+		self.my_dispatch_proc_rd = DispatchProc(self.my_dispatch_proc)
+		# self.haveData = False
 
 	def connect(self):
 		try:
-			err = self.__Open(byref(self.hSimConnect), LPCSTR(b"Request Data"), None, 0, 0, 0)
+			err = self.__Open(
+				byref(self.hSimConnect), LPCSTR(b"Request Data"), None, 0, 0, 0
+			)
 			if IsHR(err, 0):
 				LOGGER.debug("Connected to Flight Simulator!")
 				# Set up the data definition, but do not yet do anything with itd
 				# Request an event when the simulation starts
-				self.__SubscribeToSystemEvent(self.hSimConnect, self.EventID.EVENT_SIM_START, b'SimStart')
+				self.__SubscribeToSystemEvent(
+					self.hSimConnect, self.EventID.EVENT_SIM_START, b"SimStart"
+				)
 		except OSError:
 			LOGGER.debug("Did not find Flight Simulator running.")
 			exit(0)
 
-	def Run(self):
+	def run(self):
 		for _request in self.Requests:
 			self.out_data[_request.DATA_REQUEST_ID] = None
 			if _request.time is not None:
 				if (_request.timeout + _request.time) < millis():
-					self.RequestData(_request)
+					self.request_data(_request)
 					_request.timeout = millis()
 
-		self.__CallDispatch(self.hSimConnect, self.MyDispatchProcRD, None)
+		self.__CallDispatch(self.hSimConnect, self.my_dispatch_proc_rd, None)
 
-	def Exit(self):
+	def exit(self):
 		self.__Close(self.hSimConnect)
 
-	def MapToSimEvent(self, name):
+	def map_to_sim_event(self, name):
 		for m in self.EventID:
 			if name.decode() == m.name:
 				LOGGER.debug("Already have event: ", m)
@@ -934,19 +1089,38 @@ class SimConnect():
 			LOGGER.error("Error: MapToSimEvent")
 			return None
 
-	def AddToNotificationGroup(self, group, evnt, bMaskable=False):
-		self.__AddClientEventToNotificationGroup(self.hSimConnect, group, evnt, bMaskable)
-
-	def RequestData(self, _Request):
-		self.out_data[_Request.DATA_REQUEST_ID] = None
-		self.__RequestDataOnSimObjectType(
-			self.hSimConnect, _Request.DATA_REQUEST_ID.value,
-			_Request.DATA_DEFINITION_ID.value,
-			0,
-			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER
+	def add_to_notification_group(self, group, evnt, bMaskable=False):
+		self.__AddClientEventToNotificationGroup(
+			self.hSimConnect, group, evnt, bMaskable
 		)
 
-	def GetData(self, _Request, _format=False):
+	def request_data(self, _Request):
+		self.out_data[_Request.DATA_REQUEST_ID] = None
+		self.__RequestDataOnSimObjectType(
+			self.hSimConnect,
+			_Request.DATA_REQUEST_ID.value,
+			_Request.DATA_DEFINITION_ID.value,
+			0,
+			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER,
+		)
+
+	def set_data(self, _Request, _data):
+		pyarr = list(_data.values())
+		dataarray = (ctypes.c_double * len(pyarr))(*pyarr)
+		pObjData = cast(
+			dataarray, c_void_p
+		)
+		self.__SetDataOnSimObject(
+			self.hSimConnect,
+			_Request.DATA_DEFINITION_ID.value,
+			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER,
+			0,
+			0,
+			sizeof(ctypes.c_double) * len(pyarr),
+			pObjData
+		)
+
+	def get_data(self, _Request, _format=False):
 		if self.out_data[_Request.DATA_REQUEST_ID] is None:
 			return None
 		if _format:
@@ -957,17 +1131,21 @@ class SimConnect():
 			if _format:
 				map[od] = self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]]
 			else:
-				setattr(sData, od, self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]])
+				setattr(
+					sData,
+					od,
+					self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]],
+				)
 		return map
 
-	def SendData(self, evnt, data=DWORD(0)):
+	def send_event(self, evnt, data=DWORD(0)):
 		err = self.__TransmitClientEvent(
 			self.hSimConnect,
 			SIMCONNECT_OBJECT_ID_USER,
 			evnt.value,
 			data,
 			SIMCONNECT_GROUP_PRIORITY_HIGHEST,
-			DWORD(16)
+			DWORD(16),
 		)
 		if IsHR(err, 0):
 			LOGGER.debug("Event Sent")
@@ -975,7 +1153,7 @@ class SimConnect():
 		else:
 			return False
 
-	def newRequest(self, time=None):
+	def new_request(self, time=None):
 		name = "Request" + str(len(self.Requests))
 		names = [m.name for m in self.DATA_DEFINITION_ID] + [name]
 		self.DATA_DEFINITION_ID = Enum(self.DATA_DEFINITION_ID.__name__, names)
@@ -985,6 +1163,12 @@ class SimConnect():
 		self.DATA_REQUEST_ID = Enum(self.DATA_REQUEST_ID.__name__, names)
 		REQUEST_ID = list(self.DATA_REQUEST_ID)[-1]
 
-		_Request = Request(_DATA_DEFINITION_ID=DEFINITION_ID, _DATA_REQUEST_ID=REQUEST_ID, _time=time, _name=name, _psc=self)
+		_Request = Request(
+			_DATA_DEFINITION_ID=DEFINITION_ID,
+			_DATA_REQUEST_ID=REQUEST_ID,
+			_time=time,
+			_name=name,
+			_psc=self,
+		)
 		self.Requests.append(_Request)
 		return _Request

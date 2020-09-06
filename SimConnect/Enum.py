@@ -7,14 +7,15 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #        Enum definitions
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 
 # Define the types we need.
 class CtypesEnum(IntEnum):
 	"""A ctypes-compatible IntEnum superclass."""
+
 	@classmethod
 	def from_param(cls, obj):
 		return int(obj)
@@ -23,6 +24,7 @@ class CtypesEnum(IntEnum):
 # Define the types we need.
 class CtypesEn(Enum):
 	"""A ctypes-compatible Enum superclass."""
+
 	@classmethod
 	def from_param(cls, obj):
 		return int(obj)
@@ -63,28 +65,29 @@ class SIMCONNECT_RECV_ID(CtypesEnum):
 	SIMCONNECT_RECV_ID_EVENT_RACE_END = 25
 	SIMCONNECT_RECV_ID_EVENT_RACE_LAP = 26
 
+
 # Data data types
 class SIMCONNECT_DATATYPE(CtypesEnum):
-	SIMCONNECT_DATATYPE_INVALID = 0        # invalid data type
-	SIMCONNECT_DATATYPE_INT32 = 1          # 32-bit integer number
-	SIMCONNECT_DATATYPE_INT64 = 2          # 64-bit integer number
-	SIMCONNECT_DATATYPE_FLOAT32 = 3        # 32-bit floating-point number (float)
-	SIMCONNECT_DATATYPE_FLOAT64 = 4        # 64-bit floating-point number (double)
-	SIMCONNECT_DATATYPE_STRING8 = 5        # 8-byte string
-	SIMCONNECT_DATATYPE_STRING32 = 6       # 32-byte string
-	SIMCONNECT_DATATYPE_STRING64 = 7       # 64-byte string
-	SIMCONNECT_DATATYPE_STRING128 = 8      # 128-byte string
-	SIMCONNECT_DATATYPE_STRING256 = 9      # 256-byte string
-	SIMCONNECT_DATATYPE_STRING260 = 10      # 260-byte string
-	SIMCONNECT_DATATYPE_STRINGV = 11        # variable-length string
+	SIMCONNECT_DATATYPE_INVALID = 0  # invalid data type
+	SIMCONNECT_DATATYPE_INT32 = 1  # 32-bit integer number
+	SIMCONNECT_DATATYPE_INT64 = 2  # 64-bit integer number
+	SIMCONNECT_DATATYPE_FLOAT32 = 3  # 32-bit floating-point number (float)
+	SIMCONNECT_DATATYPE_FLOAT64 = 4  # 64-bit floating-point number (double)
+	SIMCONNECT_DATATYPE_STRING8 = 5  # 8-byte string
+	SIMCONNECT_DATATYPE_STRING32 = 6  # 32-byte string
+	SIMCONNECT_DATATYPE_STRING64 = 7  # 64-byte string
+	SIMCONNECT_DATATYPE_STRING128 = 8  # 128-byte string
+	SIMCONNECT_DATATYPE_STRING256 = 9  # 256-byte string
+	SIMCONNECT_DATATYPE_STRING260 = 10  # 260-byte string
+	SIMCONNECT_DATATYPE_STRINGV = 11  # variable-length string
 
-	SIMCONNECT_DATATYPE_INITPOSITION = 12   # see SIMCONNECT_DATA_INITPOSITION
-	SIMCONNECT_DATATYPE_MARKERSTATE = 13    # see SIMCONNECT_DATA_MARKERSTATE
-	SIMCONNECT_DATATYPE_WAYPOINT = 14       # see SIMCONNECT_DATA_WAYPOINT
-	SIMCONNECT_DATATYPE_LATLONALT = 15      # see SIMCONNECT_DATA_LATLONALT
-	SIMCONNECT_DATATYPE_XYZ = 16            # see SIMCONNECT_DATA_XYZ
+	SIMCONNECT_DATATYPE_INITPOSITION = 12  # see SIMCONNECT_DATA_INITPOSITION
+	SIMCONNECT_DATATYPE_MARKERSTATE = 13  # see SIMCONNECT_DATA_MARKERSTATE
+	SIMCONNECT_DATATYPE_WAYPOINT = 14  # see SIMCONNECT_DATA_WAYPOINT
+	SIMCONNECT_DATATYPE_LATLONALT = 15  # see SIMCONNECT_DATA_LATLONALT
+	SIMCONNECT_DATATYPE_XYZ = 16  # see SIMCONNECT_DATA_XYZ
 
-	SIMCONNECT_DATATYPE_MAX = 17            # enum limit
+	SIMCONNECT_DATATYPE_MAX = 17  # enum limit
 
 
 # Exception error types
@@ -233,26 +236,48 @@ class SIMCONNECT_VOR_FLAGS(CtypesEn):  # flags for SIMCONNECT_RECV_ID_VOR_LIST
 # bits for the Waypoint Flags field: may be combined
 class SIMCONNECT_WAYPOINT_FLAGS(CtypesEn):  #
 	SIMCONNECT_WAYPOINT_NONE = DWORD(0x00)  #
-	SIMCONNECT_WAYPOINT_SPEED_REQUESTED = DWORD(0x04)  # requested speed at waypoint is valid
-	SIMCONNECT_WAYPOINT_THROTTLE_REQUESTED = DWORD(0x08)  # request a specific throttle percentage
-	SIMCONNECT_WAYPOINT_COMPUTE_VERTICAL_SPEED = DWORD(0x10)  # compute vertical to speed to reach waypoint altitude when crossing the waypoint
+	SIMCONNECT_WAYPOINT_SPEED_REQUESTED = DWORD(
+		0x04
+	)  # requested speed at waypoint is valid
+	SIMCONNECT_WAYPOINT_THROTTLE_REQUESTED = DWORD(
+		0x08
+	)  # request a specific throttle percentage
+	SIMCONNECT_WAYPOINT_COMPUTE_VERTICAL_SPEED = DWORD(
+		0x10
+	)  # compute vertical to speed to reach waypoint altitude when crossing the waypoint
 	SIMCONNECT_WAYPOINT_ALTITUDE_IS_AGL = DWORD(0x20)  # AltitudeIsAGL
-	SIMCONNECT_WAYPOINT_ON_GROUND = DWORD(0x00100000)  # place this waypoint on the ground
-	SIMCONNECT_WAYPOINT_REVERSE = DWORD(0x00200000)  # Back up to this waypoint. Only valid on first waypoint
-	SIMCONNECT_WAYPOINT_WRAP_TO_FIRST = DWORD(0x00400000)  # Wrap around back to first waypoint. Only valid on last waypoint.
+	SIMCONNECT_WAYPOINT_ON_GROUND = DWORD(
+		0x00100000
+	)  # place this waypoint on the ground
+	SIMCONNECT_WAYPOINT_REVERSE = DWORD(
+		0x00200000
+	)  # Back up to this waypoint. Only valid on first waypoint
+	SIMCONNECT_WAYPOINT_WRAP_TO_FIRST = DWORD(
+		0x00400000
+	)  # Wrap around back to first waypoint. Only valid on last waypoint.
 
 
 class SIMCONNECT_EVENT_FLAG(CtypesEn):  #
 	SIMCONNECT_EVENT_FLAG_DEFAULT = DWORD(0x00000000)  #
-	SIMCONNECT_EVENT_FLAG_FAST_REPEAT_TIMER = DWORD(0x00000001)  # set event repeat timer to simulate fast repeat
-	SIMCONNECT_EVENT_FLAG_SLOW_REPEAT_TIMER = DWORD(0x00000002)  # set event repeat timer to simulate slow repeat
-	SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY = DWORD(0x00000010)  # interpret GroupID parameter as priority value
+	SIMCONNECT_EVENT_FLAG_FAST_REPEAT_TIMER = DWORD(
+		0x00000001
+	)  # set event repeat timer to simulate fast repeat
+	SIMCONNECT_EVENT_FLAG_SLOW_REPEAT_TIMER = DWORD(
+		0x00000002
+	)  # set event repeat timer to simulate slow repeat
+	SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY = DWORD(
+		0x00000010
+	)  # interpret GroupID parameter as priority value
 
 
 class SIMCONNECT_DATA_REQUEST_FLAG(CtypesEn):  #
 	SIMCONNECT_DATA_REQUEST_FLAG_DEFAULT = DWORD(0x00000000)
-	SIMCONNECT_DATA_REQUEST_FLAG_CHANGED = DWORD(0x00000001)  # send requested data when value(s) change
-	SIMCONNECT_DATA_REQUEST_FLAG_TAGGED = DWORD(0x00000002)  # send requested data in tagged format
+	SIMCONNECT_DATA_REQUEST_FLAG_CHANGED = DWORD(
+		0x00000001
+	)  # send requested data when value(s) change
+	SIMCONNECT_DATA_REQUEST_FLAG_TAGGED = DWORD(
+		0x00000002
+	)  # send requested data in tagged format
 
 
 class SIMCONNECT_DATA_SET_FLAG(CtypesEn):  #
@@ -262,42 +287,70 @@ class SIMCONNECT_DATA_SET_FLAG(CtypesEn):  #
 
 class SIMCONNECT_CREATE_CLIENT_DATA_FLAG(CtypesEn):  #
 	SIMCONNECT_CREATE_CLIENT_DATA_FLAG_DEFAULT = DWORD(0x00000000)  #
-	SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY = DWORD(0x00000001)  # permit only ClientData creator to write into ClientData
+	SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY = DWORD(
+		0x00000001
+	)  # permit only ClientData creator to write into ClientData
 
 
 class SIMCONNECT_CLIENT_DATA_REQUEST_FLAG(CtypesEn):  #
 	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_DEFAULT = DWORD(0x00000000)  #
-	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_CHANGED = DWORD(0x00000001)  # send requested ClientData when value(s) change
-	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_TAGGED = DWORD(0x00000002)  # send requested ClientData in tagged format
+	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_CHANGED = DWORD(
+		0x00000001
+	)  # send requested ClientData when value(s) change
+	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_TAGGED = DWORD(
+		0x00000002
+	)  # send requested ClientData in tagged format
 
 
 class SIMCONNECT_CLIENT_DATA_SET_FLAG(CtypesEn):  #
 	SIMCONNECT_CLIENT_DATA_SET_FLAG_DEFAULT = DWORD(0x00000000)  #
-	SIMCONNECT_CLIENT_DATA_SET_FLAG_TAGGED = DWORD(0x00000001)  # data is in tagged format
+	SIMCONNECT_CLIENT_DATA_SET_FLAG_TAGGED = DWORD(
+		0x00000001
+	)  # data is in tagged format
 
 
-class SIMCONNECT_VIEW_SYSTEM_EVENT_DATA(CtypesEn):  # dwData contains these flags for the "View" System Event
-	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_COCKPIT_2D = DWORD(0x00000001)  # 2D Panels in cockpit view
-	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_COCKPIT_VIRTUAL = DWORD(0x00000002)  # Virtual (3D) panels in cockpit view
-	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_ORTHOGONAL = DWORD(0x00000004)  # Orthogonal (Map) view
+class SIMCONNECT_VIEW_SYSTEM_EVENT_DATA(
+	CtypesEn
+):  # dwData contains these flags for the "View" System Event
+	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_COCKPIT_2D = DWORD(
+		0x00000001
+	)  # 2D Panels in cockpit view
+	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_COCKPIT_VIRTUAL = DWORD(
+		0x00000002
+	)  # Virtual (3D) panels in cockpit view
+	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_ORTHOGONAL = DWORD(
+		0x00000004
+	)  # Orthogonal (Map) view
 
 
-class SIMCONNECT_SOUND_SYSTEM_EVENT_DATA(CtypesEn):  # dwData contains these flags for the "Sound" System Event
+class SIMCONNECT_SOUND_SYSTEM_EVENT_DATA(
+	CtypesEn
+):  # dwData contains these flags for the "Sound" System Event
 	SIMCONNECT_SOUND_SYSTEM_EVENT_DATA_MASTER = DWORD(0x00000001)  # Sound Master
 
 
 class SIMCONNECT_PICK_FLAGS(CtypesEn):
-	SIMCONNECT_PICK_GROUND = DWORD(0x01)  # pick ground/ pick result item is ground location
-	SIMCONNECT_PICK_AI = DWORD(0x02)  # pick AI    / pick result item is AI, (dwSimObjectID is valid)
-	SIMCONNECT_PICK_SCENERY = DWORD(0x04)  # pick scenery/ pick result item is scenery object (hSceneryObject is valid)
-	SIMCONNECT_PICK_ALL = DWORD(0x04 | 0x02 | 0x01)  # pick all / (not valid on pick result item)
+	SIMCONNECT_PICK_GROUND = DWORD(
+		0x01
+	)  # pick ground/ pick result item is ground location
+	SIMCONNECT_PICK_AI = DWORD(
+		0x02
+	)  # pick AI    / pick result item is AI, (dwSimObjectID is valid)
+	SIMCONNECT_PICK_SCENERY = DWORD(
+		0x04
+	)  # pick scenery/ pick result item is scenery object (hSceneryObject is valid)
+	SIMCONNECT_PICK_ALL = DWORD(
+		0x04 | 0x02 | 0x01
+	)  # pick all / (not valid on pick result item)
 	SIMCONNECT_PICK_COORDSASPIXELS = DWORD(0x08)  #
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #        User-defined enums
-#----------------------------------------------------------------------------
-class SIMCONNECT_NOTIFICATION_GROUP_ID(AutoName):  # client-defined notification group ID
+# ----------------------------------------------------------------------------
+class SIMCONNECT_NOTIFICATION_GROUP_ID(
+	AutoName
+):  # client-defined notification group ID
 	pass
 
 
@@ -322,34 +375,34 @@ class SIMCONNECT_CLIENT_DATA_ID(AutoName):  # client-defined client data ID
 	pass
 
 
-class SIMCONNECT_CLIENT_DATA_DEFINITION_ID(AutoName):  # client-defined client data definition ID
+class SIMCONNECT_CLIENT_DATA_DEFINITION_ID(
+	AutoName
+):  # client-defined client data definition ID
 	pass
 
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #        Struct definitions
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 
 class SIMCONNECT_RECV(Structure):
-	_fields_ = [
-		("dwSize", DWORD),
-		("dwVersion", DWORD),
-		("dwID", DWORD)
-	]
+	_fields_ = [("dwSize", DWORD), ("dwVersion", DWORD), ("dwID", DWORD)]
 
 
-class SIMCONNECT_RECV_EXCEPTION(SIMCONNECT_RECV):   # when dwID == SIMCONNECT_RECV_ID_EXCEPTION
+class SIMCONNECT_RECV_EXCEPTION(
+	SIMCONNECT_RECV
+):  # when dwID == SIMCONNECT_RECV_ID_EXCEPTION
 	_fields_ = [
 		("dwException", DWORD),  # see SIMCONNECT_EXCEPTION
 		("UNKNOWN_SENDID", DWORD),  #
 		("dwSendID", DWORD),  # see SimConnect_GetLastSentPacketID
 		("UNKNOWN_INDEX", DWORD),  #
-		("dwIndex", DWORD)  # index of parameter that was source of error
+		("dwIndex", DWORD),  # index of parameter that was source of error
 	]
 
 
-class SIMCONNECT_RECV_OPEN(SIMCONNECT_RECV):   # when dwID == SIMCONNECT_RECV_ID_OPEN
+class SIMCONNECT_RECV_OPEN(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_OPEN
 	_fields_ = [
 		("szApplicationName", c_char * 256),
 		("dwApplicationVersionMajor", DWORD),
@@ -361,7 +414,7 @@ class SIMCONNECT_RECV_OPEN(SIMCONNECT_RECV):   # when dwID == SIMCONNECT_RECV_ID
 		("dwSimConnectBuildMajor", DWORD),
 		("dwSimConnectBuildMinor", DWORD),
 		("dwReserved1", DWORD),
-		("dwReserved2", DWORD)
+		("dwReserved2", DWORD),
 	]
 
 
@@ -369,31 +422,34 @@ class SIMCONNECT_RECV_QUIT(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_
 	pass
 
 
-class SIMCONNECT_RECV_EVENT(SIMCONNECT_RECV):       # when dwID == SIMCONNECT_RECV_ID_EVENT
+class SIMCONNECT_RECV_EVENT(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_EVENT
 	UNKNOWN_GROUP = DWORD_MAX
 	_fields_ = [
 		("uGroupID", DWORD),
 		("uEventID", DWORD),
-		("dwData", DWORD)	 # uEventID-dependent context
+		("dwData", DWORD),  # uEventID-dependent context
 	]
 
 
-class SIMCONNECT_RECV_EVENT_FILENAME(SIMCONNECT_RECV_EVENT):       # when dwID == SIMCONNECT_RECV_ID_EVENT_FILENAME
+class SIMCONNECT_RECV_EVENT_FILENAME(
+	SIMCONNECT_RECV_EVENT
+):  # when dwID == SIMCONNECT_RECV_ID_EVENT_FILENAME
 	_fields_ = [
-		("zFileName", c_char * MAX_PATH),   # uEventID-dependent context
-		("dwFlags", DWORD)
+		("zFileName", c_char * MAX_PATH),  # uEventID-dependent context
+		("dwFlags", DWORD),
 	]
 
 
-class SIMCONNECT_RECV_EVENT_OBJECT_ADDREMOVE(SIMCONNECT_RECV_EVENT):       # when dwID == SIMCONNECT_RECV_ID_EVENT_FILENAME
+class SIMCONNECT_RECV_EVENT_OBJECT_ADDREMOVE(
+	SIMCONNECT_RECV_EVENT
+):  # when dwID == SIMCONNECT_RECV_ID_EVENT_FILENAME
 	eObjType = SIMCONNECT_SIMOBJECT_TYPE
 
 
-class SIMCONNECT_RECV_EVENT_FRAME(SIMCONNECT_RECV_EVENT):       # when dwID == SIMCONNECT_RECV_ID_EVENT_FRAME
-	_fields_ = [
-		("fFrameRate", c_float),
-		("fSimSpeed", c_float)
-	]
+class SIMCONNECT_RECV_EVENT_FRAME(
+	SIMCONNECT_RECV_EVENT
+):  # when dwID == SIMCONNECT_RECV_ID_EVENT_FRAME
+	_fields_ = [("fFrameRate", c_float), ("fSimSpeed", c_float)]
 
 
 class SIMCONNECT_RECV_EVENT_MULTIPLAYER_SERVER_STARTED(SIMCONNECT_RECV_EVENT):
@@ -419,29 +475,34 @@ class SIMCONNECT_DATA_RACE_RESULT(Structure):
 	_fields_ = [
 		("dwNumberOfRacers", DWORD),  # The total number of racers
 		("szPlayerName", c_char * MAX_PATH),  # The name of the player
-		("szSessionType", c_char * MAX_PATH),  # The type of the multiplayer session: "LAN", "GAMESPY")
+		(
+			"szSessionType",
+			c_char * MAX_PATH,
+		),  # The type of the multiplayer session: "LAN", "GAMESPY")
 		("szAircraft", c_char * MAX_PATH),  # The aircraft type
 		("szPlayerRole", c_char * MAX_PATH),  # The player role in the mission
 		("fTotalTime", c_double),  # Total time in seconds, 0 means DNF
 		("fPenaltyTime", c_double),  # Total penalty time in seconds
-		("MissionGUID", DWORD),    # The name of the mission to execute, NULL if no mission
-		("dwIsDisqualified", c_double)  # non 0 - disqualified, 0 - not disqualified
-
+		(
+			"MissionGUID",
+			DWORD,
+		),  # The name of the mission to execute, NULL if no mission
+		("dwIsDisqualified", c_double),  # non 0 - disqualified, 0 - not disqualified
 	]
 
 
-class SIMCONNECT_RECV_EVENT_RACE_END(SIMCONNECT_RECV_EVENT):       # when dwID == SIMCONNECT_RECV_ID_EVENT_RACE_END
+class SIMCONNECT_RECV_EVENT_RACE_END(
+	SIMCONNECT_RECV_EVENT
+):  # when dwID == SIMCONNECT_RECV_ID_EVENT_RACE_END
 	RacerData = SIMCONNECT_DATA_RACE_RESULT
-	_fields_ = [
-		("dwRacerNumber", DWORD)  # The index of the racer the results are for
-	]
+	_fields_ = [("dwRacerNumber", DWORD)]  # The index of the racer the results are for
 
 
-class SIMCONNECT_RECV_EVENT_RACE_LAP(SIMCONNECT_RECV_EVENT):       # when dwID == SIMCONNECT_RECV_ID_EVENT_RACE_LAP
+class SIMCONNECT_RECV_EVENT_RACE_LAP(
+	SIMCONNECT_RECV_EVENT
+):  # when dwID == SIMCONNECT_RECV_ID_EVENT_RACE_LAP
 	RacerData = SIMCONNECT_DATA_RACE_RESULT
-	_fields_ = [
-		("dwLapIndex", DWORD)  # The index of the lap the results are for
-	]
+	_fields_ = [("dwLapIndex", DWORD)]  # The index of the lap the results are for
 
 
 class SIMCONNECT_RECV_SIMOBJECT_DATA(SIMCONNECT_RECV):
@@ -453,26 +514,36 @@ class SIMCONNECT_RECV_SIMOBJECT_DATA(SIMCONNECT_RECV):
 		("dwentrynumber", DWORD),
 		("dwoutof", DWORD),
 		("dwDefineCount", DWORD),
-		("dwData", DWORD * 8192)]
+		("dwData", DWORD * 8192),
+	]
 
 
 class SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE(SIMCONNECT_RECV_SIMOBJECT_DATA):
 	_fields_ = []
 
 
-class SIMCONNECT_RECV_CLIENT_DATA(SIMCONNECT_RECV_SIMOBJECT_DATA):    # when dwID == SIMCONNECT_RECV_ID_CLIENT_DATA
+class SIMCONNECT_RECV_CLIENT_DATA(
+	SIMCONNECT_RECV_SIMOBJECT_DATA
+):  # when dwID == SIMCONNECT_RECV_ID_CLIENT_DATA
 	_fields_ = []
 
 
-class SIMCONNECT_RECV_WEATHER_OBSERVATION(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_WEATHER_OBSERVATION
+class SIMCONNECT_RECV_WEATHER_OBSERVATION(
+	SIMCONNECT_RECV
+):  # when dwID == SIMCONNECT_RECV_ID_WEATHER_OBSERVATION
 	_fields_ = [
 		("dwRequestID", DWORD),
-		("szMetar", c_char * MAX_METAR_LENGTH.value) 	# Variable length string whose maximum size is MAX_METAR_LENGTH
+		(
+			"szMetar",
+			c_char * MAX_METAR_LENGTH.value,
+		),  # Variable length string whose maximum size is MAX_METAR_LENGTH
 	]
 
 
 SIMCONNECT_CLOUD_STATE_ARRAY_WIDTH = 64
-SIMCONNECT_CLOUD_STATE_ARRAY_SIZE = SIMCONNECT_CLOUD_STATE_ARRAY_WIDTH * SIMCONNECT_CLOUD_STATE_ARRAY_WIDTH
+SIMCONNECT_CLOUD_STATE_ARRAY_SIZE = (
+	SIMCONNECT_CLOUD_STATE_ARRAY_WIDTH * SIMCONNECT_CLOUD_STATE_ARRAY_WIDTH
+)
 
 
 class SIMCONNECT_RECV_CLOUD_STATE(SIMCONNECT_RECV):
@@ -484,26 +555,26 @@ class SIMCONNECT_RECV_CLOUD_STATE(SIMCONNECT_RECV):
 	]
 
 
-class SIMCONNECT_RECV_ASSIGNED_OBJECT_ID(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID
-	_fields_ = [
-		("dwRequestID", DWORD),
-		("dwObjectID", DWORD)
-	]
+class SIMCONNECT_RECV_ASSIGNED_OBJECT_ID(
+	SIMCONNECT_RECV
+):  # when dwID == SIMCONNECT_RECV_ID_ASSIGNED_OBJECT_ID
+	_fields_ = [("dwRequestID", DWORD), ("dwObjectID", DWORD)]
 
 
-class SIMCONNECT_RECV_RESERVED_KEY(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_RESERVED_KEY
-	_fields_ = [
-		("szChoiceReserved", c_char * 30),
-		("szReservedKey", c_char * 30)
-	]
+class SIMCONNECT_RECV_RESERVED_KEY(
+	SIMCONNECT_RECV
+):  # when dwID == SIMCONNECT_RECV_ID_RESERVED_KEY
+	_fields_ = [("szChoiceReserved", c_char * 30), ("szReservedKey", c_char * 30)]
 
 
-class SIMCONNECT_RECV_SYSTEM_STATE(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_SYSTEM_STATE
+class SIMCONNECT_RECV_SYSTEM_STATE(
+	SIMCONNECT_RECV
+):  # when dwID == SIMCONNECT_RECV_ID_SYSTEM_STATE
 	_fields_ = [
 		("dwRequestID", DWORD),
 		("dwInteger", DWORD),
 		("fFloat", c_float),
-		("szString", c_char * MAX_PATH)
+		("szString", c_char * MAX_PATH),
 	]
 
 
@@ -511,12 +582,17 @@ class SIMCONNECT_RECV_CUSTOM_ACTION(SIMCONNECT_RECV_EVENT):  #
 	_fields_ = [
 		("guidInstanceId", DWORD),  # Instance id of the action that executed
 		("dwWaitForCompletion", DWORD),  # Wait for completion flag on the action
-		("szPayLoad", c_char)  # Variable length string payload associated with the mission action.
+		(
+			"szPayLoad",
+			c_char,
+		),  # Variable length string payload associated with the mission action.
 	]
 
 
 class SIMCONNECT_RECV_EVENT_WEATHER_MODE(SIMCONNECT_RECV_EVENT):  #
-	_fields_ = []  # No event specific data - the new weather mode is in the base structure dwData member.
+	_fields_ = (
+		[]
+	)  # No event specific data - the new weather mode is in the base structure dwData member.
 
 
 # SIMCONNECT_RECV_FACILITIES_LIST
@@ -524,8 +600,11 @@ class SIMCONNECT_RECV_FACILITIES_LIST(SIMCONNECT_RECV):  #
 	_fields_ = [
 		("dwRequestID", DWORD),
 		("dwArraySize", DWORD),
-		("dwEntryNumber", DWORD),  # when the array of items is too big for one send, which send this is (0..dwOutOf-1)
-		("dwOutOf", DWORD)  # total number of transmissions the list is chopped into
+		(
+			"dwEntryNumber",
+			DWORD,
+		),  # when the array of items is too big for one send, which send this is (0..dwOutOf-1)
+		("dwOutOf", DWORD),  # total number of transmissions the list is chopped into
 	]
 
 
@@ -535,31 +614,29 @@ class SIMCONNECT_DATA_FACILITY_AIRPORT(Structure):  #
 		("Icao", c_char * 9),  # ICAO of the object
 		("Latitude", c_double),  # degrees
 		("Longitude", c_double),  # degrees
-		("Altitude", c_double)  # meters
+		("Altitude", c_double),  # meters
 	]
 
 
 # SIMCONNECT_RECV_AIRPORT_LIST
-#class SIMCONNECT_RECV_AIRPORT_LIST(SIMCONNECT_RECV_FACILITIES_LIST):  #
-#	_fields_ = [
-#		("SIMCONNECT_DATA_FACILITY_AIRPORT", rgData * dwArraySize)
-#	]
+# class SIMCONNECT_RECV_AIRPORT_LIST(SIMCONNECT_RECV_FACILITIES_LIST):  #
+# 	_fields_ = [
+# 		("SIMCONNECT_DATA_FACILITY_AIRPORT", rgData * dwArraySize)
+# 	]
 #  SIMCONNECT_FIXEDTYPE_DATAV(SIMCONNECT_DATA_FACILITY_AIRPORT, rgData, dwArraySize,
 #  U1 /*member of UnmanagedType enum*/, SIMCONNECT_DATA_FACILITY_AIRPORT /*cli type*/);
 
 
 # SIMCONNECT_DATA_FACILITY_WAYPOINT
 class SIMCONNECT_DATA_FACILITY_WAYPOINT(SIMCONNECT_DATA_FACILITY_AIRPORT):  #
-	_fields_ = [
-		("fMagVar", c_float)  # Magvar in degrees
-	]
+	_fields_ = [("fMagVar", c_float)]  # Magvar in degrees
 
 
 # SIMCONNECT_RECV_WAYPOINT_LIST
-#class SIMCONNECT_RECV_WAYPOINT_LIST(SIMCONNECT_RECV_FACILITIES_LIST):  #
-#	_fields_ = [
-#		("", )
-#	]
+# class SIMCONNECT_RECV_WAYPOINT_LIST(SIMCONNECT_RECV_FACILITIES_LIST):  #
+# 	_fields_ = [
+# 		("", )
+# 	]
 #    SIMCONNECT_FIXEDTYPE_DATAV(SIMCONNECT_DATA_FACILITY_WAYPOINT,
 #   rgData
 #   dwArraySize,
@@ -569,16 +646,14 @@ class SIMCONNECT_DATA_FACILITY_WAYPOINT(SIMCONNECT_DATA_FACILITY_AIRPORT):  #
 
 # SIMCONNECT_DATA_FACILITY_NDB
 class SIMCONNECT_DATA_FACILITY_NDB(SIMCONNECT_DATA_FACILITY_WAYPOINT):  #
-	_fields_ = [
-		("fFrequency", DWORD)  # frequency in Hz
-	]
+	_fields_ = [("fFrequency", DWORD)]  # frequency in Hz
 
 
 # SIMCONNECT_RECV_NDB_LIST
 # class SIMCONNECT_RECV_NDB_LIST(SIMCONNECT_RECV_FACILITIES_LIST):  #
-#	_fields_ = [
-#		("", )
-#	]
+# 	_fields_ = [
+# 		("", )
+# 	]
 #    SIMCONNECT_FIXEDTYPE_DATAV(SIMCONNECT_DATA_FACILITY_NDB,
 #   rgData
 #   dwArraySize,
@@ -594,22 +669,24 @@ class SIMCONNECT_DATA_FACILITY_VOR(SIMCONNECT_DATA_FACILITY_NDB):  #
 		("GlideLat", c_double),  # Glide Slope Location (deg, deg, meters)
 		("GlideLon", c_double),  #
 		("GlideAlt", c_double),  #
-		("fGlideSlopeAngle", c_float)  # Glide Slope in degrees
+		("fGlideSlopeAngle", c_float),  # Glide Slope in degrees
 	]
 
 
 # SIMCONNECT_RECV_VOR_LIST
-#class SIMCONNECT_RECV_VOR_LIST(SIMCONNECT_RECV_FACILITIES_LIST):  #
-#	_fields_ = [
-#		("", )
-#	]
+# class SIMCONNECT_RECV_VOR_LIST(SIMCONNECT_RECV_FACILITIES_LIST):  #
+# 	_fields_ = [
+# 		("", )
+# 	]
 #    SIMCONNECT_FIXEDTYPE_DATAV(SIMCONNECT_DATA_FACILITY_VOR,
 #   rgData
 #   dwArraySize,
-#		 U1 /*member of UnmanagedType enum*/, SIMCONNECT_DATA_FACILITY_VOR /*cli type*/);
+# 		 U1 /*member of UnmanagedType enum*/, SIMCONNECT_DATA_FACILITY_VOR /*cli type*/);
 
 
-class SIMCONNECT_RECV_PICK(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_RESERVED_KEY
+class SIMCONNECT_RECV_PICK(
+	SIMCONNECT_RECV
+):  # when dwID == SIMCONNECT_RECV_ID_RESERVED_KEY
 	_fields_ = [
 		("hContext", HANDLE),
 		("dwFlags", DWORD),
@@ -620,8 +697,11 @@ class SIMCONNECT_RECV_PICK(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_
 		("yPos", c_int),  # reserved
 		("dwSimObjectID", DWORD),
 		("hSceneryObject", HANDLE),
-		("dwentrynumber", DWORD),  # if multiple objects returned, this is number <entrynumber> out of <outof>.
-		("dwoutof", DWORD)  # note:  starts with 1, not 0.
+		(
+			"dwentrynumber",
+			DWORD,
+		),  # if multiple objects returned, this is number <entrynumber> out of <outof>.
+		("dwoutof", DWORD),  # note:  starts with 1, not 0.
 	]
 
 
@@ -635,16 +715,13 @@ class SIMCONNECT_DATA_INITPOSITION(Structure):  #
 		("Bank", c_double),  # degrees
 		("Heading", c_double),  # degrees
 		("OnGround", DWORD),  # 1=force to be on the ground
-		("Airspeed", DWORD)  # knots
+		("Airspeed", DWORD),  # knots
 	]
 
 
 # SIMCONNECT_DATATYPE_MARKERSTATE
 class SIMCONNECT_DATA_MARKERSTATE(Structure):  #
-	_fields_ = [
-		("szMarkerName", c_char * 64),
-		("dwMarkerState", DWORD)
-	]
+	_fields_ = [("szMarkerName", c_char * 64), ("dwMarkerState", DWORD)]
 
 
 # SIMCONNECT_DATATYPE_WAYPOINT
@@ -655,23 +732,15 @@ class SIMCONNECT_DATA_WAYPOINT(Structure):  #
 		("Altitude", c_double),  # feet
 		("Flags", c_ulong),
 		("ktsSpeed", c_double),  # knots
-		("percentThrottle", c_double)
+		("percentThrottle", c_double),
 	]
 
 
 # SIMCONNECT_DATA_LATLONALT
 class SIMCONNECT_DATA_LATLONALT(Structure):  #
-	_fields_ = [
-		("Latitude", c_double),
-		("Longitude", c_double),
-		("Altitude", c_double)
-	]
+	_fields_ = [("Latitude", c_double), ("Longitude", c_double), ("Altitude", c_double)]
 
 
 # SIMCONNECT_DATA_XYZ
 class SIMCONNECT_DATA_XYZ(Structure):  #
-	_fields_ = [
-		("x", c_double),
-		("y", c_double),
-		("z", c_double)
-	]
+	_fields_ = [("x", c_double), ("y", c_double), ("z", c_double)]

@@ -16,7 +16,7 @@ request_ui.add('LATITUDE', (b'PLANE LATITUDE', b'degrees'))
 request_ui.add('LONGITUDE', (b'PLANE LONGITUDE', b'degrees'))
 request_ui.add('AIRSPEED_INDICATE', (b'AIRSPEED INDICATED', b'Knots'))
 request_ui.add('MAGNETIC_COMPASS', (b'MAGNETIC COMPASS', b'Degrees'))  # Compass reading
-request_ui.add('VERTICAL_SPEED', (b'VERTICAL SPEED', b'Feet per second'))  # Vertical speed indication
+request_ui.add('VERTICAL_SPEED', (b'VERTICAL SPEED', b'feet/minute'))  # Vertical speed indication
 request_ui.add('FLAPS_HANDLE_PERCENT', (b'FLAPS HANDLE PERCENT', b'Percent Over 100'))  # Percent flap handle extended
 request_ui.add('FUEL_TOTAL_QUANTITY', (b'FUEL TOTAL QUANTITY', b'Gallons'))  # Current quantity in volume
 request_ui.add('FUEL_TOTAL_CAPACITY', (b'FUEL TOTAL CAPACITY', b'Gallons'))  # Total capacity of the aircraft

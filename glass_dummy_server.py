@@ -1,3 +1,9 @@
+#
+# This is a dummy server which does not connect to MSFS2020
+# It just serves up random data which allows testing of the front end without MSFS2020 running
+# If you want to connect to MSFS2020 then you are looking for glass_server.py
+
+
 from flask import Flask, jsonify, render_template, request
 from time import sleep
 import random
@@ -18,7 +24,7 @@ def ajax_test():
 
 @app.route ('/glass')
 def glass():
-    return render_template("glass3.html")
+    return render_template("glass.html")
 
 @app.route('/ui')
 def output_ui_variables():

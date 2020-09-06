@@ -241,9 +241,13 @@ request_autopilot.add('FLY_BY_WIRE_FAC_FAILED', (b'FLY BY WIRE FAC FAILED', b'Bo
 request_autopilot.add('FLY_BY_WIRE_SEC_FAILED', (b'FLY BY WIRE SEC FAILED', b'Bool'))
 
 
-@app.route ('/glass')
+def thousandify(x):
+    return f"{x:,}"
+
+
+@app.route ('/')
 def glass():
-    return render_template("glass3.html")
+    return render_template("glass.html")
 
 
 def get_data(data_type):
@@ -294,7 +298,7 @@ def output_ui_variables():
         fuel_percentage = (data_dictionary.get("FUEL_TOTAL_QUANTITY") / data_dictionary.get("FUEL_TOTAL_CAPACITY")) * 100
         ui_friendly_dictionary["FUEL_PERCENTAGE"] = round(fuel_percentage)
         ui_friendly_dictionary["AIRSPEED_INDICATE"] = round(data_dictionary.get("AIRSPEED_INDICATE"))
-        ui_friendly_dictionary["ALTITUDE"] = round(data_dictionary.get("ALTITUDE"))
+        ui_friendly_dictionary["ALTITUDE"] = thousandify(round(data_dictionary.get("ALTITUDE")))
         ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(data_dictionary["FLAPS_HANDLE_PERCENT"]*100)
 
         if data_dictionary["GEAR_HANDLE_POSITION"] == 1:
@@ -308,11 +312,7 @@ def output_ui_variables():
         ui_friendly_dictionary["MAGNETIC_COMPASS"] = round(data_dictionary.get("MAGNETIC_COMPASS"))
         ui_friendly_dictionary["VERTICAL_SPEED"] = round(data_dictionary.get("VERTICAL_SPEED"))
 
-        if data_dictionary.get("AUTOPILOT_MASTER") == 0:
-            ui_friendly_dictionary["AUTOPILOT_MASTER"] = False
-        else:
-            ui_friendly_dictionary["AUTOPILOT_MASTER"] = True
-            
+        ui_friendly_dictionary["AUTOPILOT_MASTER"] = data_dictionary.get("AUTOPILOT_MASTER")
         ui_friendly_dictionary["AUTOPILOT_NAV_SELECTED"] = data_dictionary.get("AUTOPILOT_NAV_SELECTED")
         ui_friendly_dictionary["AUTOPILOT_WING_LEVELER"] = data_dictionary.get("AUTOPILOT_WING_LEVELER")
         ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK"] = data_dictionary.get("AUTOPILOT_HEADING_LOCK")

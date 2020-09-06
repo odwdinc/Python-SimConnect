@@ -150,7 +150,7 @@
 										<div class="card bg-light mb-3">
 											<div class="card-body">
 												<h7>Autopilot Master</h7><br><br>
-												<input id="autopilot-master" class="form-check-input" type="checkbox" data-toggle="toggle" data-width="150" data-on="Engaged" data-off="Disengaged" data-onstyle="success" data-offstyle="danger" disabled>
+												<input id="autopilot-master" class="form-check-input" type="checkbox" data-toggle="toggle" data-width="150" data-on="Engaged" data-off="Disengaged" data-onstyle="success" data-offstyle="danger">
 											</div>
 										</div>
 									</div>
@@ -162,48 +162,48 @@
 												<table style="border-collapse:separate; border-spacing:0 5px;">
 													<tr>
 														<td width="120">Wing Leveler</td>
-														<td width="100"><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
-														<td></td>
-													</tr>
-													<tr>
-														<td>NAV</td>
-														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td width="100"><input id="autopilot-wing-leveler" class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
 														<td></td>
 													</tr>
 
 													<tr>
 														<td>Heading</td>
-														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td><input class="form-check-input m-2" id="autopilot_heading_lock" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
 														<td>[ ]</td>
 													</tr>
 													<tr>
 														<td>Altitude</td>
-														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td><input class="form-check-input m-2" id="autopilot_altitude_lock" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
 														<td>[ ]</td>
 													</tr>
 													<tr>
 														<td>Airspeed</td>
-														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td><input class="form-check-input m-2" id="autopilot_airspeed_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
 														<td>[ ]</td>
 													</tr>
 													<tr>
 														<td>Attitude</td>
-														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td><input class="form-check-input m-2" id="autopilot_attitude_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
 														<td></td>
 													</tr>
 													<tr>
+														<td>Pitch</td>
+														<td><input class="form-check-input m-2" id="autopilot_pitch_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
+														<td>[ ]</td>
+													</tr>
+													<tr>
 														<td>Backcourse</td>
-														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td><input class="form-check-input m-2" id="autopilot_backcourse_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
 														<td></td>
 													</tr>
 													<tr>
 														<td>Glideslope</td>
-														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td><input class="form-check-input m-2" id="autopilot_glidescope_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
 														<td></td>
 													</tr>
 													<tr>
 														<td>Approach</td>
-														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td><input class="form-check-input m-2" id="autopilot_approach_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
 														<td></td>
 													</tr>
 												</table>
@@ -242,7 +242,7 @@
 
         // Icon options
         var iconOptions = {
-            iconUrl: '/static/img/plane8.png',
+            iconUrl: '/static/img/plane.png',
             iconSize: [35, 35]
         }
 
@@ -275,6 +275,25 @@
         let latitude;
         let longitude;
 
+        let autopilot_master;
+		let autopilot_nav_selected;
+		let autopilot_wing_leveler;
+		let autopilot_heading_lock;
+		let autopilot_heading_lock_dir;
+		let autopilot_altitude_lock;
+		let autopilot_altitude_lock_var;
+		let autopilot_attitude_hold;
+		let autopilot_glidescope_hold;
+		let autopilot_approach_hold;
+		let autopilot_backcourse_hold;
+		let autopilot_vertical_hold;
+		let autopilot_vertical_hold_var;
+		let autopilot_pitch_hold;
+		let autopilot_pitch_hold_ref;
+		let autopilot_flight_director_active;
+		let autopilot_airspeed_hold;
+		let autopilot_airspeed_hold_var;
+
         function getSimulatorData() {
             $.getJSON($SCRIPT_ROOT + '/ui', {}, function(data) {
                 altitude = data.ALTITUDE;
@@ -297,7 +316,7 @@
                 autopilot_glidescope_hold = data.AUTOPILOT_GLIDESLOPE_HOLD;
                 autopilot_approach_hold = data.AUTOPILOT_APPROACH_HOLD;
                 autopilot_backcourse_hold = data.AUTOPILOT_BACKCOURSE_HOLD;
-                autopulot_autopilot_vertical_hold = data.AUTOPILOT_VERTICAL_HOLD
+                autopilot_vertical_hold = data.AUTOPILOT_VERTICAL_HOLD
                 autopilot_vertical_hold_var = data.AUTOPILOT_VERTICAL_HOLD_VAR;
                 autopilot_pitch_hold = data.AUTOPILOT_PITCH_HOLD
                 autopilot_pitch_hold_ref = data.AUTOPILOT_PITCH_HOLD_REF;
@@ -314,7 +333,18 @@
             $("#compass").text(compass);
             $("#vertical-speed").text(vertical_speed);
 	        $("#airspeed").text(airspeed);
-	        $("#autopilot-master").prop('checked', true);
+
+			$("#autopilot-master").prop('checked', autopilot_master).change()
+			$("#autopilot_wing_leveler").prop('checked', autopilot_wing_leveler).change()
+			$("#autopilot_heading_lock").prop('checked', autopilot_heading_lock).change()
+			$("#autopilot_altitude_lock").prop('checked', autopilot_altitude_lock).change()
+			$("#autopilot_airspeed_hold").prop('checked', autopilot_airspeed_hold).change()
+			$("#autopilot_attitude_hold").prop('checked', autopilot_attitude_hold).change()
+			$("#autopilot_pitch_hold").prop('checked', autopilot_attitude_hold).change()
+			$("#autopilot_backcourse_hold").prop('checked', autopilot_backcourse_hold).change()
+			$("#autopilot_glidescope_hold").prop('checked', autopilot_glidescope_hold).change()
+			$("#autopilot_approach_hold").prop('checked', autopilot_approach_hold).change()
+
 
             $("#fuel-percentage").text(fuel_percentage);
             $("#fuel-percentage-bar").css("width", fuel_percentage+"%");

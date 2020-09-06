@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>msfs2020-go/vfrmap</title>
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo=">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+          crossorigin=""/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="VFRMap">
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+            crossorigin="">
+    </script>
+    <script src="leafletjs/leaflet.rotatedMarker.js"></script>
+    <style type="text/css">
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #map {
+        background-color: gray;
+        flex-grow: 1;
+      }
+
+      #hide-hud {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 14;
+        padding: 0.5em;
+        color: black;
+        font-size: 1em;
+        font-weight: bold;
+        color: black;
+        cursor: pointer;
+      }
+      #hide-hud:hover {
+        color: white;
+      }
+
+      #hud {
+        padding: 1em;
+        text-align: center;
+        color: white;
+        font-size: 1.5em;
+        background-color: black;
+      }
+
+      #hud span.field {
+        padding-right: 0.5em;
+      }
+      #hud span.value {
+        font-size: 2.0em;
+      }
+      #hud span.value_small {
+        font-size: 1.0em;
+        padding-left: 0.1em;
+      }
+      #teleport-popup p {
+        padding:0.2em;
+        margin: 0;
+        text-align: center;
+      }
+      #teleport-popup p label {
+        padding-right: 0.2em;
+      }
+    </style>
+
+    <script>
+      "use strict";
+
+      let hud;
+      let map;
+      let marker;
+      let markerTeleport;
+      let markerIcon;
+      let popup;
+      let ws;
+      let plane_popup;
+      let teleport_popup;
+      let follow_plane = false;
+      let last_report = {};
+      let svgPlaneIconString = '<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" height="249.84" width="248.25" version="1.0"><metadata id="metadata9"/><path id="path5724" d="M 247.51404,152.40266 139.05781,71.800946 c 0.80268,-12.451845 1.32473,-40.256266 0.85468,-45.417599 -3.94034,-43.266462 -31.23018,-24.6301193 -31.48335,-5.320367 -0.0693,5.281361 -1.01502,32.598388 -1.10471,50.836622 L 0.2842717,154.37562 0,180.19575 l 110.50058,-50.48239 3.99332,80.29163 -32.042567,22.93816 -0.203845,16.89693 42.271772,-11.59566 0.008,0.1395 42.71311,10.91879 -0.50929,-16.88213 -32.45374,-22.39903 2.61132,-80.35205 111.35995,48.50611 -0.73494,-25.77295 z" fill-rule="evenodd" fill="__COLOR__"/></svg>'
+
+      let planeIconBlack = L.icon({
+        iconUrl: encodeURI("data:image/svg+xml," + svgPlaneIconString).replace("#","%23").replace("__COLOR__", "black"),
+        iconSize: [64, 64],
+      });
+      let planeIconWhite = L.icon({
+        iconUrl: encodeURI("data:image/svg+xml," + svgPlaneIconString).replace("#","%23").replace("__COLOR__", "white"),
+        iconSize: [64, 64],
+      });
+      let planeIconGreen = L.icon({
+        iconUrl: encodeURI("data:image/svg+xml," + svgPlaneIconString).replace("#","%23").replace("__COLOR__", "green"),
+        iconSize: [64, 64],
+      });
+
+      document.onkeyup = function(event) {
+         if (event.key === "Escape"){
+           toggle_follow();
+         }
+      }
+
+      function open_in_google_maps() {
+        var url = "https://www.google.com/maps/@" + last_report.latitude + "," + last_report.longitude + "," + map.getZoom() + "z"
+        window.open(url,'_blank');
+      }
+
+      function updateMap(msg) {
+          var pos = L.latLng(msg.latitude, msg.longitude);
+          marker.setLatLng(pos);
+          marker.setRotationAngle(msg.heading);
+
+          plane_popup.pos.innerText = Number(pos.lat).toFixed(6) + "," + Number(pos.lng).toFixed(6);
+          //plane_popup.gmap.innerHTML = "<a href=\"https://www.google.com/maps/@" + pos.lat + "," + pos.lng + "," + map.getZoom() + "z\">google maps</a>";
+
+          if (follow_plane) {
+            map.panTo(pos);
+          }
+      }
+      
+      function updateHUD(msg) {
+        hud.altitude.innerText = msg.altitude;
+        hud.heading.innerText = msg.heading;
+        hud.airspeed.innerText = msg.airspeed;
+        hud.vertical_speed.innerText = msg.vertical_speed;
+        hud.airspeed_true.innerText = "(" + msg.airspeed_true + ")";
+        hud.flaps.innerText = msg.flaps;
+        hud.trim.innerText = msg.trim;
+        hud.rudder_trim.innerText = msg.rudder_trim;
+      }
+
+      ws = new WebSocket("ws://" + window.location.hostname + ":" + window.location.port + "/ws");
+      ws.onopen = function() {
+        //console.log("ws open");
+      };
+      ws.onclose = function() {
+        //console.log("ws close");
+      };
+      ws.onmessage = function(e) {
+        var msg = JSON.parse(e.data);
+        //console.log("ws data", msg);
+        last_report = msg;
+
+        updateHUD(msg);
+
+        if (map !== undefined) {
+          updateMap(msg);
+        }
+      };
+
+      function initMap() {
+        var pos = L.latLng(52.4727,-1.7523);
+
+        var osm = new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 18,
+          minZoom: 2,
+          format: "image/png",
+          subdomains: ["a", "b", "c"]
+        });
+        var openaip_cached_basemap = new L.TileLayer("http://{s}.tile.maps.openaip.net/geowebcache/service/tms/1.0.0/openaip_basemap@EPSG%3A900913@png/{z}/{x}/{y}.png", {
+          maxZoom: 14,
+          minZoom: 4,
+          tms: true,
+          //detectRetina: true,
+          subdomains: "12",
+          format: "image/png",
+          transparent: true
+        });
+        var stamen_black_white = new L.TileLayer("http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png", {
+          maxZoom: 18,
+          minZoom: 2,
+          format: "image/png",
+          subdomains: ["a", "b", "c"]
+        });
+        var stamen_terrain = new L.TileLayer("http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.png", {
+          maxZoom: 18,
+          minZoom: 2,
+          format: "image/png",
+          subdomains: ["a", "b", "c"]
+        });
+        var stamen_water = new L.TileLayer("http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.png", {
+          maxZoom: 18,
+          minZoom: 2,
+          format: "image/png",
+          subdomains: ["a", "b", "c"]
+        });
+        var carto_dark = new L.TileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png", {
+          maxZoom: 18,
+          minZoom: 2,
+          format: "image/png",
+          subdomains: ["a", "b", "c"]
+        });
+        
+        map = new L.Map("map", {
+          layers: [ osm ],
+          center: pos,
+          zoom: 10,
+          attributionControl: false
+        });
+
+        var attrib = L.control.attribution({position: "bottomleft"});
+        attrib.addAttribution("<a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\" style=\"\">OpenStreetMap</a>");
+        attrib.addAttribution("<a href=\"https://www.openaip.net\" target=\"_blank\" style=\"\">openAIP</a>");
+        attrib.addAttribution("<a href=\"http://maps.stamen.com\" target=\"_blank\" style=\"\">Stamen</a>");
+        attrib.addAttribution("<a href=\"https://carto.com/\" target=\"_blank\" style=\"\">Carto</a>");
+        
+        attrib.addTo(map);
+
+        var baseMaps = {
+            "OpenStreetMap": osm,
+            "Stamen Terrain": stamen_terrain,
+            "Stamen Toner": stamen_black_white,
+            "Stamen Water": stamen_water,
+            "Carto Dark (Night Mode)": carto_dark,
+        };
+     
+        var overlayMaps = {
+            "Navigational Data": openaip_cached_basemap,
+        };
+        L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+        marker = L.marker(pos, {
+          icon: planeIconBlack,
+          rotationAngle: 0,
+          rotationOrigin: "center",
+        });
+        marker.addTo(map);
+        marker.bindPopup(L.popup({autoPan: false}).setLatLng(pos).setContent(plane_popup.main));
+
+        var markerPos = L.latLng(0,0);
+        markerTeleport = L.marker(markerPos, {});
+        markerTeleport.addTo(map);
+        markerTeleport.bindPopup(L.popup({autoPan: false}).setContent(teleport_popup.main));
+        set_teleport_marker(markerPos);
+
+
+        map.on('dragstart', function(e) {
+          follow_plane = true
+          toggle_follow();
+        });
+
+        map.on('click', function(e) {
+          set_teleport_marker(e.latlng);
+        });
+
+        map.on('baselayerchange', function(e) {
+          if (e.name == "Carto Dark (Night Mode)") {
+            marker.setIcon(planeIconWhite);
+          } else if (e.name == "Stamen Toner") {
+            marker.setIcon(planeIconGreen);
+          } else {
+            marker.setIcon(planeIconBlack);
+          }
+        });
+      }
+
+      function set_teleport_marker(latlng) {
+        markerTeleport.setLatLng(latlng);
+        teleport_popup.gps.value = latlng.lat.toFixed(8) + "," + latlng.lng.toFixed(8);
+        if (last_report.altitude) {
+          teleport_popup.altitude.value = last_report.altitude;
+        }
+      }
+
+      function teleport_here() {
+        //var pos = markerTeleport.getLatLng();
+        var msg = JSON.stringify(
+          {
+            "type": "teleport",
+            "lat": parseFloat(teleport_popup.gps.value.split(",")[0]),
+            "lng": parseFloat(teleport_popup.gps.value.split(",")[1]),
+            "altitude": parseFloat(teleport_popup.altitude.value) + 0.5,
+          }
+        );
+        console.log(msg);
+        ws.send(msg);
+      }
+
+      function toggle_follow() {
+        if (follow_plane) {
+          plane_popup.follow.innerText = "follow plane";
+        } else {
+          plane_popup.follow.innerText = "don't follow plane";
+        }
+        follow_plane = !follow_plane;
+      }
+
+      function hide_hud() {
+         var hud = document.getElementById("hud");
+         hud.style.display = "none";
+         hud = document.getElementById("hide-hud");
+         hud.style.display = "none";
+      }
+
+      document.addEventListener("DOMContentLoaded", function(event) {
+        plane_popup = {
+          main: document.getElementById("plane-popup"),
+          pos: document.getElementById("plane-popup-pos"),
+          gmap: document.getElementById("plane-popup-gmap"),
+          follow: document.getElementById("plane-popup-follow"),
+        };
+        teleport_popup = {
+          main: document.getElementById("teleport-popup"),
+          submit: document.getElementById("teleport-popup-submit"),
+          gps: document.getElementById("teleport-popup-gps"),
+          altitude: document.getElementById("teleport-popup-altitude"),
+        };
+        hud = {
+          altitude: document.getElementById("altitude_value"),
+          heading: document.getElementById("heading_value"),
+          airspeed: document.getElementById("airspeed_value"),
+          airspeed_true: document.getElementById("airspeed_true_value"),
+          vertical_speed: document.getElementById("vertical_speed_value"),
+          flaps: document.getElementById("flaps_value"),
+          trim: document.getElementById("trim_value"),
+          rudder_trim: document.getElementById("rudder_trim_value"),
+        };
+
+        toggle_follow();
+        initMap();
+      });
+    </script>
+  </head>
+  <body>
+    <div id="hud">
+      <span class="field">Airspeed: <span id="airspeed_value" class="value">0</span><span id="airspeed_true_value" class="value_small">0</span> </span>
+      <span class="field">Altitude: <span id="altitude_value" class="value">0</span></span>
+      <span class="field">Heading: <span id="heading_value" class="value">0</span></span>
+      <span class="field">V.Speed: <span id="vertical_speed_value" class="value">0</span></span>
+      <span class="field">Flaps: <span id="flaps_value" class="value">0</span></span>
+      <span class="field">Trim: <span id="trim_value" class="value">0</span></span>
+      <span class="field">R.Trim: <span id="rudder_trim_value" class="value">0</span></span>
+    </div>
+    <span id="hide-hud" onclick="hide_hud();">hide hud</span>
+
+    <div id="map"></div>
+
+    <div style="display:none;">
+      <div id="plane-popup">
+        <p><h3 id="plane-popup-pos"></h3></p>
+        <p><button id="plane-popup-gmap" onclick="open_in_google_maps();">open in google maps</button></p>
+        <p><button id="plane-popup-follow" onclick="toggle_follow();"></button></p>
+      </div>
+
+      <div id="teleport-popup">
+        <p><label for="teleport-popup-gps">GPS:</label><input type="text" id="teleport-popup-gps"></p>
+        <p><label for="teleport-popup-alt">Altitude:</label><input type="text" id="teleport-popup-altitude"></p>
+        <p><button type="button" id="teleport-popup-submit" onclick="teleport_here();">teleport</button></p>
+      </div>
+
+    </div>
+  </body>
+</html>

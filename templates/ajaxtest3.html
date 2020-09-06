@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <!-- JQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script type=text/javascript>
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+
+    <!--	Bootstrap CSS-->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+
+</head>
+<body>
+
+
+<script>
+    let altitude;
+    let fuel_percentage;
+
+    function getSimulatorData() {
+        $.getJSON($SCRIPT_ROOT + '/ui', {}, function(data) {
+            altitude = data.ALTITUDE;
+            fuel_percentage = data.FUEL_PERCENTAGE;
+        });
+        return false;
+        console.log(altitude)
+        console.log(fuel_percentage)
+    }
+
+    function setWords() {
+       altitude = "hey";
+       fuel_percentage = "you";
+    }
+
+    function displayData() {
+        getSimulatorData();
+        $("#altitude").text(altitude);
+
+        $("#fuel_percentage").text(fuel_percentage);
+        $("#fuel-progress").css("width", fuel_percentage+"%");
+
+    }
+
+    window.setInterval(function(){
+        displayData()
+    }, 2000);
+
+</script>
+
+<h1>jQuery Example</h1>
+<p>Altitude = <span id=altitude>?</span>
+
+<div class="progress m-1" style="height: 20px;">
+    <div class="progress-bar" id="fuel-progress" style="width: 25%;" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"><span id=fuel_percentage>?</span></div>
+</div>
+
+
+<!--Boostrap JS-->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+
+</body>
+</html>

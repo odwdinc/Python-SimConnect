@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>pyGlass Cockpit</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!--	Bootstrap CSS-->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+	<!-- Leaflet CSS and JS -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+	<script src="https://cdn.jsdelivr.net/npm/leaflet-rotatedmarker@0.2.0/leaflet.rotatedMarker.min.js"></script>
+
+	<!-- Fontawesome JS-->
+	<script src="https://kit.fontawesome.com/99043d701d.js" crossorigin="anonymous"></script>
+
+	<!-- JQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<!-- Toggle -->
+	<link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+
+	<!-- Set script root-->
+	<script type=text/javascript>
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+	</script>
+
+</head>
+
+<body>
+
+	<div class="container-fluid p-0" style="position: absolute; top: 0; bottom: 0; width: 100%;">  <!--Main container-->
+
+		<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+			<div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+				<ul class="navbar-nav mr-auto">
+
+				</ul>
+			</div>
+			<div class="mx-auto order-0">
+				<a class="navbar-brand mx-auto" href="#">pyGlass Cockpit</a>
+				<button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+			</div>
+			<div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+				<ul class="navbar-nav ml-auto">
+					<li class="nav-item m-1">
+						<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseNavigation" aria-expanded="true" aria-controls="collapseNavigation">
+							<i class="fas fa-map"></i>
+						</button>
+					</li>
+					<li class="nav-item m-1">
+						<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseFuel" aria-expanded="true" aria-controls="collapseFuel">
+							<i class="fas fa-gas-pump"></i>
+						</button>
+					</li>
+					<li class="nav-item m-1">
+						<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseAutopilot" aria-expanded="true" aria-controls="collapseAutopilot">
+							<i class="fas fa-robot"></i>
+						</button>
+					</li>
+				</ul>
+			</div>
+		</nav>
+
+
+		<div class="row p-2 h-100">
+			<div class="col-sm-8 no-gutters collapse show p-0" style="background-color: grey;" id="map_column" style="position: relative; height=100%;">
+				<div id = "map" style = "position: absolute; top: 0; bottom: 0; width: 100%;"></div>
+			</div>
+
+			<div class="col collapse show" id="hud_column">
+
+
+				<div class="accordion" id="accordionHUD">
+
+					<!-- NAVIGATION -->
+					<div class="card">
+
+						<div id="collapseNavigation" class="collapse show" aria-labelledby="collapseNavigation" data-parent="#accordionHUD">
+							<div class="card-body">
+								<div class="row">
+									<div class="col-6">
+										<div class="card text-white bg-secondary mb-3">
+											<div class="card-body text-center">
+												<h7 class="card-title">Altitude</h7>
+												<h3 class="card-title"><span id=altitude>?</span></h3>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="card text-white bg-secondary mb-3">
+											<div class="card-body text-center">
+												<h7 class="card-title">V/Speed</h7>
+												<h3 class="card-title"><span id=vertical-speed>?</span></h3>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="card text-white bg-secondary mb-3">
+											<div class="card-body text-center">
+												<h7 class="card-title">Heading</h7>
+												<h3 class="card-title"><span id=compass>?</span></h3>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="card text-white bg-secondary mb-3">
+											<div class="card-body text-center">
+												<h7 class="card-title">Airspeed</h7>
+												<h3 class="card-title"><span id=airspeed>?</span></h3>
+											</div>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+					<!-- FUEL -->
+					<div class="card">
+						<div id="collapseFuel" class="collapse" aria-labelledby="collapseFuel" data-parent="#accordionHUD">
+							<div class="card-body text-center">
+								<div class="row">
+									<div class="col">
+										<div class="card bg-light mb-3">
+											<div class="card-body">
+												<h7 class="card-title">Fuel %</h7>
+												<div class="progress m-1" style="height: 20px;">
+													<div id="fuel-percentage-bar" class="progress-bar" style="width: 25%;" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"><span id=fuel-percentage></span></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- AUTOPILOT -->
+					<div class="card">
+						<div id="collapseAutopilot" class="collapse" aria-labelledby="collapseAutopilot" data-parent="#accordionHUD">
+							<div class="card-body text-center">
+								<div class="row">
+									<div class="col-sm-12">
+										<div class="card bg-light mb-3">
+											<div class="card-body">
+												<h7>Autopilot Master</h7><br>
+												<input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="150" data-on="Engaged" data-off="Disengaged" data-onstyle="success" data-offstyle="danger" disabled>
+											</div>
+										</div>
+									</div>
+
+									<div class="col-sm-12">
+										<div class="card bg-light mb-3">
+											<div class="card-body text-left">
+
+												<table style="border-collapse:separate; border-spacing:0 5px;">
+													<tr>
+														<td width="120">Wing Leveler</td>
+														<td width="100"><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td></td>
+													</tr>
+													<tr>
+														<td>NAV</td>
+														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td></td>
+													</tr>
+
+													<tr>
+														<td>Heading</td>
+														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td>[ ]</td>
+													</tr>
+													<tr>
+														<td>Altitude</td>
+														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td>[ ]</td>
+													</tr>
+													<tr>
+														<td>Airspeed</td>
+														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td>[ ]</td>
+													</tr>
+													<tr>
+														<td>Attitude</td>
+														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td></td>
+													</tr>
+													<tr>
+														<td>Backcourse</td>
+														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td></td>
+													</tr>
+													<tr>
+														<td>Glideslope</td>
+														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td></td>
+													</tr>
+													<tr>
+														<td>Approach</td>
+														<td><input class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px" disabled></td>
+														<td></td>
+													</tr>
+												</table>
+
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+	</div>  <!--Main container-->
+
+	<!-- script to create map -->
+	<script>
+        // Creating map options
+        var mapOptions = {
+            center: [17.385044, 78.486671],
+            zoom: 10,
+	        dragging: false,
+        }
+
+        // Creating a map object
+        var map = new L.map('map', mapOptions);
+
+        // Creating a Layer object
+        var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+        // Adding layer to the map
+        map.addLayer(layer);
+
+        // Icon options
+        var iconOptions = {
+            iconUrl: '/static/img/plane8.png',
+            iconSize: [35, 35]
+        }
+
+        // Creating a custom icon
+        var customIcon = L.icon(iconOptions);
+
+        // Creating Marker Options
+        var markerOptions = {
+            clickable: false,
+            draggable: false,
+            icon: customIcon,
+            rotationAngle: 0,
+            rotationOrigin: "center"
+        }
+        // Creating a Marker
+        var marker = L.marker([17.438139, 78.395830], markerOptions);
+
+        // Adding marker to the map
+        marker.addTo(map);
+	</script>
+
+
+	<!-- Script to get data from sim -->
+	<script>
+        let altitude;
+        let fuel_percentage;
+        let vertical_speed;
+        let compass;
+        let airspeed;
+        let latitude;
+        let longitude;
+
+        function getSimulatorData() {
+            $.getJSON($SCRIPT_ROOT + '/ui', {}, function(data) {
+                altitude = data.ALTITUDE;
+                fuel_percentage = data.FUEL_PERCENTAGE;
+                vertical_speed = data.VERTICAL_SPEED;
+                compass = data.MAGNETIC_COMPASS;
+                airspeed = data.AIRSPEED_INDICATE;
+
+                latitude = data.LATITUDE;
+                longitude = data.LONGITUDE;
+
+            });
+            return false;
+            console.log(altitude)
+            console.log(fuel_percentage)
+        }
+
+        function setWords() {
+            altitude = "hey";
+            fuel_percentage = "you";
+        }
+
+        function displayData() {
+            $("#altitude").text(altitude);
+            $("#compass").text(compass);
+            $("#vertical-speed").text(vertical_speed)
+	        $("#airspeed").text(airspeed)
+
+            $("#fuel-percentage").text(fuel_percentage);
+            $("#fuel-percentage-bar").css("width", fuel_percentage+"%");
+        }
+
+        function updateMap() {
+
+            var pos = L.latLng(latitude, longitude);
+            marker.setLatLng(pos);
+            marker.setRotationAngle(compass);
+            map.panTo(pos);
+        }
+
+        window.setInterval(function(){
+            getSimulatorData();
+            displayData()
+	        updateMap()
+        }, 2000);
+
+	</script>
+
+	<!--Boostrap JS-->
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+	<!--Bootstrap Toggle JS-->
+	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+</body>
+</html>

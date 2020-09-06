@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, request
 from SimConnect import *
 from time import sleep
 
@@ -275,7 +275,12 @@ def get_data(data_type):
     return data_dictionary
 
 
-@app.route('/ui/')
+@app.route('/ajaxtest')
+def ajax_test:
+    return render_template("ajaxtest.html")
+
+
+@app.route('/ui')
 def output_ui_variables():
     data_dictionary = get_data("ui")
 

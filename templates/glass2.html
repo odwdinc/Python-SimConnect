@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>pyGlass Cockpit</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!--	Bootstrap CSS-->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+	<!-- Leaflet CSS and JS -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+
+	<!-- Fontawesome JS-->
+	<script src="https://kit.fontawesome.com/99043d701d.js" crossorigin="anonymous"></script>
+
+	<!-- JQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+
+	<div class="container-fluid p-0" style="position: absolute; top: 0; bottom: 0; width: 100%;">  <!--Main container-->
+
+		<nav class="navbar navbar-dark bg-dark">
+			<a class="navbar-brand" href="#">pyGlass Cockpit</a>
+			<a class="btn btn-outline-secondary" data-toggle="collapse" href="#hud_column" role="button" aria-expanded="true" aria-controls="hud_column"><i class="fas fa-tachometer-alt"></i></a>
+		</nav>
+
+		<div class="row p-2 h-100">
+			<div class="col-sm-8 no-gutters collapse show p-0" style="background-color: grey;" id="map_column" style="position: relative; height=100%;">
+				<div id = "map" style = "position: absolute; top: 0; bottom: 0; width: 100%;"></div>
+			</div>
+
+			<div class="col collapse show" id="hud_column">
+
+
+				<div class="accordion" id="accordionHUD">
+
+					<!-- NAVIGATION -->
+					<div class="card">
+						<div class="card-header" id="headingNavigation">
+							<h5 class="mb-0">
+								<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseNavigation" aria-expanded="true" aria-controls="collapseNavigation">
+									Navigation
+								</button>
+							</h5>
+						</div>
+						<div id="collapseNavigation" class="collapse show" aria-labelledby="collapseNavigation" data-parent="#accordionHUD">
+							<div class="card-body">
+
+								<div class="row">
+									<div class="col-6">
+										<div class="card text-white bg-secondary mb-3">
+											<div class="card-body text-center">
+												<h7 class="card-title">Altitude</h7>
+												<h5 class="card-title">[ ]</h5>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="card text-white bg-secondary mb-3">
+											<div class="card-body text-center">
+												<h7 class="card-title">V/Speed</h7>
+												<h5 class="card-title">[ ]</h5>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="card text-white bg-secondary mb-3">
+											<div class="card-body text-center">
+												<h7 class="card-title">Heading</h7>
+												<h5 class="card-title">[ ]</h5>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="card text-white bg-secondary mb-3">
+											<div class="card-body text-center">
+												<h7 class="card-title">Airspeed</h7>
+												<h5 class="card-title">[ ]</h5>
+											</div>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+					<!-- FUEL -->
+					<div class="card">
+						<div class="card-header" id="headingFuel">
+							<h5 class="mb-0">
+								<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseFuel" aria-expanded="false" aria-controls="collapseFuel">
+									<i class="fas fa-gas-pump"></i> Fuel
+								</button>
+							</h5>
+						</div>
+						<div id="collapseFuel" class="collapse" aria-labelledby="collapseFuel" data-parent="#accordionHUD">
+							<div class="card-body text-center">
+								<div class="row">
+									<div class="col">
+										<div class="card text-white bg-secondary mb-3">
+											<div class="card-body">
+												<h7 class="card-title">Fuel</h7>
+												<div class="progress m-1" style="height: 20px;">
+													<div class="progress-bar" style="width: 25%;" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">[ ]%</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+
+
+
+
+			</div>
+		</div>
+
+
+	</div>  <!--Main container-->
+
+
+	<script>
+        // Creating map options
+        var mapOptions = {
+            center: [17.385044, 78.486671],
+            zoom: 10,
+	        dragging: false,
+        }
+
+        // Creating a map object
+        var map = new L.map('map', mapOptions);
+
+        // Creating a Layer object
+        var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+        // Adding layer to the map
+        map.addLayer(layer);
+
+        // Icon options
+        var iconOptions = {
+            iconUrl: 'plane.png',
+            iconSize: [50, 50]
+        }
+
+        // Creating a custom icon
+        var customIcon = L.icon(iconOptions);
+
+        // Creating Marker Options
+        var markerOptions = {
+            clickable: false,
+            draggable: false,
+            icon: customIcon
+        }
+        // Creating a Marker
+        var marker = L.marker([17.438139, 78.395830], markerOptions);
+
+        // Adding marker to the map
+        marker.addTo(map);
+	</script>
+
+
+	<!--Boostrap JS-->
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+
+</body>
+</html>

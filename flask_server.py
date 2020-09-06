@@ -11,9 +11,9 @@ sm = SimConnect()
 
 # create Request
 request_ui = sm.new_request()
-request_ui.add('ALTITUDE', (b'Plane ALTITUDE', b'feet'))
-request_ui.add('Latitude', (b'Plane Latitude', b'degrees'))
-request_ui.add('Longitude', (b'Plane Longitude', b'degrees'))
+request_ui.add('ALTITUDE', (b'PLANE ALTITUDE', b'feet'))
+request_ui.add('LATITUDE', (b'PLANE LATITUDE', b'degrees'))
+request_ui.add('LONGITUDE', (b'PLANE LONGITUDE', b'degrees'))
 request_ui.add('AIRSPEED_INDICATE', (b'AIRSPEED INDICATED', b'Knots'))
 request_ui.add('MAGNETIC_COMPASS', (b'MAGNETIC COMPASS', b'Degrees'))  # Compass reading
 request_ui.add('VERTICAL_SPEED', (b'VERTICAL SPEED', b'Feet per second'))  # Vertical speed indication
@@ -40,10 +40,10 @@ request_ui.add('AUTOPILOT_AIRSPEED_HOLD', (b'AUTOPILOT AIRSPEED HOLD', b'Bool'))
 request_ui.add('AUTOPILOT_AIRSPEED_HOLD_VAR', (b'AUTOPILOT AIRSPEED HOLD VAR', b'Knots'))
 
 request_location = sm.new_request()
-request_location.add('ALTITUDE', (b'Plane ALTITUDE', b'feet'))
-request_location.add('Latitude', (b'Plane Latitude', b'degrees'))
-request_location.add('Longitude', (b'Plane Longitude', b'degrees'))
-request_location.add('Kohlsman', (b'Kohlsman setting hg', b'inHg'))
+request_location.add('ALTITUDE', (b'PLANE ALTITUDE', b'feet'))
+request_location.add('LATITUDE', (b'PLANE LATITUDE', b'degrees'))
+request_location.add('LONGITUDE', (b'PLANE LONGITUDE', b'degrees'))
+request_location.add('KOHLSMAN', (b'KOHLSMAN SETTING HG', b'inHg'))
 
 request_airspeed = sm.new_request()
 request_airspeed.add('AIRSPEED_TRUE', (b'AIRSPEED TRUE', b'Knots'))
@@ -296,8 +296,8 @@ def output_ui_variables():
         else:
             ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "Up"
 
-        ui_friendly_dictionary["Latitude"] = data_dictionary.get("Latitude")
-        ui_friendly_dictionary["Longitude"] = data_dictionary.get("Longitude")
+        ui_friendly_dictionary["LATITUDE"] = data_dictionary.get("LATITUDE")
+        ui_friendly_dictionary["LONGITUDE"] = data_dictionary.get("LONGITUDE")
 
         ui_friendly_dictionary["MAGNETIC_COMPASS"] = round(data_dictionary.get("MAGNETIC_COMPASS"))
         ui_friendly_dictionary["VERTICAL_SPEED"] = round(data_dictionary.get("VERTICAL_SPEED"))

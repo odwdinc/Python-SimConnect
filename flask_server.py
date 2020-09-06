@@ -280,7 +280,7 @@ def output_ui_variables():
     data_dictionary = get_data("ui")
 
     ui_friendly_dictionary = {}
-    if data_dictionary.get("STATUS") != "success"
+    if data_dictionary.get("STATUS") != "success":
         ui_friendly_dictionary["STATUS"] = data_dictionary.get("STATUS")
     else:
         ui_friendly_dictionary["STATUS"] = "success"

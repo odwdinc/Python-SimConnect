@@ -11,7 +11,7 @@ sm = SimConnect()
 
 # create Request
 request_ui = sm.new_request()
-request_ui.add('Altitude', (b'Plane Altitude', b'feet'))
+request_ui.add('ALTITUDE', (b'Plane ALTITUDE', b'feet'))
 request_ui.add('Latitude', (b'Plane Latitude', b'degrees'))
 request_ui.add('Longitude', (b'Plane Longitude', b'degrees'))
 request_ui.add('AIRSPEED_INDICATE', (b'AIRSPEED INDICATED', b'Knots'))
@@ -40,7 +40,7 @@ request_ui.add('AUTOPILOT_AIRSPEED_HOLD', (b'AUTOPILOT AIRSPEED HOLD', b'Bool'))
 request_ui.add('AUTOPILOT_AIRSPEED_HOLD_VAR', (b'AUTOPILOT AIRSPEED HOLD VAR', b'Knots'))
 
 request_location = sm.new_request()
-request_location.add('Altitude', (b'Plane Altitude', b'feet'))
+request_location.add('ALTITUDE', (b'Plane ALTITUDE', b'feet'))
 request_location.add('Latitude', (b'Plane Latitude', b'degrees'))
 request_location.add('Longitude', (b'Plane Longitude', b'degrees'))
 request_location.add('Kohlsman', (b'Kohlsman setting hg', b'inHg'))
@@ -288,7 +288,7 @@ def output_ui_variables():
         fuel_percentage = (data_dictionary.get("FUEL_TOTAL_QUANTITY") / data_dictionary.get("FUEL_TOTAL_CAPACITY")) * 100
         ui_friendly_dictionary["FUEL_PERCENTAGE"] = round(fuel_percentage)
         ui_friendly_dictionary["AIRSPEED_INDICATE"] = round(data_dictionary.get("AIRSPEED_INDICATE"))
-        ui_friendly_dictionary["Altitude"] = round(data_dictionary.get("Altitude"))
+        ui_friendly_dictionary["ALTITUDE"] = round(data_dictionary.get("ALTITUDE"))
         ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(data_dictionary["FLAPS_HANDLE_PERCENT"]*100)
 
         if data_dictionary["GEAR_HANDLE_POSITION"] == 1:

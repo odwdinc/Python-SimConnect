@@ -275,7 +275,20 @@ def get_data(data_type):
     return data_dictionary
 
 
-@app.route('/data/<data_type>')
+@app.route('/ui/')
+def output_ui_variables()
+    data_dictionary = get_data("ui")
+
+    # calculate fuel percentage
+    fuel_quantity = data_dictionary.get("FUEL_TOTAL_QUANTITY")
+    fuel_capacity = data.dictionary.get("FUEL_TOTAL_CAPACITY")
+    fuel_percantage = fuel quantity / fuel_capacity
+
+    data_dictionary["FUEL_PERCENTAGE"] = fuel_percantage
+    return jsonify(data_dictionary)
+
+
+@app.route('/data/<data_type>/')
 def output_detailed_json_data(data_type):
 
     data_dictionary = get_data(data_type)

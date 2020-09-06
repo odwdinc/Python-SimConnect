@@ -150,7 +150,7 @@
 										<div class="card bg-light mb-3">
 											<div class="card-body">
 												<h7>Autopilot Master</h7><br><br>
-												<input id="autopilot-master" class="form-check-input" type="checkbox" data-toggle="toggle" data-width="150" data-on="Engaged" data-off="Disengaged" data-onstyle="success" data-offstyle="danger" checked disabled>
+												<input id="autopilot-master" class="form-check-input" type="checkbox" data-toggle="toggle" data-width="150" data-on="Engaged" data-off="Disengaged" data-onstyle="success" data-offstyle="danger" disabled>
 											</div>
 										</div>
 									</div>
@@ -314,8 +314,7 @@
             $("#compass").text(compass);
             $("#vertical-speed").text(vertical_speed);
 	        $("#airspeed").text(airspeed);
-	        $("#autopilot-master").prop('checked', autopilot_master);
-	        console.log autopilot_master;
+	        $("#autopilot-master").prop('checked', true);
 
             $("#fuel-percentage").text(fuel_percentage);
             $("#fuel-percentage-bar").css("width", fuel_percentage+"%");

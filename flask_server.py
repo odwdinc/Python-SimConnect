@@ -214,16 +214,16 @@ request_autopilot.add('FLY_BY_WIRE_SEC_FAILED', (b'FLY BY WIRE SEC FAILED', b'Bo
 @app.route('/data/<data_type>')
 def old_json(data_type):
 
-    if data_type = "navigation": request_to_action = request_navigation
-    if data_type = "airspeed": request_to_action = request_airspeed
-    if data_type = "compass": request_to_action = request_compass
-    if data_type = "vertical_speed": request_to_action = request_vertical_speed
-    if data_type = "fuel": request_to_action = request_fuel
-    if data_type = "flaps": request_to_action = request_flaps
-    if data_type = "throttle": request_to_action = request_throttle
-    if data_type = "gear": request_to_action = request_gear
-    if data_type = "trim": request_to_action = request_trim
-    if data_type = "autopilot": request_to_action = request_autopilot
+    if data_type == "navigation": request_to_action = request_navigation
+    if data_type == "airspeed": request_to_action = request_airspeed
+    if data_type == "compass": request_to_action = request_compass
+    if data_type == "vertical_speed": request_to_action = request_vertical_speed
+    if data_type == "fuel": request_to_action = request_fuel
+    if data_type == "flaps": request_to_action = request_flaps
+    if data_type == "throttle": request_to_action = request_throttle
+    if data_type == "gear": request_to_action = request_gear
+    if data_type == "trim": request_to_action = request_trim
+    if data_type == "autopilot": request_to_action = request_autopilot
 
     attempts = 0
     data = None

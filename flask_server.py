@@ -10,11 +10,11 @@ app = Flask(__name__)
 sm = SimConnect()
 
 # create Request
-request_navigation = sm.new_request()
-request_navigation.add('Altitude', (b'Plane Altitude', b'feet'))
-request_navigation.add('Latitude', (b'Plane Latitude', b'degrees'))
-request_navigation.add('Longitude', (b'Plane Longitude', b'degrees'))
-request_navigation.add('Kohlsman', (b'Kohlsman setting hg', b'inHg'))
+request_location = sm.new_request()
+request_location.add('Altitude', (b'Plane Altitude', b'feet'))
+request_location.add('Latitude', (b'Plane Latitude', b'degrees'))
+request_location.add('Longitude', (b'Plane Longitude', b'degrees'))
+request_location.add('Kohlsman', (b'Kohlsman setting hg', b'inHg'))
 
 request_airspeed = sm.new_request()
 request_airspeed.add('AIRSPEED_TRUE', (b'AIRSPEED TRUE', b'Knots'))
@@ -214,7 +214,7 @@ request_autopilot.add('FLY_BY_WIRE_SEC_FAILED', (b'FLY BY WIRE SEC FAILED', b'Bo
 @app.route('/data/<data_type>')
 def old_json(data_type):
 
-    if data_type == "navigation": request_to_action = request_navigation
+    if data_type == "navigation": request_to_action = request_location
     if data_type == "airspeed": request_to_action = request_airspeed
     if data_type == "compass": request_to_action = request_compass
     if data_type == "vertical_speed": request_to_action = request_vertical_speed
@@ -224,6 +224,8 @@ def old_json(data_type):
     if data_type == "gear": request_to_action = request_gear
     if data_type == "trim": request_to_action = request_trim
     if data_type == "autopilot": request_to_action = request_autopilot
+    
+    if data_type == "all": request_to_action = request_location + request_compass
 
     attempts = 0
     data = None

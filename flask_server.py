@@ -10,7 +10,7 @@ app = Flask(__name__)
 sm = SimConnect()
 
 # create Request
-myRequest = sm.new_request(time=2000)  # set auto data collection time @ 2s
+myRequest = sm.new_request()
 
 # add required definitions output data name, definition from SDK
 myRequest.add('Altitude', (b'Plane Altitude', b'feet'))
@@ -224,11 +224,10 @@ def json_add_data():
 
     attempts = 0
     data = None
-
+    sm.request_data(myRequest)
     while data is None and attempts < 20:
-        sm.RequestData(myRequest)
-        sm.Run()
-        data = sm.GetData(myRequest, True)
+        sm.run()
+        data = sm.get_data(myRequest)
         if data is None:
             sleep(0.5)
         attempts = attempts + 1

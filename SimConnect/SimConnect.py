@@ -19,12 +19,6 @@ def millis():
 	return int(round(time.time() * 1000))
 
 
-class sData(dict):
-	__getattr__ = dict.__getitem__
-	__setattr__ = dict.__setitem__
-	__delattr__ = dict.__delitem__
-
-
 class Request:
 	def __init__(
 		self,
@@ -1120,22 +1114,12 @@ class SimConnect:
 			pObjData
 		)
 
-	def get_data(self, _Request, _format=False):
+	def get_data(self, _Request):
 		if self.out_data[_Request.DATA_REQUEST_ID] is None:
 			return None
-		if _format:
-			map = {}
-		else:
-			map = sData
+		map = {}
 		for od in _Request.outData:
-			if _format:
-				map[od] = self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]]
-			else:
-				setattr(
-					sData,
-					od,
-					self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]],
-				)
+			map[od] = self.out_data[_Request.DATA_REQUEST_ID][_Request.outData[od]]
 		return map
 
 	def send_event(self, evnt, data=DWORD(0)):

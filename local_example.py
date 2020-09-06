@@ -67,25 +67,25 @@ while not sm.quit:
 	data = sm.get_data(myRequest)
 	if data is not None:
 		print("Lat=%f  Lon=%f  Alt=%f Kohlsman=%.2f" % (
-			data.Latitude,
-			data.Longitude,
-			data.Altitude,
-			data.Kohlsman
+			data["Latitude"],
+			data["Longitude"],
+			data["Altitude"],
+			data["Kohlsman"]
 		))
 
 	# check for data from myRequest2
 	data = sm.get_data(myRequest2)
 	if data is not None:
 		print("Alt=%f GEAR=%d" % (
-			data.ALTITUDE,
-			data.GEAR
+			data["ALTITUDE"],
+			data["GEAR"]
 		))
 
 	# check for data from THROTTLERequest
 	data = sm.get_data(THROTTLERequest)
 	if data is not None:
 		print("THROTTLE: %f" % (
-			data.THROTTLE
+			data["THROTTLE"]
 		))
 
 sm.exit()

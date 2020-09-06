@@ -312,6 +312,7 @@ def output_ui_variables():
         ui_friendly_dictionary["MAGNETIC_COMPASS"] = round(data_dictionary.get("MAGNETIC_COMPASS"))
         ui_friendly_dictionary["VERTICAL_SPEED"] = round(data_dictionary.get("VERTICAL_SPEED"))
 
+
         ui_friendly_dictionary["AUTOPILOT_MASTER"] = data_dictionary.get("AUTOPILOT_MASTER")
         ui_friendly_dictionary["AUTOPILOT_NAV_SELECTED"] = data_dictionary.get("AUTOPILOT_NAV_SELECTED")
         ui_friendly_dictionary["AUTOPILOT_WING_LEVELER"] = data_dictionary.get("AUTOPILOT_WING_LEVELER")

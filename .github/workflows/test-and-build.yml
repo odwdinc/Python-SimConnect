@@ -1,5 +1,8 @@
 name: Test and Publish
-on: push
+on: 
+  push:
+    branches:
+      - master
 
 jobs:
   test:

@@ -5,7 +5,7 @@ from time import sleep
 sm = SimConnect()
 
 # create Request
-myRequest = sm.newRequest(time=2000)  # set auto data collection time @ 2s
+myRequest = sm.new_request(time=2000)  # set auto data collection time @ 2s
 
 # add required definitions output data name, definition from SDK
 myRequest.add('Altitude', (b'Plane Altitude', b'feet'))

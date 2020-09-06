@@ -150,7 +150,7 @@
 										<div class="card bg-light mb-3">
 											<div class="card-body">
 												<h7>Autopilot Master</h7><br><br>
-												<input class="form-check-input" type="checkbox" data-toggle="toggle" data-width="150" data-on="Engaged" data-off="Disengaged" data-onstyle="success" data-offstyle="danger" disabled>
+												<input id="autopilot-master" class="form-check-input" type="checkbox" data-toggle="toggle" data-width="150" data-on="Engaged" data-off="Disengaged" data-onstyle="success" data-offstyle="danger" disabled>
 											</div>
 										</div>
 									</div>
@@ -304,7 +304,7 @@
 				autopilot_flight_director_active = data.AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE
 	            autopilot_airspeed_hold = data.AUTOPILOT_AIRSPEED_HOLD
 	            autopilot_airspeed_hold_var = data.AUTOPILOT_AIRSPEED_HOLD_VAR
-	            
+
             });
             return false;
         }
@@ -312,8 +312,9 @@
         function displayData() {
             $("#altitude").text(altitude);
             $("#compass").text(compass);
-            $("#vertical-speed").text(vertical_speed)
-	        $("#airspeed").text(airspeed)
+            $("#vertical-speed").text(vertical_speed);
+	        $("#airspeed").text(airspeed);
+	        $('#autopilot-master').prop('checked', autopilot_master);
 
             $("#fuel-percentage").text(fuel_percentage);
             $("#fuel-percentage-bar").css("width", fuel_percentage+"%");

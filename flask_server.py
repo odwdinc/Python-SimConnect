@@ -241,6 +241,11 @@ request_autopilot.add('FLY_BY_WIRE_FAC_FAILED', (b'FLY BY WIRE FAC FAILED', b'Bo
 request_autopilot.add('FLY_BY_WIRE_SEC_FAILED', (b'FLY BY WIRE SEC FAILED', b'Bool'))
 
 
+@app.route ('/glass')
+def glass():
+    return render_template("glass3.html")
+
+
 def get_data(data_type):
     if data_type == "navigation": request_to_action = request_location
     if data_type == "airspeed": request_to_action = request_airspeed

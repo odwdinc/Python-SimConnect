@@ -10,6 +10,36 @@ app = Flask(__name__)
 sm = SimConnect()
 
 # create Request
+request_ui = sm.new_request()
+request_ui.add('Altitude', (b'Plane Altitude', b'feet'))
+request_ui.add('Latitude', (b'Plane Latitude', b'degrees'))
+request_ui.add('Longitude', (b'Plane Longitude', b'degrees'))
+request_ui.add('AIRSPEED_INDICATE', (b'AIRSPEED INDICATED', b'Knots'))
+request_ui.add('MAGNETIC_COMPASS', (b'MAGNETIC COMPASS', b'Degrees'))  # Compass reading
+request_ui.add('VERTICAL_SPEED', (b'VERTICAL SPEED', b'Feet per second'))  # Vertical speed indication
+request_ui.add('FLAPS_HANDLE_PERCENT', (b'FLAPS HANDLE PERCENT', b'Percent Over 100'))  # Percent flap handle extended
+request_ui.add('FUEL_TOTAL_QUANTITY', (b'FUEL TOTAL QUANTITY', b'Gallons'))  # Current quantity in volume
+request_ui.add('FUEL_TOTAL_CAPACITY', (b'FUEL TOTAL CAPACITY', b'Gallons'))  # Total capacity of the aircraft
+request_ui.add('GEAR_HANDLE_POSITION', (b'GEAR HANDLE POSITION', b'Bool'))  # True if gear handle is applied
+request_ui.add('AUTOPILOT_MASTER', (b'AUTOPILOT MASTER', b'Bool'))
+
+request_autopilot.add('AUTOPILOT_NAV_SELECTED', (b'AUTOPILOT NAV SELECTED', b'Number'))
+request_autopilot.add('AUTOPILOT_WING_LEVELER', (b'AUTOPILOT WING LEVELER', b'Bool'))
+request_autopilot.add('AUTOPILOT_HEADING_LOCK', (b'AUTOPILOT HEADING LOCK', b'Bool'))
+request_autopilot.add('AUTOPILOT_HEADING_LOCK_DIR', (b'AUTOPILOT HEADING LOCK DIR', b'Degrees'))
+request_autopilot.add('AUTOPILOT_ALTITUDE_LOCK', (b'AUTOPILOT ALTITUDE LOCK', b'Bool'))
+request_autopilot.add('AUTOPILOT_ALTITUDE_LOCK_VAR', (b'AUTOPILOT ALTITUDE LOCK VAR', b'Feet'))
+request_autopilot.add('AUTOPILOT_ATTITUDE_HOLD', (b'AUTOPILOT ATTITUDE HOLD', b'Bool'))
+request_autopilot.add('AUTOPILOT_GLIDESLOPE_HOLD', (b'AUTOPILOT GLIDESLOPE HOLD', b'Bool'))
+request_autopilot.add('AUTOPILOT_PITCH_HOLD_REF', (b'AUTOPILOT PITCH HOLD REF', b'Radians'))
+request_autopilot.add('AUTOPILOT_APPROACH_HOLD', (b'AUTOPILOT APPROACH HOLD', b'Bool'))
+request_autopilot.add('AUTOPILOT_BACKCOURSE_HOLD', (b'AUTOPILOT BACKCOURSE HOLD', b'Bool'))
+request_autopilot.add('AUTOPILOT_VERTICAL_HOLD_VAR', (b'AUTOPILOT VERTICAL HOLD VAR', b'Feet/minute'))
+request_autopilot.add('AUTOPILOT_PITCH_HOLD', (b'AUTOPILOT PITCH HOLD', b'Bool'))
+request_autopilot.add('AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE', (b'AUTOPILOT FLIGHT DIRECTOR ACTIVE', b'Bool'))
+request_autopilot.add('AUTOPILOT_AIRSPEED_HOLD', (b'AUTOPILOT AIRSPEED HOLD', b'Bool'))
+request_autopilot.add('AUTOPILOT_AIRSPEED_HOLD_VAR', (b'AUTOPILOT AIRSPEED HOLD VAR', b'Knots'))
+
 request_location = sm.new_request()
 request_location.add('Altitude', (b'Plane Altitude', b'feet'))
 request_location.add('Latitude', (b'Plane Latitude', b'degrees'))
@@ -211,9 +241,7 @@ request_autopilot.add('FLY_BY_WIRE_FAC_FAILED', (b'FLY BY WIRE FAC FAILED', b'Bo
 request_autopilot.add('FLY_BY_WIRE_SEC_FAILED', (b'FLY BY WIRE SEC FAILED', b'Bool'))
 
 
-@app.route('/data/<data_type>')
-def old_json(data_type):
-
+def get_data(data_type):
     if data_type == "navigation": request_to_action = request_location
     if data_type == "airspeed": request_to_action = request_airspeed
     if data_type == "compass": request_to_action = request_compass
@@ -224,8 +252,7 @@ def old_json(data_type):
     if data_type == "gear": request_to_action = request_gear
     if data_type == "trim": request_to_action = request_trim
     if data_type == "autopilot": request_to_action = request_autopilot
-    
-    if data_type == "all": request_to_action = request_location + request_compass
+    if data_type == "ui": request_to_action = request_ui
 
     attempts = 0
     data = None
@@ -246,6 +273,13 @@ def old_json(data_type):
             "Status": "success"
         }
         data_dictionary.update(data)
+    return data_dictionary
+
+
+@app.route('/data/<data_type>')
+def output_detailed_json_data(data_type):
+
+    data_dictionary = get_data(data_type)
     return jsonify(data_dictionary)
 
 

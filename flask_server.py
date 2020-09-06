@@ -282,9 +282,9 @@ def output_ui_variables():
     # calculate fuel percentage
     fuel_quantity = data_dictionary.get("FUEL_TOTAL_QUANTITY")
     fuel_capacity = data.dictionary.get("FUEL_TOTAL_CAPACITY")
-    fuel_percantage = fuel quantity / fuel_capacity
+    fuel_percentage = fuel_quantity / fuel_capacity
 
-    data_dictionary["FUEL_PERCENTAGE"] = fuel_percantage
+    data_dictionary["FUEL_PERCENTAGE"] = fuel_percentage
     return jsonify(data_dictionary)
 
 

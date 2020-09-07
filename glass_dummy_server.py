@@ -22,7 +22,7 @@ def ajax_test():
     return render_template("ajaxtest3.html")
 
 
-@app.route ('/glass')
+@app.route ('/')
 def glass():
     return render_template("glass.html")
 

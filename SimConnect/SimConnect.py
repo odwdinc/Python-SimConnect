@@ -33,6 +33,7 @@ class Request(object):
 	@property
 	def value(self):
 		if (self.LastData + self.time) < millis():
+			# LOGGER.info("get Request:" + str(self.definitions[0]))
 			self.sm.get_data(self)
 			self.LastData = millis()
 		return self.outData[self.name]
@@ -52,7 +53,7 @@ class Request(object):
 		self.outData = {}
 		self.sm = _sm
 		self.time = _time
-		self.LastData = millis() - self.time
+		self.LastData = 0
 		self.outData[self.name] = len(self.outData)
 		_sm.out_data[self.DATA_REQUEST_ID] = None
 		_sm.Requests.append(self)
@@ -66,6 +67,21 @@ class Request(object):
 			SIMCONNECT_UNUSED,
 		)
 
+
+class requestHolder:
+	def __init__(self, _sm, _time=2000):
+		self._sm = _sm
+		self._time = _time
+
+	def add(self, name, _deff):
+		setattr(
+			self,
+			name,
+			Request(_deff, self._sm, self._time)
+		)
+
+	def get(self, _name):
+		return getattr(self, _name).value
 
 class SimConnect:
 
@@ -219,3 +235,6 @@ class SimConnect:
 		REQUEST_ID = list(self.dll.DATA_REQUEST_ID)[-1]
 
 		return (DEFINITION_ID, REQUEST_ID)
+
+	def new_request_holder(self, _time=2000):
+		return requestHolder(self, _time)

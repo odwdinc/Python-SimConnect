@@ -10,7 +10,7 @@ app = Flask(__name__)
 sm = SimConnect()
 
 # create Request
-request_ui = sm.new_request()
+request_ui = sm.new_request_holder()
 request_ui.add('ALTITUDE', (b'PLANE ALTITUDE', b'feet'))
 request_ui.add('LATITUDE', (b'PLANE LATITUDE', b'degrees'))
 request_ui.add('LONGITUDE', (b'PLANE LONGITUDE', b'degrees'))
@@ -40,20 +40,20 @@ request_ui.add('AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE', (b'AUTOPILOT FLIGHT DIRECTOR 
 request_ui.add('AUTOPILOT_AIRSPEED_HOLD', (b'AUTOPILOT AIRSPEED HOLD', b'Bool'))
 request_ui.add('AUTOPILOT_AIRSPEED_HOLD_VAR', (b'AUTOPILOT AIRSPEED HOLD VAR', b'Knots'))
 
-request_location = sm.new_request()
+request_location = sm.new_request_holder()
 request_location.add('ALTITUDE', (b'PLANE ALTITUDE', b'feet'))
 request_location.add('LATITUDE', (b'PLANE LATITUDE', b'degrees'))
 request_location.add('LONGITUDE', (b'PLANE LONGITUDE', b'degrees'))
 request_location.add('KOHLSMAN', (b'KOHLSMAN SETTING HG', b'inHg'))
 
-request_airspeed = sm.new_request()
+request_airspeed = sm.new_request_holder()
 request_airspeed.add('AIRSPEED_TRUE', (b'AIRSPEED TRUE', b'Knots'))
 request_airspeed.add('AIRSPEED_INDICATE', (b'AIRSPEED INDICATED', b'Knots'))
 request_airspeed.add('AIRSPEED_TRUE CALIBRATE', (b'AIRSPEED TRUE CALIBRATE', b'Degrees'))
 request_airspeed.add('AIRSPEED_BARBER POLE', (b'AIRSPEED BARBER POLE', b'Knots'))
 request_airspeed.add('AIRSPEED_MACH', (b'AIRSPEED MACH', b'Mach'))
 
-request_compass = sm.new_request()
+request_compass = sm.new_request_holder()
 request_compass.add('WISKEY_COMPASS_INDICATION_DEGREES', (b'WISKEY COMPASS INDICATION DEGREES', b'Degrees'))
 request_compass.add('PARTIAL_PANEL_COMPASS', (b'PARTIAL PANEL COMPASS', b'Enum'))  # Gauge fail flag (0 = ok, 1 = fail, 2 = blank)
 request_compass.add('ADF_CARD', (b'ADF CARD', b'Degrees'))  # ADF compass rose setting
@@ -61,13 +61,13 @@ request_compass.add('MAGNETIC_COMPASS', (b'MAGNETIC COMPASS', b'Degrees'))  # Co
 request_compass.add('INDUCTOR_COMPASS_PERCENT_DEVIATION', (b'INDUCTOR COMPASS PERCENT DEVIATION', b'Percent over 100'))  # Inductor compass deviation reading
 request_compass.add('INDUCTOR_COMPASS_HEADING_REF', (b'INDUCTOR COMPASS HEADING REF', b'Radians'))  # Inductor compass heading
 
-request_vertical_speed = sm.new_request()
+request_vertical_speed = sm.new_request_holder()
 request_vertical_speed.add('VELOCITY_BODY_Y', (b'VELOCITY BODY Y', b'Feet per second'))  # True vertical speed, relative to aircraft axis
 request_vertical_speed.add('RELATIVE_WIND_VELOCITY_BODY_Y', (b'RELATIVE WIND VELOCITY BODY Y', b'Feet per second'))  # Vertical speed relative to wind
 request_vertical_speed.add('VERTICAL_SPEED', (b'VERTICAL SPEED', b'Feet per second'))  # Vertical speed indication
 request_vertical_speed.add('GPS_WP_VERTICAL_SPEED', (b'GPS WP VERTICAL SPEED', b'Meters per second'))  # Vertical speed to waypoint
 
-request_fuel = sm.new_request()
+request_fuel = sm.new_request_holder()
 request_fuel.add('FUEL_TANK_CENTER_LEVEL', (b'FUEL TANK CENTER LEVEL', b'Percent Over 100'))  # Percent of maximum capacity
 request_fuel.add('FUEL_TANK_CENTER2_LEVEL', (b'FUEL TANK CENTER2 LEVEL', b'Percent Over 100'))  # Percent of maximum capacity
 request_fuel.add('FUEL_TANK_CENTER3_LEVEL', (b'FUEL TANK CENTER3 LEVEL', b'Percent Over 100'))  # Percent of maximum capacity
@@ -115,7 +115,7 @@ request_fuel.add('NUM_FUEL_SELECTORS', (b'NUM FUEL SELECTORS', b'Number'))  # Nu
 request_fuel.add('UNLIMITED_FUEL', (b'UNLIMITED FUEL', b'Bool'))  # Unlimited fuel flag
 request_fuel.add('ESTIMATED_FUEL_FLOW', (b'ESTIMATED FUEL FLOW', b'Pounds per hour'))  # Estimated fuel flow at cruise
 
-request_flaps = sm.new_request()
+request_flaps = sm.new_request_holder()
 request_flaps.add('FLAPS_HANDLE_PERCENT', (b'FLAPS HANDLE PERCENT', b'Percent Over 100'))  # Percent flap handle extended
 request_flaps.add('FLAPS_HANDLE_INDEX', (b'FLAPS HANDLE INDEX', b'Number'))  # Index of current flap position
 request_flaps.add('FLAPS_NUM_HANDLE_POSITIONS', (b'FLAPS NUM HANDLE POSITIONS', b'Number'))  # Number of flap positions
@@ -131,7 +131,7 @@ request_flaps.add('FLAPS_AVAILABLE', (b'FLAPS AVAILABLE', b'Bool'))  # True if f
 request_flaps.add('FLAP_DAMAGE_BY_SPEED', (b'FLAP DAMAGE BY SPEED', b'Bool'))  # True if flagps are damaged by excessive speed
 request_flaps.add('FLAP_SPEED_EXCEEDED', (b'FLAP SPEED EXCEEDED', b'Bool'))  # True if safe speed limit for flaps exceeded
 
-request_throttle = sm.new_request()
+request_throttle = sm.new_request_holder()
 request_throttle.add('AUTOPILOT_THROTTLE_ARM', (b'AUTOPILOT THROTTLE ARM', b'Bool'))  # Autothrottle armed
 request_throttle.add('AUTOPILOT_TAKEOFF_POWER_ACTIVE', (b'AUTOPILOT TAKEOFF POWER ACTIVE', b'Bool'))  # Takeoff / Go Around power mode active
 request_throttle.add('AUTOTHROTTLE_ACTIVE', (b'AUTOTHROTTLE ACTIVE', b'Bool'))  # Auto-throttle active
@@ -142,7 +142,7 @@ request_throttle.add('AUTOPILOT_THROTTLE_ARM', (b'AUTOPILOT THROTTLE ARM', b'Boo
 request_throttle.add('AUTOTHROTTLE_ACTIVE', (b'AUTOTHROTTLE ACTIVE', b'Bool'))  # Auto-throttle active
 request_throttle.add('FULL_THROTTLE_THRUST_TO_WEIGHT_RATIO', (b'FULL THROTTLE THRUST TO WEIGHT RATIO', b'Number'))  # Full throttle thrust to weight ratio
 
-request_gear = sm.new_request()
+request_gear = sm.new_request_holder()
 request_gear.add('IS_GEAR_RETRACTABLE', (b'IS GEAR RETRACTABLE', b'Bool'))  # True if gear can be retracted
 request_gear.add('IS_GEAR_SKIS', (b'IS GEAR SKIS', b'Bool'))  # True if landing gear is skis
 request_gear.add('IS_GEAR_FLOATS', (b'IS GEAR FLOATS', b'Bool'))  # True if landing gear is floats
@@ -191,7 +191,7 @@ request_gear.add('GEAR_DAMAGE_BY_SPEED', (b'GEAR DAMAGE BY SPEED', b'Bool'))  # 
 request_gear.add('GEAR_SPEED_EXCEEDED', (b'GEAR SPEED EXCEEDED', b'Bool'))  # True if safe speed limit for gear exceeded
 request_gear.add('NOSEWHEEL_LOCK_ON', (b'NOSEWHEEL LOCK ON', b'Bool'))  # True if the nosewheel lock is engaged.
 
-request_trim = sm.new_request()
+request_trim = sm.new_request_holder()
 request_trim.add('ROTOR_LATERAL_TRIM_PCT', (b'ROTOR LATERAL TRIM PCT', b'Percent Over 100'))  # Trim percent
 request_trim.add('ELEVATOR_TRIM_POSITION', (b'ELEVATOR TRIM POSITION', b'Radians'))  # Elevator trim deflection
 request_trim.add('ELEVATOR_TRIM_INDICATOR', (b'ELEVATOR TRIM INDICATOR', b'Position (-16K to 0) -16K = full down'))  # Percent elevator trim (for indication)
@@ -201,7 +201,7 @@ request_trim.add('AILERON_TRIM_PCT', (b'AILERON TRIM PCT', b'Float. Percent over
 request_trim.add('RUDDER_TRIM_PCT', (b'RUDDER TRIM PCT', b'Float. Percent over 100'))  # The trim position of the rudder. Zero is no trim.
 request_trim.add('RUDDER_TRIM', (b'RUDDER TRIM', b'Radians'))  # Angle deflection
 
-request_autopilot = sm.new_request()
+request_autopilot = sm.new_request_holder()
 request_autopilot.add('AUTOPILOT_MASTER', (b'AUTOPILOT MASTER', b'Bool'))
 request_autopilot.add('AUTOPILOT_AVAILABLE', (b'AUTOPILOT AVAILABLE', b'Bool'))
 request_autopilot.add('AUTOPILOT_NAV_SELECTED', (b'AUTOPILOT NAV SELECTED', b'Number'))
@@ -245,7 +245,7 @@ def thousandify(x):
     return f"{x:,}"
 
 
-@app.route ('/')
+@app.route('/')
 def glass():
     return render_template("glass.html")
 
@@ -263,25 +263,7 @@ def get_data(data_type):
     if data_type == "autopilot": request_to_action = request_autopilot
     if data_type == "ui": request_to_action = request_ui
 
-    attempts = 0
-    data = None
-    sm.request_data(request_to_action)
-    while data is None and attempts < 20:
-        sm.run()
-        if sm.get_data(request_to_action):
-            sleep(0.5)
-        attempts = attempts + 1
-
-    if request_to_action.outData is None:
-        data_dictionary = {
-            "STATUS": "failed to access simulator despite repeated attempts"
-        }
-    else:
-        data_dictionary = {
-            "STATUS": "success"
-        }
-        data_dictionary.update(request_to_action.outData)
-    return data_dictionary
+    return request_to_action
 
 
 @app.route('/ui')
@@ -289,47 +271,44 @@ def output_ui_variables():
     data_dictionary = get_data("ui")
 
     ui_friendly_dictionary = {}
-    if data_dictionary.get("STATUS") != "success":
-        ui_friendly_dictionary["STATUS"] = data_dictionary.get("STATUS")
+    ui_friendly_dictionary["STATUS"] = "success"
+
+    fuel_percentage = (data_dictionary.get("FUEL_TOTAL_QUANTITY") / data_dictionary.get("FUEL_TOTAL_CAPACITY")) * 100
+    ui_friendly_dictionary["FUEL_PERCENTAGE"] = round(fuel_percentage)
+    ui_friendly_dictionary["AIRSPEED_INDICATE"] = round(data_dictionary.get("AIRSPEED_INDICATE"))
+    ui_friendly_dictionary["ALTITUDE"] = thousandify(round(data_dictionary.get("ALTITUDE")))
+    ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(data_dictionary.get("FLAPS_HANDLE_PERCENT")*100)
+
+    if data_dictionary.get("GEAR_HANDLE_POSITION") == 1:
+        ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "Down"
     else:
-        ui_friendly_dictionary["STATUS"] = "success"
+        ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "Up"
 
-        fuel_percentage = (data_dictionary.get("FUEL_TOTAL_QUANTITY") / data_dictionary.get("FUEL_TOTAL_CAPACITY")) * 100
-        ui_friendly_dictionary["FUEL_PERCENTAGE"] = round(fuel_percentage)
-        ui_friendly_dictionary["AIRSPEED_INDICATE"] = round(data_dictionary.get("AIRSPEED_INDICATE"))
-        ui_friendly_dictionary["ALTITUDE"] = thousandify(round(data_dictionary.get("ALTITUDE")))
-        ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(data_dictionary["FLAPS_HANDLE_PERCENT"]*100)
+    ui_friendly_dictionary["LATITUDE"] = data_dictionary.get("LATITUDE")
+    ui_friendly_dictionary["LONGITUDE"] = data_dictionary.get("LONGITUDE")
 
-        if data_dictionary["GEAR_HANDLE_POSITION"] == 1:
-            ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "Down"
-        else:
-            ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "Up"
-
-        ui_friendly_dictionary["LATITUDE"] = data_dictionary.get("LATITUDE")
-        ui_friendly_dictionary["LONGITUDE"] = data_dictionary.get("LONGITUDE")
-
-        ui_friendly_dictionary["MAGNETIC_COMPASS"] = round(data_dictionary.get("MAGNETIC_COMPASS"))
-        ui_friendly_dictionary["VERTICAL_SPEED"] = round(data_dictionary.get("VERTICAL_SPEED"))
+    ui_friendly_dictionary["MAGNETIC_COMPASS"] = round(data_dictionary.get("MAGNETIC_COMPASS"))
+    ui_friendly_dictionary["VERTICAL_SPEED"] = round(data_dictionary.get("VERTICAL_SPEED"))
 
 
-        ui_friendly_dictionary["AUTOPILOT_MASTER"] = data_dictionary.get("AUTOPILOT_MASTER")
-        ui_friendly_dictionary["AUTOPILOT_NAV_SELECTED"] = data_dictionary.get("AUTOPILOT_NAV_SELECTED")
-        ui_friendly_dictionary["AUTOPILOT_WING_LEVELER"] = data_dictionary.get("AUTOPILOT_WING_LEVELER")
-        ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK"] = data_dictionary.get("AUTOPILOT_HEADING_LOCK")
-        ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK_DIR"] = data_dictionary.get("AUTOPILOT_HEADING_LOCK_DIR")
-        ui_friendly_dictionary["AUTOPILOT_ALTITUDE_LOCK"] = data_dictionary.get("AUTOPILOT_ALTITUDE_LOCK")
-        ui_friendly_dictionary["AUTOPILOT_ALTITUDE_LOCK_VAR"] = data_dictionary.get("AUTOPILOT_ALTITUDE_LOCK_VAR")
-        ui_friendly_dictionary["AUTOPILOT_ATTITUDE_HOLD"] = data_dictionary.get("AUTOPILOT_ATTITUDE_HOLD")
-        ui_friendly_dictionary["AUTOPILOT_GLIDESLOPE_HOLD"] = data_dictionary.get("AUTOPILOT_GLIDESLOPE_HOLD")
-        ui_friendly_dictionary["AUTOPILOT_PITCH_HOLD_REF"] = data_dictionary.get("AUTOPILOT_PITCH_HOLD_REF")
-        ui_friendly_dictionary["AUTOPILOT_APPROACH_HOLD"] = data_dictionary.get("AUTOPILOT_APPROACH_HOLD")
-        ui_friendly_dictionary["AUTOPILOT_BACKCOURSE_HOLD"] = data_dictionary.get("AUTOPILOT_BACKCOURSE_HOLD")
-        ui_friendly_dictionary["AUTOPILOT_VERTICAL_HOLD"] = data_dictionary.get("AUTOPILOT_VERTICAL_HOLD")
-        ui_friendly_dictionary["AUTOPILOT_VERTICAL_HOLD_VAR"] = data_dictionary.get("AUTOPILOT_VERTICAL_HOLD_VAR")
-        ui_friendly_dictionary["AUTOPILOT_PITCH_HOLD"] = data_dictionary.get("AUTOPILOT_PITCH_HOLD")
-        ui_friendly_dictionary["AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE"] = data_dictionary.get("AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE")
-        ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD"] = data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD")
-        ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD_VAR"] = data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD_VAR")
+    ui_friendly_dictionary["AUTOPILOT_MASTER"] = data_dictionary.get("AUTOPILOT_MASTER")
+    ui_friendly_dictionary["AUTOPILOT_NAV_SELECTED"] = data_dictionary.get("AUTOPILOT_NAV_SELECTED")
+    ui_friendly_dictionary["AUTOPILOT_WING_LEVELER"] = data_dictionary.get("AUTOPILOT_WING_LEVELER")
+    ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK"] = data_dictionary.get("AUTOPILOT_HEADING_LOCK")
+    ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK_DIR"] = data_dictionary.get("AUTOPILOT_HEADING_LOCK_DIR")
+    ui_friendly_dictionary["AUTOPILOT_ALTITUDE_LOCK"] = data_dictionary.get("AUTOPILOT_ALTITUDE_LOCK")
+    ui_friendly_dictionary["AUTOPILOT_ALTITUDE_LOCK_VAR"] = data_dictionary.get("AUTOPILOT_ALTITUDE_LOCK_VAR")
+    ui_friendly_dictionary["AUTOPILOT_ATTITUDE_HOLD"] = data_dictionary.get("AUTOPILOT_ATTITUDE_HOLD")
+    ui_friendly_dictionary["AUTOPILOT_GLIDESLOPE_HOLD"] = data_dictionary.get("AUTOPILOT_GLIDESLOPE_HOLD")
+    ui_friendly_dictionary["AUTOPILOT_PITCH_HOLD_REF"] = data_dictionary.get("AUTOPILOT_PITCH_HOLD_REF")
+    ui_friendly_dictionary["AUTOPILOT_APPROACH_HOLD"] = data_dictionary.get("AUTOPILOT_APPROACH_HOLD")
+    ui_friendly_dictionary["AUTOPILOT_BACKCOURSE_HOLD"] = data_dictionary.get("AUTOPILOT_BACKCOURSE_HOLD")
+    ui_friendly_dictionary["AUTOPILOT_VERTICAL_HOLD"] = data_dictionary.get("AUTOPILOT_VERTICAL_HOLD")
+    ui_friendly_dictionary["AUTOPILOT_VERTICAL_HOLD_VAR"] = data_dictionary.get("AUTOPILOT_VERTICAL_HOLD_VAR")
+    ui_friendly_dictionary["AUTOPILOT_PITCH_HOLD"] = data_dictionary.get("AUTOPILOT_PITCH_HOLD")
+    ui_friendly_dictionary["AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE"] = data_dictionary.get("AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE")
+    ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD"] = data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD")
+    ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD_VAR"] = data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD_VAR")
 
     return jsonify(ui_friendly_dictionary)
 

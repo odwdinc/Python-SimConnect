@@ -317,7 +317,7 @@ def output_ui_variables():
 def output_detailed_json_data(data_type):
 
     data_dictionary = get_data(data_type)
-    return jsonify(data_dictionary)
+    return jsonify(data_dictionary.json())
 
 
 app.run(host='0.0.0.0', port=5000, debug=True)

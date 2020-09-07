@@ -32,8 +32,8 @@ class Request(object):
 
 	@property
 	def value(self):
+		self.sm.run()
 		if (self.LastData + self.time) < millis():
-			# LOGGER.info("get Request:" + str(self.definitions[0]))
 			self.sm.get_data(self)
 			self.LastData = millis()
 		return self.outData[self.name]
@@ -42,6 +42,7 @@ class Request(object):
 	def value(self, val):
 		self.outData[self.name] = val
 		self.sm.set_data(self)
+		self.sm.run()
 
 	def __init__(self, _deff, _sm, _time=2000):
 		(_DATA_DEFINITION_ID, _DATA_REQUEST_ID) = _sm.new_request_id()
@@ -72,8 +73,16 @@ class requestHolder:
 	def __init__(self, _sm, _time=2000):
 		self._sm = _sm
 		self._time = _time
+		self.dic = []
+
+	def json(self):
+		map = {}
+		for att in self.dic:
+			map[att] = self.get(att)
+		return map
 
 	def add(self, name, _deff):
+		self.dic.append(name)
 		setattr(
 			self,
 			name,
@@ -82,6 +91,11 @@ class requestHolder:
 
 	def get(self, _name):
 		return getattr(self, _name).value
+
+	def set(self, _name, _value):
+		temp = getattr(self, _name)
+		setattr(temp, "value", _value)
+
 
 class SimConnect:
 
@@ -107,6 +121,7 @@ class SimConnect:
 					).contents
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
 			LOGGER.info("SIM OPEN")
+			self.ok = True
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EXCEPTION:
 			LOGGER.warn("ID EXCEPTION")
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_QUIT:
@@ -122,6 +137,7 @@ class SimConnect:
 		self.dll = SimConnectDll(library_path)
 		self.hSimConnect = HANDLE()
 		self.quit = 0
+		self.ok = False
 		self.my_dispatch_proc_rd = self.dll.DispatchProc(self.my_dispatch_proc)
 		if auto_connect:
 			self.connect()
@@ -138,6 +154,8 @@ class SimConnect:
 				self.dll.SubscribeToSystemEvent(
 					self.hSimConnect, self.dll.EventID.EVENT_SIM_START, b"SimStart"
 				)
+				while self.ok is False:
+					self.run()
 		except OSError:
 			LOGGER.debug("Did not find Flight Simulator running.")
 			exit(0)
@@ -186,7 +204,7 @@ class SimConnect:
 		pObjData = cast(
 			dataarray, c_void_p
 		)
-		self.dll.SetDataOnSimObject(
+		err = self.dll.SetDataOnSimObject(
 			self.hSimConnect,
 			_Request.DATA_DEFINITION_ID.value,
 			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER,
@@ -195,6 +213,11 @@ class SimConnect:
 			sizeof(ctypes.c_double) * len(pyarr),
 			pObjData
 		)
+		if IsHR(err, 0):
+			# LOGGER.debug("Request Sent")
+			return True
+		else:
+			return False
 
 	def get_data(self, _Request):
 		self.request_data(_Request)
@@ -219,7 +242,7 @@ class SimConnect:
 			DWORD(16),
 		)
 		if IsHR(err, 0):
-			LOGGER.debug("Event Sent")
+			# LOGGER.debug("Event Sent")
 			return True
 		else:
 			return False

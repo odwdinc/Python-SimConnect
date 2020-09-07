@@ -63,3 +63,4 @@ SIMCONNECT_CLIENTDATAOFFSET_AUTO = DWORD(
 SIMCONNECT_OPEN_CONFIGINDEX_LOCAL = DWORD(
 	-1
 )  # ignore SimConnect.cfg settings, and force local connection
+SIMCONNECT_OBJECT_ID = DWORD

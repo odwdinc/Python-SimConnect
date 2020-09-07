@@ -18,8 +18,6 @@
 	<script src="/static/vendor/leaflet.rainviewer.js"></script>
 	<link rel="stylesheet" href="/static/vendor/leaflet.rainviewer.css">
 
-	<script src="/static/vendor/leaflet.toolbar.js"></script>
-
 	<!-- Fontawesome JS-->
 	<script src="https://kit.fontawesome.com/99043d701d.js" crossorigin="anonymous"></script>
 
@@ -34,16 +32,29 @@
         $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
 	</script>
 
+	<style>
+		html, body {
+			height: 100vh;
+			margin: 0;
+			padding: 0;
+		}
+		body {
+			display: flex;
+			flex-direction: column;
+		}
+	</style>
 </head>
 
 <body>
 
-	<div class="container-fluid p-0" style="position: absolute; top: 0; bottom: 0; width: 100%;">  <!--Main container-->
+	<div class="container-fluid p-0 h-100" style="height: 100%; width: 100%;">  <!--Main container-->
 
 		<nav class="navbar navbar-expand-md navbar-dark bg-dark">
 			<div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
 				<ul class="navbar-nav mr-auto">
-
+					<button id=followModeButton class="btn btn-primary btn-sm" type="button" onclick="toggleFollowPlane()">
+						<i class="fas fa-location-arrow"></i> <span id=followMode>Moving map enabled</span>
+					</button>
 				</ul>
 			</div>
 			<div class="mx-auto order-0">
@@ -74,9 +85,9 @@
 		</nav>
 
 
-		<div class="row p-2 h-100">
+		<div class="row p-2" style="height: 100%">
 			<div class="col-sm-8 no-gutters collapse show p-0" style="background-color: grey;" id="map_column" style="position: relative; height=100%;">
-				<div id = "map" style = "position: absolute; top: 0; bottom: 0; width: 100%;"></div>
+				<div id = "map" style = "height: 100%; width: 100%;"></div>
 			</div>
 
 			<div class="col collapse show" id="hud_column">
@@ -294,7 +305,7 @@
 
         // Adding rainviewer
         var rainviewer = L.control.rainviewer({
-            position: 'bottomleft',
+            position: 'topleft',
             nextButtonText: '>',
             playStopButtonText: 'Start/Stop',
             prevButtonText: '<',
@@ -304,26 +315,6 @@
             opacity: 0.5
         });
         rainviewer.addTo(map);
-
-		//Adding toolbar
-        var MyCustomAction = L.ToolbarAction.extend({
-
-            options: {
-                toolbarIcon: {
-                    html: '&#9873;',
-                    tooltip: 'Go to the Eiffel Tower'
-                }
-            },
-
-            addHooks: function () {
-                map.setView([48.85815, 2.29420], 19);
-            }
-
-        });
-
-        new L.Toolbar.Control({
-            actions: [MyCustomAction]
-        }).addTo(map);
 
 	</script>
 

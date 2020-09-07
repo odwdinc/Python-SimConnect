@@ -92,6 +92,14 @@ function displayData() {
 
 function toggleFollowPlane() {
     followPlane = !followPlane;
+    if (followPlane === true) {
+        $("#followMode").text("Moving map enabled")
+        $("#followModeButton").removeClass("btn-outline-danger").addClass("btn-primary")
+    }
+    if (followPlane === false) {
+        $("#followMode").text("Moving map disabled")
+        $("#followModeButton").removeClass("btn-primary").addClass("btn-outline-danger")
+    }
 }
 
 function updateMap() {

@@ -25,7 +25,7 @@ class Event(object):
 			self.event = self.sm.map_to_sim_event(self.deff)
 		self.sm.send_event(self.event, DWORD(value))
 
-	def __init__(self, _deff, _sm, _dec):
+	def __init__(self, _deff, _sm, _dec=''):
 		self.deff = _deff
 		self.event = None
 		self.description = _dec

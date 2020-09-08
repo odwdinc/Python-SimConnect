@@ -31,7 +31,7 @@ window.setInterval(function(){
     getSimulatorData();
     displayData()
     updateMap()
-}, 1000);
+}, 2000);
 
 
 function getSimulatorData() {

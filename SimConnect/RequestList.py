@@ -6,6 +6,21 @@ class AircraftRequests():
 	# if Request.defined is false there was
 	# errors with the Request definition.
 	# Request.description hold a small dec of the Request
+	def _find(self, key):
+		for requ in list(self.__dict__):
+			rq_holder = getattr(self, requ)
+			for rq in rq_holder.dic:
+				if key in rq:
+					return rq_holder
+
+	def get(self, key):
+		event = self._find(key)
+		if event is None:
+			return None
+		return event.get(key)
+
+	def set(self, key, _value):
+		return self._find(key).set(key, _value)
 
 	def getall(self):
 		for requ in list(self.__dict__):

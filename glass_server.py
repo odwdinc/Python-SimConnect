@@ -319,8 +319,21 @@ def output_detailed_json_data(dataset_name):
     return jsonify(data_dictionary.json())
 
 
+# NOT WORKING
+@app.route('/datapoint/<datapoint_name>/get')
+def get_datapoint_endpoint(datapoint_name):
+    sm = SimConnect()
+
+    request_set = sm.new_request_holder()
+    request_set.add('thr', (b'GENERAL ENG THROTTLE LEVER POSITION:1', b'Percent'))
+
+    print(request_ui.get("thr"))
+
+    return
+
+
 @app.route('/datapoint/<datapoint_name>/set', methods=["POST"])
-def set_datapoint(datapoint_name):
+def set_datapoint_endpoint(datapoint_name):
 
     value_to_use = request.form.get('value_to_use')
 

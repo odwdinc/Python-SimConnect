@@ -7,34 +7,42 @@ from time import sleep
 logging.basicConfig(level=logging.DEBUG)
 LOGGER = logging.getLogger(__name__)
 LOGGER.info("START")
-
+# time holder for inline commands
+ct_g = millis()
 
 # creat simconnection and pass used user classes
 sm = SimConnect()
 
+ae = AircraftEvents(sm)
+# PARKING_BRAKES = Event(b'PARKING_BRAKES', sm)
+# long path
+PARKING_BRAKES = ae.Miscellaneous_Systems.PARKING_BRAKES
+# using get
+GEAR_TOGGLE = ae.Miscellaneous_Systems.get("GEAR_TOGGLE")
+# Using find to lookup Event 
+# Note at this time find is limmed to AircraftEvents
+AP_MASTER = ae.find("AP_MASTER")
+
+# THROTTLE1 Event
+THROTTLE1 = ae.Engine.THROTTLE1_SET
+
+
 aq = AircraftRequests(sm)
-# aq.getall()
-
-# Throttle = Request((b'GENERAL ENG THROTTLE LEVER POSITION:1', b'Percent'), sm, _time=500)
+# THROTTLE1 Request
 Throttle = aq.Engine.obj('GENERAL_ENG_THROTTLE_LEVER_POSITION:index')
-
-print(Throttle.value)
-Throttle.setIndex(0)
-print(Throttle.value)
+# Need to set index befor read/write
+# Note to set index 2 vs 1 just re-run
 Throttle.setIndex(1)
-print(Throttle.value)
 
 
-PARKING_BRAKES = Event(b'PARKING_BRAKES', sm)
-GEAR_DOWN = Event(b'GEAR_DOWN', sm)
-GEAR_UP = Event(b'GEAR_UP', sm)
-GEAR_TOGGLE = Event(b'GEAR_TOGGLE', sm)
-AP_MASTER = Event(b'AP_MASTER', sm)
-THROTTLE1_SET = Event(b'THROTTLE1_SET', sm)
+# print the built in description
+# AP_MASTER Toggles AP on/off
+print("AP_MASTER", AP_MASTER.description) 
+# Throttle Percent of max throttle position
+print("Throttle", Throttle.description)
+# THROTTLE1 Set throttle 1 exactly (0 to 16383)
+print("THROTTLE1", THROTTLE1.description)
 
-# time holder for inline commands
-ct_r2 = millis()
-ct_g = millis()
 
 while not sm.quit:
 	print("Throttle:", Throttle.value)
@@ -47,10 +55,10 @@ while not sm.quit:
 	sleep(2)
 
 	# Send Event with value
-	# THROTTLE1_SET(1500).
+	# THROTTLE1(1500)
 
-	# Send Event
-	# AP_MASTER()
+	# Send Event toggle AP_MASTER
+	AP_MASTER()
 
 	# send new data inine @ 5s
 	if ct_g + 5000 < millis():

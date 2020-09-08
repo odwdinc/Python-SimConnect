@@ -19,7 +19,7 @@ ae = AircraftEvents(sm)
 PARKING_BRAKES = ae.Miscellaneous_Systems.PARKING_BRAKES
 # using get
 GEAR_TOGGLE = ae.Miscellaneous_Systems.get("GEAR_TOGGLE")
-# Using find to lookup Event 
+# Using find to lookup Event
 # Note at this time find is limmed to AircraftEvents
 AP_MASTER = ae.find("AP_MASTER")
 
@@ -28,6 +28,7 @@ THROTTLE1 = ae.Engine.THROTTLE1_SET
 
 
 aq = AircraftRequests(sm)
+
 # THROTTLE1 Request
 Throttle = aq.Engine.obj('GENERAL_ENG_THROTTLE_LEVER_POSITION:index')
 # Need to set index befor read/write
@@ -46,7 +47,7 @@ print("THROTTLE1", THROTTLE1.description)
 
 while not sm.quit:
 	print("Throttle:", Throttle.value)
-	print("Lat=%f  Lon=%f  Alt=%f Kohlsman=%.2f" % (
+	print("Alt=%f Lat=%f Lon=%f Kohlsman=%.2f" % (
 		aq.Position_and_Speed.get('PLANE_ALTITUDE'),
 		aq.Position_and_Speed.get('PLANE_LATITUDE'),
 		aq.Position_and_Speed.get('PLANE_LONGITUDE'),

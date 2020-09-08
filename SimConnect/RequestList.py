@@ -1140,12 +1140,12 @@ class AircraftRequests():
 		)
 		self.Position_and_Speed.add(
 			'PLANE_LATITUDE',
-			(b'PLANE LATITUDE', b'Radians'),
+			(b'PLANE LATITUDE', b'Degrees'),
 			_dec='Latitude of aircraft, North is positive, South negative'
 		)
 		self.Position_and_Speed.add(
 			'PLANE_LONGITUDE',
-			(b'PLANE LONGITUDE', b'Radians'),
+			(b'PLANE LONGITUDE', b'Degrees'),
 			_dec='Longitude of aircraft, East is positive, West negative'
 		)
 		self.Position_and_Speed.add(
@@ -1297,7 +1297,7 @@ class AircraftRequests():
 		)
 		self.Flight_Instrumentation.add(
 			'VERTICAL_SPEED',
-			(b'VERTICAL SPEED', b'Feet per second'),
+			(b'VERTICAL SPEED', b'feet/minute'),
 			_dec='Vertical speed indication'
 		)
 		self.Flight_Instrumentation.add(

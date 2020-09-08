@@ -1170,3 +1170,39 @@ class AircraftEvents():
 			(b'MP_BROADCAST_VOICE_CAPTURE_STOP', "Stop capturing broadcast audio.", "Shared Cockpit"),
 			(b'TOGGLE_RACERESULTS_WINDOW', "Show or hide multi-player race results.", "Disabled"),
 		]
+
+	class __G1000_PFD(EventHelper):
+		list = [
+			(b'G1000_PFD_FLIGHTPLAN_BUTTON', "The primary flight display (PFD) should display its current flight plan.", "Shared Cockpit")
+			(b'G1000_PFD_PROCEDURE_BUTTON', "Turn to the Procedure page.", "Shared Cockpit")
+			(b'G1000_PFD_ZOOMIN_BUTTON', "Zoom in on the current map.", "Shared Cockpit")
+			(b'G1000_PFD_ZOOMOUT_BUTTON', "Zoom out on the current map.", "Shared Cockpit")
+			(b'G1000_PFD_DIRECTTO_BUTTON', "Turn to the Direct To page.", "Shared Cockpit")
+			(b'G1000_PFD_MENU_BUTTON', "If a segmented flight plan is highlighted, activates the associated menu.", "Shared Cockpit")
+			(b'G1000_PFD_CLEAR_BUTTON', "Clears the current input.", "Shared Cockpit")
+			(b'G1000_PFD_ENTER_BUTTON', "Enters the current input.", "Shared Cockpit")
+			(b'G1000_PFD_CURSOR_BUTTON', "Turns on or off a screen cursor.", "Shared Cockpit")
+			(b'G1000_PFD_GROUP_KNOB_INC', "Step up through the page groups.", "Shared Cockpit")
+			(b'G1000_PFD_GROUP_KNOB_DEC', "Step down through the page groups.", "Shared Cockpit")
+			(b'G1000_PFD_PAGE_KNOB_INC', "Step up through the individual pages.", "Shared Cockpit")
+			(b'G1000_PFD_PAGE_KNOB_DEC', "Step down through the individual pages.", "Shared Cockpit")
+		]
+		# G1000_PFD_SOFTKEY1, G1000_PFD_SOFTKEY12	Initiate the action for the icon displayed in the softkey position.	Shared Cockpit
+
+	class __G1000_MFD(EventHelper):
+		list = [
+			(b'G1000_MFD_FLIGHTPLAN_BUTTON', "The multifunction display (MFD) should display its current flight plan.", "Shared Cockpit")
+			(b'G1000_MFD_PROCEDURE_BUTTON', "Turn to the Procedure page.", "Shared Cockpit")
+			(b'G1000_MFD_ZOOMIN_BUTTON', "Zoom in on the current map.", "Shared Cockpit")
+			(b'G1000_MFD_ZOOMOUT_BUTTON', "Zoom out on the current map.", "Shared Cockpit")
+			(b'G1000_MFD_DIRECTTO_BUTTON', "Turn to the Direct To page.", "Shared Cockpit")
+			(b'G1000_MFD_MENU_BUTTON', "If a segmented flight plan is highlighted, activates the associated menu.", "Shared Cockpit")
+			(b'G1000_MFD_CLEAR_BUTTON', "Clears the current input.", "Shared Cockpit")
+			(b'G1000_MFD_ENTER_BUTTON', "Enters the current input.", "Shared Cockpit")
+			(b'G1000_MFD_CURSOR_BUTTON', "Turns on or off a screen cursor.", "Shared Cockpit")
+			(b'G1000_MFD_GROUP_KNOB_INC', "Step up through the page groups.", "Shared Cockpit")
+			(b'G1000_MFD_GROUP_KNOB_DEC', "Step down through the page groups.", "Shared Cockpit")
+			(b'G1000_MFD_PAGE_KNOB_INC', "Step up through the individual pages.", "Shared Cockpit")
+			(b'G1000_MFD_PAGE_KNOB_DEC', "Step down through the individual pages.", "Shared Cockpit")
+		]
+		# G1000_MFD_SOFTKEY1, G1000_MFD_SOFTKEY12	Initiate the action for the icon displayed in the softkey position.	Shared Cockpit

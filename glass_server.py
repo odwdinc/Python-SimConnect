@@ -8,6 +8,7 @@ app = Flask(__name__)
 
 # create simconnection
 sm = SimConnect()
+ae = AircraftEvents(sm)
 
 # create Request
 request_ui = sm.new_request_holder()
@@ -319,28 +320,22 @@ def output_detailed_json_data(dataset_name):
     return jsonify(data_dictionary.json())
 
 
-# NOT WORKING
 @app.route('/datapoint/<datapoint_name>/get')
 def get_datapoint_endpoint(datapoint_name):
-    sm = SimConnect()
-
-    request_set = sm.new_request_holder()
-    request_set.add('thr', (b'GENERAL ENG THROTTLE LEVER POSITION:1', b'Percent'))
-
-    print(request_ui.get("thr"))
-
-    return
+    data_dictionary = get_dataset("ui")
+    data_dictionary.get(datapoint_name)
+    return jsonify(data_dictionary.get(datapoint_name))
 
 
 @app.route('/datapoint/<datapoint_name>/set', methods=["POST"])
 def set_datapoint_endpoint(datapoint_name):
-
+    data_dictionary = get_dataset("ui")
     value_to_use = request.form.get('value_to_use')
 
     if value_to_use is None:
         print(datapoint_name + ": " + "No value passed")
     else:
-        print(datapoint_name + ": " + value_to_use)
+        data_dictionary.set(datapoint_name, int(value_to_use))
 
     status = "success"
     return jsonify(status)
@@ -351,17 +346,11 @@ def trigger_event(event_name):
 
     value_to_use = request.form.get('value_to_use')
 
-    event_name_bytes = bytes(event_name, encoding='utf-8')
-
-    sm = SimConnect()
-    EVENT_TO_TRIGGER = Event(event_name_bytes, sm)
-
+    EVENT_TO_TRIGGER = ae.find(event_name)
     if value_to_use is None:
         EVENT_TO_TRIGGER()
     else:
-        pass
-
-    sm.exit()
+        EVENT_TO_TRIGGER(value_to_use)
 
     status = "success"
     return jsonify(status)

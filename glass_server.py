@@ -280,16 +280,15 @@ def output_ui_variables():
     ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(data_dictionary.get("FLAPS_HANDLE_PERCENT")*100)
 
     if data_dictionary.get("GEAR_HANDLE_POSITION") == 1:
-        ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "Down"
+        ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "UP"
     else:
-        ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "Up"
+        ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "DOWN"
 
     ui_friendly_dictionary["LATITUDE"] = data_dictionary.get("LATITUDE")
     ui_friendly_dictionary["LONGITUDE"] = data_dictionary.get("LONGITUDE")
 
     ui_friendly_dictionary["MAGNETIC_COMPASS"] = round(data_dictionary.get("MAGNETIC_COMPASS"))
     ui_friendly_dictionary["VERTICAL_SPEED"] = round(data_dictionary.get("VERTICAL_SPEED"))
-
 
     ui_friendly_dictionary["AUTOPILOT_MASTER"] = data_dictionary.get("AUTOPILOT_MASTER")
     ui_friendly_dictionary["AUTOPILOT_NAV_SELECTED"] = data_dictionary.get("AUTOPILOT_NAV_SELECTED")
@@ -300,12 +299,12 @@ def output_ui_variables():
     ui_friendly_dictionary["AUTOPILOT_ALTITUDE_LOCK_VAR"] = data_dictionary.get("AUTOPILOT_ALTITUDE_LOCK_VAR")
     ui_friendly_dictionary["AUTOPILOT_ATTITUDE_HOLD"] = data_dictionary.get("AUTOPILOT_ATTITUDE_HOLD")
     ui_friendly_dictionary["AUTOPILOT_GLIDESLOPE_HOLD"] = data_dictionary.get("AUTOPILOT_GLIDESLOPE_HOLD")
-    ui_friendly_dictionary["AUTOPILOT_PITCH_HOLD_REF"] = data_dictionary.get("AUTOPILOT_PITCH_HOLD_REF")
     ui_friendly_dictionary["AUTOPILOT_APPROACH_HOLD"] = data_dictionary.get("AUTOPILOT_APPROACH_HOLD")
     ui_friendly_dictionary["AUTOPILOT_BACKCOURSE_HOLD"] = data_dictionary.get("AUTOPILOT_BACKCOURSE_HOLD")
     ui_friendly_dictionary["AUTOPILOT_VERTICAL_HOLD"] = data_dictionary.get("AUTOPILOT_VERTICAL_HOLD")
     ui_friendly_dictionary["AUTOPILOT_VERTICAL_HOLD_VAR"] = data_dictionary.get("AUTOPILOT_VERTICAL_HOLD_VAR")
     ui_friendly_dictionary["AUTOPILOT_PITCH_HOLD"] = data_dictionary.get("AUTOPILOT_PITCH_HOLD")
+    ui_friendly_dictionary["AUTOPILOT_PITCH_HOLD_REF"] = data_dictionary.get("AUTOPILOT_PITCH_HOLD_REF")
     ui_friendly_dictionary["AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE"] = data_dictionary.get("AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE")
     ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD"] = data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD")
     ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD_VAR"] = data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD_VAR")
@@ -313,11 +312,37 @@ def output_ui_variables():
     return jsonify(ui_friendly_dictionary)
 
 
-@app.route('/data/<data_type>/')
-def output_detailed_json_data(data_type):
+@app.route('/dataset/<dataset_name>/', methods=["GET"])
+def output_detailed_json_data(dataset_name):
 
-    data_dictionary = get_data(data_type)
+    data_dictionary = get_data(dataset_name)
     return jsonify(data_dictionary.json())
+
+
+@app.route('/datapoint/<datapoint_name>/set', methods=["POST"])
+def set_datapoint(datapoint_name):
+
+    value_to_use = request.form.get('value_to_use')
+
+    if value_to_use is None:
+        print(datapoint_name + ": " + "No value passed")
+    else:
+        print(datapoint_name + ": " + value_to_use)
+
+    status = "success"
+    return jsonify(status)
+
+
+@app.route('/event/<event_name>/trigger', methods=["POST"])
+def trigger_event(event_name):
+
+    sm = SimConnect()
+    EVENT_TO_TRIGGER = Event(b'AP_MASTER', sm)
+    EVENT_TO_TRIGGER()
+    sm.exit()
+
+    status = "success"
+    return jsonify(status)
 
 
 app.run(host='0.0.0.0', port=5000, debug=True)

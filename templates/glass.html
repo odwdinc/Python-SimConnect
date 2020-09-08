@@ -8,15 +8,15 @@
 	<!--	Bootstrap CSS-->
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 
+	<!--	Range Slider CSS-->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rangeslider.js/2.3.3/rangeslider.css" integrity="sha512-FkNnPJevAkIHB3NqUiMadWNcoMcOCPQUMyF55JeAFZmPcSR6wK6TgZ0qL6bMrRqGNaaVS8CAwBYceORhdTUILQ==" crossorigin="anonymous" />
+
 	<!-- Leaflet CSS and JS -->
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
 	<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
 	<script src="https://cdn.jsdelivr.net/npm/leaflet-rotatedmarker@0.2.0/leaflet.rotatedMarker.min.js"></script>
 	<script src="/static/vendor/leaflet-providers.js"></script>
 	<script src='https://unpkg.com/leaflet.marker.slideto@0.2.0/Leaflet.Marker.SlideTo.js'></script>
-
-	<script src="/static/vendor/leaflet.rainviewer.js"></script>
-	<link rel="stylesheet" href="/static/vendor/leaflet.rainviewer.css">
 
 	<!-- Fontawesome JS-->
 	<script src="https://kit.fontawesome.com/99043d701d.js" crossorigin="anonymous"></script>
@@ -42,6 +42,23 @@
 			display: flex;
 			flex-direction: column;
 		}
+		sim-input-field {
+			width: 175px;
+		}
+		.vertical-slider-wrapper {
+			display: inline-block;
+			width: 20px;
+			height: 150px;
+			padding: 0;
+		}
+		.vertical-slider-wrapper input {
+			width: 150px;
+			height: 20px;
+			margin: 0;
+			transform-origin: 75px 75px;
+			transform: rotate(-90deg);
+		}
+		}
 	</style>
 </head>
 
@@ -49,6 +66,7 @@
 
 	<div class="container-fluid p-0 h-100" style="height: 100%; width: 100%;">  <!--Main container-->
 
+		<!-- NAVBAR -->
 		<nav class="navbar navbar-expand-md navbar-dark bg-dark">
 			<div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
 				<ul class="navbar-nav mr-auto">
@@ -76,6 +94,11 @@
 						</button>
 					</li>
 					<li class="nav-item m-1">
+						<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseControlSurfaces" aria-expanded="true" aria-controls="collapseControlSurfaces">
+							<i class="fas fa-sliders-h"></i>
+						</button>
+					</li>
+					<li class="nav-item m-1">
 						<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseAutopilot" aria-expanded="true" aria-controls="collapseAutopilot">
 							<i class="fas fa-robot"></i>
 						</button>
@@ -91,7 +114,6 @@
 			</div>
 
 			<div class="col collapse show" id="hud_column">
-
 
 				<div class="accordion" id="accordionHUD">
 
@@ -144,12 +166,76 @@
 						<div id="collapseFuel" class="collapse" aria-labelledby="collapseFuel" data-parent="#accordionHUD">
 							<div class="card-body text-center">
 								<div class="row">
-									<div class="col">
+									<div class="col-12">
 										<div class="card bg-light mb-3">
 											<div class="card-body">
 												<h7 class="card-title">Fuel %</h7>
-												<div class="progress m-1" style="height: 20px;">
+												<div class="progress m-1" style="height: 25px;">
 													<div id="fuel-percentage-bar" class="progress-bar" style="width: 25%;" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"><span id=fuel-percentage></span></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- EMERGENCY -->
+					<div class="card">
+						<div id="collapseEmergency" class="collapse" aria-labelledby="collapseFuel" data-parent="#accordionHUD">
+							<div class="card-body text-center">
+								<div class="row">
+									<div class="col-12">
+										<div class="card bg-light mb-3">
+											<div class="card-body">
+												<button onclick="triggerSimEvent('GEAR_TOGGLE')" id="emergency-engine-fire" type="button" class="btn mt-3 btn-block btn-danger btn-lg">Engine Fire</button>
+
+
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- CONTROL SURFACES -->
+					<div class="card">
+						<div id="collapseControlSurfaces" class="collapse" aria-labelledby="collapseControlSurfaces" data-parent="#accordionHUD">
+							<div class="card-body text-center">
+								<div class="row">
+									<div class="col-12">
+										<div class="card bg-light mb-3">
+											<div class="card-body">
+												<h7 class="card-title">Landing gear</h7>
+												<button onclick="triggerSimEvent('GEAR_TOGGLE')" id="gear-handle-position" type="button" class="btn mt-3 btn-block btn-danger btn-lg">?</button>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="card bg-light mb-3">
+											<div class="card-body text-center">
+												<h7 class="card-title mb-2">Flaps</h7><br><br>
+												<div class="vertical-slider-wrapper">
+													<input type="range" min="0" max="100" value="25" step="25">
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="col-6">
+										<div class="card bg-light">
+											<div class="card-body text-center">
+												<h7 class="card-title mb-2">Vertical Trim</h7><br><br>
+												<div class="row">
+													<div class="col-8 align-middle">
+														<div class="vertical-slider-wrapper">
+															<input type="range" min="0" max="100" value="25" step="25">
+														</div>
+													</div>
+													<div class="col-4 align-middle">
+														[ ]
+													</div>
 												</div>
 											</div>
 										</div>
@@ -167,8 +253,8 @@
 									<div class="col-sm-12">
 										<div class="card bg-light mb-3">
 											<div class="card-body">
-												<h7>Autopilot Master</h7><br><br>
-												<input id="autopilot-master" class="form-check-input" type="checkbox" data-toggle="toggle" data-width="150" data-on="Engaged" data-off="Disengaged" data-onstyle="success" data-offstyle="danger">
+												<h7>Autopilot Master</h7>
+												<button onclick="triggerSimEvent('AP_MASTER')" id="autopilot-master" type="button" class="btn mt-3 btn-block btn-danger btn-lg">?</button>
 											</div>
 										</div>
 									</div>
@@ -177,51 +263,62 @@
 										<div class="card bg-light mb-3">
 											<div class="card-body text-left">
 
-												<table style="border-collapse:separate; border-spacing:0 5px;">
+												<table style="border-collapse:separate; border-spacing:0 5px; vertical-align: center">
 													<tr>
 														<td width="120">Wing Leveler</td>
-														<td width="100"><input id="autopilot-wing-leveler" class="form-check-input m-2" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
+														<td width="100"><button onclick="triggerSimEvent('AP_WING_LEVELER')" id="autopilot-wing-leveler" type="button" class="btn m-1 btn-danger" style="width: 75px">?</button></td>
 														<td></td>
 													</tr>
 
 													<tr>
 														<td>Heading</td>
-														<td><input class="form-check-input m-2" id="autopilot_heading_lock" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
-														<td>[ ]</td>
+														<td width="100"><button onclick="triggerSimEvent('AP_HDG_HOLD')" id="autopilot-heading-lock" type="button" class="btn m-1 btn-danger" style="width: 75px">?</button></td>
+														<td>
+															<div class="input-group sim-input-field">
+																<input id="autopilot-heading-lock-dir" type="text" class="form-control" placeholder="?" aria-describedby="basic-addon2">
+																<div class="input-group-append">
+																	<button class="btn btn-outline-primary" type="button">Set</button>
+																</div>
+															</div>
+														</td>
 													</tr>
 													<tr>
 														<td>Altitude</td>
-														<td><input class="form-check-input m-2" id="autopilot_altitude_lock" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
-														<td>[ ]</td>
+														<td width="100"><button onclick="triggerSimEvent('AP_ALT_HOLD')" id="autopilot-altitude-lock" type="button" class="btn m-1 btn-danger" style="width: 75px">?</button></td>
+														<td>
+															<div class="input-group sim-input-field">
+																<input id="autopilot-altitude-lock-var" type="text" class="form-control" placeholder="?" aria-describedby="basic-addon2">
+																<div class="input-group-append">
+																	<button class="btn btn-outline-primary" type="button">Set</button>
+																</div>
+															</div>
+														</td>
 													</tr>
 													<tr>
 														<td>Airspeed</td>
-														<td><input class="form-check-input m-2" id="autopilot_airspeed_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
-														<td>[ ]</td>
+														<td width="100"><button onclick="triggerSimEvent('AP_AIRSPEED_HOLD')" id="autopilot-airspeed-hold" type="button" class="btn m-1 btn-danger" style="width: 75px">?</button></td>
+														<td>
+															<div class="input-group sim-input-field">
+																<input id="autopilot-airspeed-hold-var" type="text" class="form-control" placeholder="?" aria-describedby="basic-addon2">
+																<div class="input-group-append">
+																	<button class="btn btn-outline-primary" type="button">Set</button>
+																</div>
+															</div>
+														</td>
 													</tr>
 													<tr>
 														<td>Attitude</td>
-														<td><input class="form-check-input m-2" id="autopilot_attitude_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
+														<td width="100"><button onclick="triggerSimEvent('AP_ATT_HOLD')" id="autopilot-attitude-hold" type="button" class="btn m-1 btn-danger" style="width: 75px">?</button></td>
 														<td></td>
-													</tr>
-													<tr>
-														<td>Pitch</td>
-														<td><input class="form-check-input m-2" id="autopilot_pitch_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
-														<td>[ ]</td>
 													</tr>
 													<tr>
 														<td>Backcourse</td>
-														<td><input class="form-check-input m-2" id="autopilot_backcourse_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
-														<td></td>
-													</tr>
-													<tr>
-														<td>Glideslope</td>
-														<td><input class="form-check-input m-2" id="autopilot_glidescope_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
+														<td width="100"><button onclick="triggerSimEvent('AP_BC_HOLD')" id="autopilot-backcourse-hold" type="button" class="btn m-1 btn-danger" style="width: 75px">?</button></td>
 														<td></td>
 													</tr>
 													<tr>
 														<td>Approach</td>
-														<td><input class="form-check-input m-2" id="autopilot_approach_hold" type="checkbox" data-toggle="toggle" data-width="75" data-on="On" data-off="Off" data-onstyle="success" data-offstyle="danger" data-height="10px"></td>
+														<td width="100"><button onclick="triggerSimEvent('AP_APR_HOLD')" id="autopilot-approach-hold" type="button" class="btn m-1 btn-danger" style="width: 75px">?</button></td>
 														<td></td>
 													</tr>
 												</table>
@@ -246,7 +343,7 @@
 
         // Create map options
         var mapOptions = {
-            center: [17.385044, 78.486671],
+            center: [41.8601, -87.6101],
             zoom: 10,
             dragging: true,
         }
@@ -303,21 +400,8 @@
         // Adding marker to the map
         marker.addTo(map);
 
-        // Adding rainviewer
-        var rainviewer = L.control.rainviewer({
-            position: 'topleft',
-            nextButtonText: '>',
-            playStopButtonText: 'Start/Stop',
-            prevButtonText: '<',
-            positionSliderLabelText: "Time:",
-            opacitySliderLabelText: "Opacity:",
-            animationInterval: 500,
-            opacity: 0.5
-        });
-        rainviewer.addTo(map);
 
 	</script>
-
 
 	<!--Boostrap JS-->
 	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>

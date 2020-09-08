@@ -51,9 +51,7 @@ class Request(object):
 			self.sm.run()
 
 	def __init__(self, _deff, _sm, _time=2000, _dec=None):
-		(_DATA_DEFINITION_ID, _DATA_REQUEST_ID) = _sm.new_request_id()
-		self.DATA_DEFINITION_ID = _DATA_DEFINITION_ID
-		self.DATA_REQUEST_ID = _DATA_REQUEST_ID
+		self.DATA_DEFINITION_ID = None
 		self.definitions = []
 		self.description = _dec
 		self.definitions.append(_deff)
@@ -63,8 +61,6 @@ class Request(object):
 		self.time = _time
 		self.defined = False
 		self.LastData = 0
-		_sm.out_data[self.DATA_REQUEST_ID] = None
-		_sm.Requests.append(self)
 
 	def setIndex(self, index):
 		(dec, stype) = self.definitions[0]
@@ -75,15 +71,16 @@ class Request(object):
 		self.redefine()
 
 	def redefine(self):
-		self.sm.dll.ClearDataDefinition(
-			self.sm.hSimConnect,
-			self.DATA_DEFINITION_ID.value,
-		)
-		self.defined = False
-		self.sm.run()
-		self._deff_test()
-		self.sm.run()
-		self.sm.get_data(self)
+		if self.DATA_DEFINITION_ID is not None:
+			self.sm.dll.ClearDataDefinition(
+				self.sm.hSimConnect,
+				self.DATA_DEFINITION_ID.value,
+			)
+			self.defined = False
+			self.sm.run()
+		if self._deff_test():
+			self.sm.run()
+			self.sm.get_data(self)
 
 	def _deff_test(self):
 		if ':index' in str(self.definitions[0][0]):
@@ -91,6 +88,11 @@ class Request(object):
 			return False
 		if self.defined is True:
 			return True
+		if self.DATA_DEFINITION_ID is None:
+			(self.DATA_DEFINITION_ID, self.DATA_REQUEST_ID) = self.sm.new_request_id()
+			self.sm.out_data[self.DATA_REQUEST_ID] = None
+			self.sm.Requests.append(self)
+
 		err = self.sm.dll.AddToDataDefinition(
 			self.sm.hSimConnect,
 			self.DATA_DEFINITION_ID.value,

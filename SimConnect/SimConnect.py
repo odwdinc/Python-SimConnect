@@ -32,41 +32,80 @@ class Request(object):
 
 	@property
 	def value(self):
-		self.sm.run()
-		if (self.LastData + self.time) < millis():
-			self.sm.get_data(self)
-			self.LastData = millis()
-		return self.outData[self.name]
+		if self._deff_test():
+			self.sm.run()
+			if (self.LastData + self.time) < millis():
+				if self.sm.get_data(self):
+					self.LastData = millis()
+				else:
+					return -999999
+			return self.outData[self.name]
+		else:
+			return None
 
 	@value.setter
 	def value(self, val):
-		self.outData[self.name] = val
-		self.sm.set_data(self)
-		self.sm.run()
+		if self._deff_test():
+			self.outData[self.name] = val
+			self.sm.set_data(self)
+			self.sm.run()
 
-	def __init__(self, _deff, _sm, _time=2000):
+	def __init__(self, _deff, _sm, _time=2000, _dec=None):
 		(_DATA_DEFINITION_ID, _DATA_REQUEST_ID) = _sm.new_request_id()
 		self.DATA_DEFINITION_ID = _DATA_DEFINITION_ID
 		self.DATA_REQUEST_ID = _DATA_REQUEST_ID
 		self.definitions = []
+		self.description = _dec
 		self.definitions.append(_deff)
 		self.name = "_name"
-		self.outData = {}
+		self.outData = {self.name: 0}
 		self.sm = _sm
 		self.time = _time
+		self.defined = False
 		self.LastData = 0
-		self.outData[self.name] = len(self.outData)
 		_sm.out_data[self.DATA_REQUEST_ID] = None
 		_sm.Requests.append(self)
-		_sm.dll.AddToDataDefinition(
-			_sm.hSimConnect,
+
+	def setIndex(self, index):
+		(dec, stype) = self.definitions[0]
+		newindex = str(":" + str(index)).encode()
+		dec = dec.replace(self.lastIndex, newindex)
+		self.lastIndex = newindex
+		self.definitions[0] = (dec, stype)
+		self.redefine()
+
+	def redefine(self):
+		self.sm.dll.ClearDataDefinition(
+			self.sm.hSimConnect,
 			self.DATA_DEFINITION_ID.value,
-			_deff[0],
-			_deff[1],
+		)
+		self.defined = False
+		self.sm.run()
+		self._deff_test()
+		self.sm.run()
+		self.sm.get_data(self)
+
+	def _deff_test(self):
+		if ':index' in str(self.definitions[0][0]):
+			self.lastIndex = b':index'
+			return False
+		if self.defined is True:
+			return True
+		err = self.sm.dll.AddToDataDefinition(
+			self.sm.hSimConnect,
+			self.DATA_DEFINITION_ID.value,
+			self.definitions[0][0],
+			self.definitions[0][1],
 			SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_FLOAT64,
 			0,
 			SIMCONNECT_UNUSED,
 		)
+		if IsHR(err, 0):
+			self.defined = True
+			return True
+		else:
+			LOGGER.error("SIM def" + str(self.definitions[0]))
+			return False
 
 
 class requestHolder:
@@ -78,18 +117,25 @@ class requestHolder:
 	def json(self):
 		map = {}
 		for att in self.dic:
-			map[att] = self.get(att)
+			val = self.get(att)
+			if val is not None:
+				map[att] = val
 		return map
 
-	def add(self, name, _deff):
+	def add(self, name, _deff, _dec=''):
 		self.dic.append(name)
 		setattr(
 			self,
 			name,
-			Request(_deff, self._sm, self._time)
+			Request(_deff, self._sm, self._time, _dec)
 		)
 
-	def get(self, _name):
+	def obj(self, _name):
+		return getattr(self, _name)
+
+	def get(self, _name, _dec=False):
+		if _dec is True and getattr(self, _name).description is not None:
+			return (getattr(self, _name).value, getattr(self, _name).description)
 		return getattr(self, _name).value
 
 	def set(self, _name, _value):
@@ -106,7 +152,7 @@ class SimConnect:
 		if dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EVENT:
 			evt = cast(pData, POINTER(SIMCONNECT_RECV_EVENT))
 			uEventID = evt.contents.uEventID
-			if uEventID == self.EventID.EVENT_SIM_START:
+			if uEventID == self.dll.EventID.EVENT_SIM_START:
 				LOGGER.info("SIM START")
 
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE:
@@ -123,7 +169,7 @@ class SimConnect:
 			LOGGER.info("SIM OPEN")
 			self.ok = True
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EXCEPTION:
-			LOGGER.warn("ID EXCEPTION")
+			pass  # LOGGER.warn("ID EXCEPTION")
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_QUIT:
 			self.quit = 1
 		else:
@@ -161,6 +207,7 @@ class SimConnect:
 			exit(0)
 
 	def run(self):
+		time.sleep(.01)
 		self.dll.CallDispatch(self.hSimConnect, self.my_dispatch_proc_rd, None)
 
 	def exit(self):
@@ -222,8 +269,13 @@ class SimConnect:
 	def get_data(self, _Request):
 		self.request_data(_Request)
 		self.run()
-		while self.out_data[_Request.DATA_REQUEST_ID] is None:
+		attemps = 0
+		while self.out_data[_Request.DATA_REQUEST_ID] is None and attemps < 4:
 			self.run()
+			attemps += 1
+
+		if self.out_data[_Request.DATA_REQUEST_ID] is None:
+			return False
 
 		newData = self.out_data[_Request.DATA_REQUEST_ID]
 		for od in _Request.outData:
@@ -247,7 +299,7 @@ class SimConnect:
 		else:
 			return False
 
-	def new_request_id(self, time=None):
+	def new_request_id(self):
 		name = "Request" + str(len(self.Requests))
 		names = [m.name for m in self.dll.DATA_DEFINITION_ID] + [name]
 		self.dll.DATA_DEFINITION_ID = Enum(self.dll.DATA_DEFINITION_ID.__name__, names)

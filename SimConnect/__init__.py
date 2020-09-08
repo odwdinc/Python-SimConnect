@@ -10,7 +10,7 @@ def int_or_str(value):
 		return value
 
 
-__version__ = "0.3.2"
+__version__ = "0.3.3"
 VERSION = tuple(map(int_or_str, __version__.split(".")))
 
 __all__ = ["SimConnect", "Request", "Event", "millis", "DWORD", "Plane", "AircraftRequests", "AircraftEvents"]

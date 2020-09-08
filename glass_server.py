@@ -336,8 +336,18 @@ def set_datapoint(datapoint_name):
 @app.route('/event/<event_name>/trigger', methods=["POST"])
 def trigger_event(event_name):
 
+    value_to_use = request.form.get('value_to_use')
+    if value_to_use is None:
+        print(event_name + ": " + "No value passed")
+    else:
+        print(event_name + ": " + value_to_use)
+
+    # event_name = 'AP_MASTER'
+    event_name_bytes = bytes(event_name, encoding='utf-8')
+
     sm = SimConnect()
-    EVENT_TO_TRIGGER = Event(b'AP_MASTER', sm)
+    EVENT_TO_TRIGGER = Event(event_name_bytes, sm)
+    # EVENT_TO_TRIGGER = Event(b'AP_MASTER', sm)
     EVENT_TO_TRIGGER()
     sm.exit()
 

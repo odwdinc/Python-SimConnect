@@ -88,28 +88,33 @@ function displayData() {
     $("#fuel-percentage-bar").css("width", fuel_percentage+"%");
 
     //Autopilot
-    $("#autopilot-master").prop('checked', autopilot_master).change()
-    $("#autopilot_wing_leveler").prop('checked', autopilot_wing_leveler).change()
-    $("#autopilot_heading_lock").prop('checked', autopilot_heading_lock).change()
-    $("#autopilot_altitude_lock").prop('checked', autopilot_altitude_lock).change()
-    $("#autopilot_airspeed_hold").prop('checked', autopilot_airspeed_hold).change()
-    $("#autopilot_attitude_hold").prop('checked', autopilot_attitude_hold).change()
-    $("#autopilot_pitch_hold").prop('checked', autopilot_pitch_hold).change()
-    $("#autopilot_backcourse_hold").prop('checked', autopilot_backcourse_hold).change()
-    $("#autopilot_glidescope_hold").prop('checked', autopilot_glidescope_hold).change()
-    $("#autopilot_approach_hold").prop('checked', autopilot_approach_hold).change()
+    //$("#autopilot-master").html(autopilot_master);
+    if (autopilot_master === 1) {
+        $("#autopilot-master").removeClass("btn-danger").addClass("btn-success").html("Engaged");
+    } else {
+        $("#autopilot-master").removeClass("btn-success").addClass("btn-danger").html("Disengaged");
+    }
 
-    $("#autopilot_heading_lock_dir").attr('placeholder', autopilot_heading_lock_dir);
-    $("#autopilot_altitude_lock_var").attr('placeholder', autopilot_altitude_lock_var);
-    $("#autopilot_airspeed_hold_var").attr('placeholder', autopilot_airspeed_hold_var);
-    $("#autopilot_pitch_hold_ref").attr('placeholder', autopilot_pitch_hold_ref);
+    $("#autopilot-wing-leveler").prop('checked', autopilot_wing_leveler).change()
+    $("#autopilot-heading-lock").prop('checked', autopilot_heading_lock).change()
+    $("#autopilot-altitude-lock").prop('checked', autopilot_altitude_lock).change()
+    $("#autopilot-airspeed-hold").prop('checked', autopilot_airspeed_hold).change()
+    $("#autopilot-attitude-hold").prop('checked', autopilot_attitude_hold).change()
+    $("#autopilot-pitch-hold").prop('checked', autopilot_pitch_hold).change()
+    $("#autopilot-backcourse-hold").prop('checked', autopilot_backcourse_hold).change()
+    $("#autopilot-glidescope-hold").prop('checked', autopilot_glidescope_hold).change()
+    $("#autopilot-approach-hold").prop('checked', autopilot_approach_hold).change()
+
+    $("#autopilot-heading-lock-dir").attr('placeholder', autopilot_heading_lock_dir);
+    $("#autopilot-altitude-lock-var").attr('placeholder', autopilot_altitude_lock_var);
+    $("#autopilot-airspeed-hold_var").attr('placeholder', autopilot_airspeed_hold_var);
+    $("#autopilot-pitch-hold_ref").attr('placeholder', autopilot_pitch_hold_ref);
 
     //Control surfaces
     $("#gear-handle-position").html(gear_handle_position);
     if (gear_handle_position === "UP"){
         $("#gear-handle-position").removeClass("btn-success").addClass("btn-danger");
-    }
-    if (gear_handle_position === "DOWN"){
+    } else {
         $("#gear-handle-position").removeClass("btn-danger").addClass("btn-success");
     }
 
@@ -149,7 +154,7 @@ function setSimDatapoint(datapointToSet, valueToUse) {
 }
 
 function triggerSimEvent(eventToTrigger, valueToUse){
-    url_to_call = "/event/"+datapointToSet+"/trigger";
+    url_to_call = "/event/"+eventToTrigger+"/trigger";
     $.post( url_to_call, { value_to_use: valueToUse } );
 }
 

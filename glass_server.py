@@ -250,7 +250,7 @@ def glass():
     return render_template("glass.html")
 
 
-def get_data(data_type):
+def get_dataset(data_type):
     if data_type == "navigation": request_to_action = request_location
     if data_type == "airspeed": request_to_action = request_airspeed
     if data_type == "compass": request_to_action = request_compass
@@ -268,7 +268,7 @@ def get_data(data_type):
 
 @app.route('/ui')
 def output_ui_variables():
-    data_dictionary = get_data("ui")
+    data_dictionary = get_dataset("ui")
 
     ui_friendly_dictionary = {}
     ui_friendly_dictionary["STATUS"] = "success"
@@ -280,9 +280,9 @@ def output_ui_variables():
     ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(data_dictionary.get("FLAPS_HANDLE_PERCENT")*100)
 
     if data_dictionary.get("GEAR_HANDLE_POSITION") == 1:
-        ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "UP"
-    else:
         ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "DOWN"
+    else:
+        ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "UP"
 
     ui_friendly_dictionary["LATITUDE"] = data_dictionary.get("LATITUDE")
     ui_friendly_dictionary["LONGITUDE"] = data_dictionary.get("LONGITUDE")
@@ -315,7 +315,7 @@ def output_ui_variables():
 @app.route('/dataset/<dataset_name>/', methods=["GET"])
 def output_detailed_json_data(dataset_name):
 
-    data_dictionary = get_data(dataset_name)
+    data_dictionary = get_dataset(dataset_name)
     return jsonify(data_dictionary.json())
 
 

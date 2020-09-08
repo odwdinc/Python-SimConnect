@@ -294,9 +294,9 @@ def output_ui_variables():
     ui_friendly_dictionary["AUTOPILOT_NAV_SELECTED"] = data_dictionary.get("AUTOPILOT_NAV_SELECTED")
     ui_friendly_dictionary["AUTOPILOT_WING_LEVELER"] = data_dictionary.get("AUTOPILOT_WING_LEVELER")
     ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK"] = data_dictionary.get("AUTOPILOT_HEADING_LOCK")
-    ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK_DIR"] = data_dictionary.get("AUTOPILOT_HEADING_LOCK_DIR")
+    ui_friendly_dictionary["AUTOPILOT_HEADING_LOCK_DIR"] = round(data_dictionary.get("AUTOPILOT_HEADING_LOCK_DIR"))
     ui_friendly_dictionary["AUTOPILOT_ALTITUDE_LOCK"] = data_dictionary.get("AUTOPILOT_ALTITUDE_LOCK")
-    ui_friendly_dictionary["AUTOPILOT_ALTITUDE_LOCK_VAR"] = data_dictionary.get("AUTOPILOT_ALTITUDE_LOCK_VAR")
+    ui_friendly_dictionary["AUTOPILOT_ALTITUDE_LOCK_VAR"] = thousandify(round(data_dictionary.get("AUTOPILOT_ALTITUDE_LOCK_VAR")))
     ui_friendly_dictionary["AUTOPILOT_ATTITUDE_HOLD"] = data_dictionary.get("AUTOPILOT_ATTITUDE_HOLD")
     ui_friendly_dictionary["AUTOPILOT_GLIDESLOPE_HOLD"] = data_dictionary.get("AUTOPILOT_GLIDESLOPE_HOLD")
     ui_friendly_dictionary["AUTOPILOT_APPROACH_HOLD"] = data_dictionary.get("AUTOPILOT_APPROACH_HOLD")
@@ -307,7 +307,7 @@ def output_ui_variables():
     ui_friendly_dictionary["AUTOPILOT_PITCH_HOLD_REF"] = data_dictionary.get("AUTOPILOT_PITCH_HOLD_REF")
     ui_friendly_dictionary["AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE"] = data_dictionary.get("AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE")
     ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD"] = data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD")
-    ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD_VAR"] = data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD_VAR")
+    ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD_VAR"] = round(data_dictionary.get("AUTOPILOT_AIRSPEED_HOLD_VAR"))
 
     return jsonify(ui_friendly_dictionary)
 
@@ -337,18 +337,17 @@ def set_datapoint(datapoint_name):
 def trigger_event(event_name):
 
     value_to_use = request.form.get('value_to_use')
-    if value_to_use is None:
-        print(event_name + ": " + "No value passed")
-    else:
-        print(event_name + ": " + value_to_use)
 
-    # event_name = 'AP_MASTER'
     event_name_bytes = bytes(event_name, encoding='utf-8')
 
     sm = SimConnect()
     EVENT_TO_TRIGGER = Event(event_name_bytes, sm)
-    # EVENT_TO_TRIGGER = Event(b'AP_MASTER', sm)
-    EVENT_TO_TRIGGER()
+
+    if value_to_use is None:
+        EVENT_TO_TRIGGER()
+    else:
+        pass
+
     sm.exit()
 
     status = "success"

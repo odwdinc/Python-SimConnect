@@ -31,7 +31,7 @@ window.setInterval(function(){
     getSimulatorData();
     displayData()
     updateMap()
-}, 2000);
+}, 1000);
 
 
 function getSimulatorData() {
@@ -88,22 +88,14 @@ function displayData() {
     $("#fuel-percentage-bar").css("width", fuel_percentage+"%");
 
     //Autopilot
-    //$("#autopilot-master").html(autopilot_master);
-    if (autopilot_master === 1) {
-        $("#autopilot-master").removeClass("btn-danger").addClass("btn-success").html("Engaged");
-    } else {
-        $("#autopilot-master").removeClass("btn-success").addClass("btn-danger").html("Disengaged");
-    }
-
-    $("#autopilot-wing-leveler").prop('checked', autopilot_wing_leveler).change()
-    $("#autopilot-heading-lock").prop('checked', autopilot_heading_lock).change()
-    $("#autopilot-altitude-lock").prop('checked', autopilot_altitude_lock).change()
-    $("#autopilot-airspeed-hold").prop('checked', autopilot_airspeed_hold).change()
-    $("#autopilot-attitude-hold").prop('checked', autopilot_attitude_hold).change()
-    $("#autopilot-pitch-hold").prop('checked', autopilot_pitch_hold).change()
-    $("#autopilot-backcourse-hold").prop('checked', autopilot_backcourse_hold).change()
-    $("#autopilot-glidescope-hold").prop('checked', autopilot_glidescope_hold).change()
-    $("#autopilot-approach-hold").prop('checked', autopilot_approach_hold).change()
+    checkAndUpdateButton("#autopilot-master", autopilot_master, "Engaged", "Disengaged");
+    checkAndUpdateButton("#autopilot-wing-leveler", autopilot_wing_leveler);
+    checkAndUpdateButton("#autopilot-heading-lock", autopilot_heading_lock);
+    checkAndUpdateButton("#autopilot-altitude-lock", autopilot_altitude_lock);
+    checkAndUpdateButton("#autopilot-airspeed-hold", autopilot_airspeed_hold);
+    checkAndUpdateButton("#autopilot-attitude-hold", autopilot_attitude_hold);
+    checkAndUpdateButton("#autopilot-backcourse-hold", autopilot_backcourse_hold);
+    checkAndUpdateButton("#autopilot-approach-hold", autopilot_approach_hold)
 
     $("#autopilot-heading-lock-dir").attr('placeholder', autopilot_heading_lock_dir);
     $("#autopilot-altitude-lock-var").attr('placeholder', autopilot_altitude_lock_var);
@@ -118,10 +110,16 @@ function displayData() {
         $("#gear-handle-position").removeClass("btn-danger").addClass("btn-success");
     }
 
-
-
-
 }
+
+function checkAndUpdateButton(buttonName, variableToCheck, onText="On", offText="Off") {
+    if (variableToCheck === 1) {
+        $(buttonName).removeClass("btn-danger").addClass("btn-success").html(onText);
+    } else {
+        $(buttonName).removeClass("btn-success").addClass("btn-danger").html(offText);
+    }
+}
+
 
 function toggleFollowPlane() {
     followPlane = !followPlane;

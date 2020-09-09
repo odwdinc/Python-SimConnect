@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Glass Cockpit</title>
+	<title>MSFS2020 Cockpit Computer</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<!-- Bootstrap CSS-->
@@ -32,6 +32,13 @@
 	<link rel="stylesheet" href="/static/vendor/jquery-ui-slider/jquery-ui-slider-pips.css">
 	<script src="/static/vendor/jquery-ui-slider/jquery-ui-slider-pips.js"></script>
 
+	<!-- Sweetalert2 -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+	<script src="sweetalert2.all.min.js"></script>
+
+	<!-- Microtip tooltips -->
+	<link rel="stylesheet" href="https://unpkg.com/microtip/microtip.css">
+
 	<!-- Set script root-->
 	<script type=text/javascript>
         $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
@@ -40,6 +47,7 @@
 	<style>
 		html, body {
 			height: 100vh;
+			overflow: hidden;
 			margin: 0;
 			padding: 0;
 		}
@@ -66,7 +74,7 @@
 
 <body>
 
-<div class="container-fluid p-0 h-100" style="height: 100%; width: 100%;">  <!--Main container-->
+<div class="container-fluid p-0" style="height: 100%; width: 100%;">  <!--Main container-->
 
 	<!-- NAVBAR -->
 	<nav class="navbar navbar-expand-md navbar-dark bg-dark">
@@ -78,7 +86,7 @@
 			</ul>
 		</div>
 		<div class="mx-auto order-0">
-			<a class="navbar-brand mx-auto" href="#">Glass Cockpit</a>
+			<a class="navbar-brand mx-auto" href="#">MSFS2020 Cockpit Computer</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
 				<span class="navbar-toggler-icon"></span>
 			</button>
@@ -86,28 +94,38 @@
 		<div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
 			<ul class="navbar-nav ml-auto">
 				<li class="nav-item m-1">
-					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseNavigation" aria-expanded="true" aria-controls="collapseNavigation">
+					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseNavigation" aria-expanded="true" aria-controls="collapseNavigation" aria-label="Navigation" data-microtip-position="bottom" role="tooltip">
 						<i class="fas fa-map"></i>
 					</button>
 				</li>
 				<li class="nav-item m-1">
-					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseFuel" aria-expanded="true" aria-controls="collapseFuel">
+					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseFuel" aria-expanded="true" aria-controls="collapseFuel" aria-label="Fuel" data-microtip-position="bottom" role="tooltip">
 						<i class="fas fa-gas-pump"></i>
 					</button>
 				</li>
 				<li class="nav-item m-1">
-					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseControlSurfaces" aria-expanded="true" aria-controls="collapseControlSurfaces">
+					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseControlSurfaces" aria-expanded="true" aria-controls="collapseControlSurfaces" aria-label="Control surfaces" data-microtip-position="bottom" role="tooltip">
 						<i class="fas fa-sliders-h"></i>
 					</button>
 				</li>
 				<li class="nav-item m-1">
-					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseAutopilot" aria-expanded="true" aria-controls="collapseAutopilot">
+					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseAutopilot" aria-expanded="true" aria-controls="collapseAutopilot" aria-label="Autopilot" data-microtip-position="bottom" role="tooltip">
 						<i class="fas fa-robot"></i>
 					</button>
 				</li>
 				<li class="nav-item m-1">
-					<button class="btn btn-danger" type="button" data-toggle="collapse" data-target="#collapseEmergency" aria-expanded="true" aria-controls="collapseEmergency">
+					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseCabin" aria-expanded="true" aria-controls="collapseCabin" aria-label="Cabin" data-microtip-position="bottom" role="tooltip">
+						<i class="fas fa-users"></i>
+					</button>
+				</li>
+				<li class="nav-item m-1">
+					<button class="btn btn-danger" type="button" data-toggle="collapse" data-target="#collapseEmergency" aria-expanded="true" aria-controls="collapseEmergency" aria-label="Emergency" data-microtip-position="bottom" role="tooltip">
 						<i class="fas fa-fire-extinguisher"></i>
+					</button>
+				</li>
+				<li class="nav-item m-1">
+					<button class="btn btn-success" onclick="window.open('https://msfs2020.cc','_blank');" type="button" aria-label="Information about Cockpit Companion data-microtip-position="bottom" role="tooltip">
+						<i class="<i class="fas fa-info"></i>"></i>
 					</button>
 				</li>
 			</ul>
@@ -115,7 +133,7 @@
 	</nav>
 
 
-	<div class="row p-2" style="height: 90%">
+	<div class="row p-2" style="height: 85vh">
 		<div class="col-sm-7 col-xl-8 no-gutters collapse show p-0" style="background-color: grey;" id="map_column" style="position: relative; height=100%;">
 			<div id = "map" style = "height: 100%; width: 100%;"></div>
 		</div>
@@ -206,6 +224,25 @@
 											<button onclick="triggerSimEvent('KEY_TOGGLE_HYDRAULIC_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Hydraulic Fail</button>
 											<button onclick="triggerSimEvent('KEY_TOGGLE_TOTAL_BRAKE_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Brake Fail</button>
 											<button onclick="triggerSimEvent('KEY_TOGGLE_PITOT_BLOCKAGE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Pitot Blockage</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- CABIN -->
+				<div class="card">
+					<div id="collapseCabin" class="collapse" aria-labelledby="collapseCabin" data-parent="#accordionHUD">
+						<div class="card-body text-center">
+							<div class="row">
+								<div class="col-12">
+									<div class="card bg-light mb-3">
+										<div class="card-body">
+											<button onclick="triggerSimEvent('')" id="seatbelt-sign" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Seatbelt sign</button>
+											<button onclick="triggerSimEvent('')" id="seatbelt-sign" type="button" class="btn mt-1 btn-block btn-danger btn-lg">No smoking sign</button>
+											<button onclick="temporaryAlert('', 'Cabin crew please contact cockpit', 'info')" id="seatbelt-sign" type="button" class="btn mt-5 btn-block btn-primary btn-lg">Cabin crew call</button>
 										</div>
 									</div>
 								</div>

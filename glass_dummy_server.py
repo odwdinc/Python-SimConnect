@@ -20,7 +20,7 @@ def thousandify(x):
 
 @app.route ('/')
 def glass():
-    return render_template("glassp.html")
+    return render_template("glass.html")
 
 @app.route('/ui')
 def output_ui_variables():
@@ -52,6 +52,10 @@ def output_ui_variables():
         ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "UP"
     else:
         ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "DOWN"
+
+    ui_friendly_dictionary["ELEVATOR_TRIM_PCT"] = random.randint(-10,10)
+    ui_friendly_dictionary["RUDDER_TRIM_PCT"] = random.randint(-10,10)
+    ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = random.randint(0,100)
 
     longitude = longitude + 0.01
 

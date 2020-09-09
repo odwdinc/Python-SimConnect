@@ -216,15 +216,15 @@
 									</div>
 								</div>
 								<div class="col-6">
-									<div class="card bg-light mb-3">
+									<div class="card bg-light">
 										<div class="card-body text-center">
-											<h7 class="card-title mb-2">Flaps</h7><br><br>
+											<h7 class="card-title">Flaps (%)</h7><br><br>
 
 											<table>
 												<tbody>
 												<tr>
 													<td><div id="flaps-slider" class="slider vertical-slider"></div></td>
-													<td>[ ]</td>
+													<td><span id=flaps-handle-pct>?</span></td>
 												</tr>
 												</tbody>
 											</table>
@@ -233,22 +233,30 @@
 									</div>
 								</div>
 								<div class="col-6">
-									<div class="card bg-light">
+									<div class="card bg-light mb-3">
 										<div class="card-body text-center">
-											<h7 class="card-title mb-2">Vertical Trim</h7><br><br>
-
+											<h7 class="card-title">Elevator Trim (%)</h7><br><br>
 											<table>
 												<tbody>
 												<tr>
-													<td><div id="vertical-trim-slider" class="slider vertical-slider"></div></td>
-													<td>[ ]</td>
+													<td><div id="elevator-trim-slider" class="slider vertical-slider"></div></td>
+													<td><span id=elevator-trim-pct>?</span></td>
 												</tr>
 												</tbody>
 											</table>
-
 										</div>
 									</div>
 								</div>
+								<div class="col-12">
+									<div class="card bg-light">
+										<div class="card-body"">
+											<h7 class="card-title">Rudder Trim (%)</h7>
+											<div id="rudder-trim-slider" class="slider mt-3"></div
+											<div class="text-center"><span style="text-align: center" id=rudder-trim-pct>?</span></div>
+										</div>
+									</div>
+								</div>
+
 							</div>
 						</div>
 					</div>
@@ -412,7 +420,7 @@
 </script>
 
 <script>
-    $("#vertical-trim-slider")
+    $("#elevator-trim-slider")
         .slider({
             min: -30,
             max: 30,
@@ -428,10 +436,23 @@
         .slider({
             min: 0,
             max: 100,
-            orientation: "vertical"
+            orientation: "vertical",
+	        value: 10
         })
         .slider("pips", {
             step: "50",
+            first: "pip",
+            last: "pip"
+        });
+
+    $("#rudder-trim-slider")
+        .slider({
+            min: -30,
+            max: 30,
+            orientation: "horizontal"
+        })
+        .slider("pips", {
+            step: "10",
             first: "pip",
             last: "pip"
         });

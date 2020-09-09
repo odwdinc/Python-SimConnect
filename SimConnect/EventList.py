@@ -7,7 +7,7 @@ class EventHelper:
 
 	def __getattr__(self, _name):
 		for key in self.list:
-			if _name in str(key[0]):
+			if _name == key[0].decode():
 				ne = Event(key[0], self.sm, _dec=key[1])
 				setattr(self, _name, ne)
 				return ne

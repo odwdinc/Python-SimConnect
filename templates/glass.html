@@ -214,14 +214,14 @@
 										<div class="card-body">
 											<button onclick="triggerSimEvent('')" id="emergency-engine-fire" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg" disabled>Engine Fire</button>
 											<div class="row">
-												<div class="col-6"><button onclick="triggerSimEvent('KEY_TOGGLE_ENGINE1_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Engine 1 Fail</button></div>
-												<div class="col-6">	<button onclick="triggerSimEvent('KEY_TOGGLE_ENGINE2_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Engine 2 Fail</button></div>
+												<div class="col-6"><button onclick="triggerSimEvent('TOGGLE_ENGINE1_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Engine 1 Fail</button></div>
+												<div class="col-6">	<button onclick="triggerSimEvent('TOGGLE_ENGINE2_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Engine 2 Fail</button></div>
 											</div>
 
-											<button onclick="triggerSimEvent('KEY_TOGGLE_ELECTRICAL_FAILURE')" type="button" class="btn mt-5 btn-block btn-outline-danger btn-lg">Electrical Fail</button>
-											<button onclick="triggerSimEvent('KEY_TOGGLE_HYDRAULIC_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Hydraulic Fail</button>
-											<button onclick="triggerSimEvent('KEY_TOGGLE_TOTAL_BRAKE_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Brake Fail</button>
-											<button onclick="triggerSimEvent('KEY_TOGGLE_PITOT_BLOCKAGE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Pitot Blockage</button>
+											<button onclick="triggerSimEvent('TOGGLE_ELECTRICAL_FAILURE')" type="button" class="btn mt-5 btn-block btn-outline-danger btn-lg">Electrical Fail</button>
+											<button onclick="triggerSimEvent('TOGGLE_HYDRAULIC_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Hydraulic Fail</button>
+											<button onclick="triggerSimEvent('TOGGLE_TOTAL_BRAKE_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Brake Fail</button>
+											<button onclick="triggerSimEvent('TOGGLE_PITOT_BLOCKAGE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Pitot Blockage</button>
 										</div>
 									</div>
 								</div>
@@ -341,7 +341,7 @@
 														<div class="input-group sim-input-field">
 															<input id="autopilot-heading-lock-dir" type="text" class="form-control" placeholder="?" aria-describedby="basic-addon2">
 															<div class="input-group-append">
-																<button onclick='triggerSimEventFromField ("KEY_HEADING_BUG_SET", "autopilot-heading-lock-dir", "Setting heading lock")' class="btn btn-outline-primary" type="button">Set</button>
+																<button onclick='triggerSimEventFromField ("HEADING_BUG_SET", "autopilot-heading-lock-dir", "Setting heading lock")' class="btn btn-outline-primary" type="button">Set</button>
 															</div>
 														</div>
 													</td>
@@ -353,7 +353,7 @@
 														<div class="input-group sim-input-field">
 															<input id="autopilot-altitude-lock-var" type="text" class="form-control" placeholder="?" aria-describedby="basic-addon2">
 															<div class="input-group-append">
-																<button onclick='triggerSimEventFromField ("KEY_AP_VS_VAR_SET_ENGLISH", "autopilot-altitude-lock-var", "Setting altitude lock")' class="btn btn-outline-primary" type="button">Set</button>
+																<button onclick='triggerSimEventFromField ("AP_VS_VAR_SET_ENGLISH", "autopilot-altitude-lock-var", "Setting altitude lock")' class="btn btn-outline-primary" type="button">Set</button>
 															</div>
 														</div>
 													</td>
@@ -365,7 +365,7 @@
 														<div class="input-group sim-input-field">
 															<input id="autopilot-airspeed-hold-var" type="text" class="form-control" placeholder="?" aria-describedby="basic-addon2">
 															<div class="input-group-append">
-																<button onclick='triggerSimEventFromField ("KEY_AP_SPD_VAR_SET", "autopilot-airspeed-hold-var", "Setting airspeed hold")' class="btn btn-outline-primary" type="button">Set</button>
+																<button onclick='triggerSimEventFromField ("AP_SPD_VAR_SET", "autopilot-airspeed-hold-var", "Setting airspeed hold")' class="btn btn-outline-primary" type="button">Set</button>
 															</div>
 														</div>
 													</td>

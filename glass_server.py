@@ -336,14 +336,25 @@ def output_detailed_json_data(dataset_name):
 
 @app.route('/datapoint/<datapoint_name>/get')
 def get_datapoint_endpoint(datapoint_name):
+
+	index = request.form.get('index')
+	if index is not None and ':index' in datapoint_name:
+		clas = aq._find(datapoint_name)
+		clas.obj(datapoint_name).setIndex(int(index))
+
 	return jsonify(aq.get(datapoint_name))
 
 
 @app.route('/datapoint/<datapoint_name>/set', methods=["POST"])
 def set_datapoint_endpoint(datapoint_name):
 	data_dictionary = get_dataset("ui")
-	value_to_use = request.form.get('value_to_use')
 
+	index = request.form.get('index')
+	if index is not None and ':index' in datapoint_name:
+		clas = aq._find(datapoint_name)
+		clas.obj(datapoint_name).setIndex(int(index))
+
+	value_to_use = request.form.get('value_to_use')
 	if value_to_use is None:
 		aq.set(datapoint_name, 0)
 	else:

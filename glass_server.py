@@ -339,46 +339,54 @@ def output_detailed_json_data(dataset_name):
 
 @app.route('/datapoint/<datapoint_name>/get', methods=["GET", "POST"])
 def get_datapoint_endpoint(datapoint_name):
-
-	index = request.form.get('index')
+	ds = request.get_json() if request.is_json else request.form
+	index = ds.get('index')
 	if index is not None and ':index' in datapoint_name:
 		clas = aq._find(datapoint_name)
-		clas.obj(datapoint_name).setIndex(int(index))
+		if clas is not None:
+			clas.obj(datapoint_name).setIndex(int(index))
 
 	return jsonify(aq.get(datapoint_name))
 
 
 @app.route('/datapoint/<datapoint_name>/set', methods=["POST"])
 def set_datapoint_endpoint(datapoint_name):
-	data_dictionary = get_dataset("ui")
-
-	index = request.form.get('index')
+	ds = request.get_json() if request.is_json else request.form
+	index = ds.get('index')
 	if index is not None and ':index' in datapoint_name:
 		clas = aq._find(datapoint_name)
-		clas.obj(datapoint_name).setIndex(int(index))
+		if clas is not None:
+			clas.obj(datapoint_name).setIndex(int(index))
 
-	value_to_use = request.form.get('value_to_use')
+	value_to_use = ds.get('value_to_use')
+	sent = False
 	if value_to_use is None:
-		aq.set(datapoint_name, 0)
+		sent = aq.set(datapoint_name, 0)
 	else:
-		aq.set(datapoint_name, int(value_to_use))
+		sent = aq.set(datapoint_name, int(value_to_use))
 
-	status = "success"
+	if sent is True:
+		status = "success"
+	else:
+		status = "Error with sending request: %s" % (datapoint_name)
 	return jsonify(status)
 
 
 @app.route('/event/<event_name>/trigger', methods=["POST"])
 def trigger_event(event_name):
+	ds = request.get_json() if request.is_json else request.form
 
-	value_to_use = request.form.get('value_to_use')
-
+	value_to_use = ds.get('value_to_use')
 	EVENT_TO_TRIGGER = ae.find(event_name)
-	if value_to_use is None:
-		EVENT_TO_TRIGGER()
-	else:
-		EVENT_TO_TRIGGER(value_to_use)
+	if EVENT_TO_TRIGGER is not None:
+		if value_to_use is None:
+			EVENT_TO_TRIGGER()
+		else:
+			EVENT_TO_TRIGGER(int(value_to_use))
 
-	status = "success"
+		status = "success"
+	else:
+		status = "Error: %s is not an Event" % (event_name)
 	return jsonify(status)
 
 

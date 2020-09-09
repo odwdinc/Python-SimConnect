@@ -142,13 +142,18 @@ class requestHolder:
 		return getattr(self, _name)
 
 	def get(self, _name, _dec=False):
+		if getattr(self, _name) is None:
+			return None
 		if _dec is True and getattr(self, _name).description is not None:
 			return (getattr(self, _name).value, getattr(self, _name).description)
 		return getattr(self, _name).value
 
 	def set(self, _name, _value):
 		temp = getattr(self, _name)
+		if temp is None:
+			return False
 		setattr(temp, "value", _value)
+		return True
 
 
 class SimConnect:

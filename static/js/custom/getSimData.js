@@ -170,6 +170,8 @@ function triggerSimEvent(eventToTrigger, valueToUse){
     //alert (valueToUse)
     url_to_call = "/event/"+eventToTrigger+"/trigger";
     $.post( url_to_call, { value_to_use: valueToUse } );
+
+    temporaryAlert('', "Sending instruction", "success")
 }
 
 function triggerSimEventFromField(eventToTrigger, fieldToUse, messageToDisplay = null){
@@ -183,6 +185,10 @@ function triggerSimEventFromField(eventToTrigger, fieldToUse, messageToDisplay =
 
     // Clear the field so it can be repopulated with the placeholder
     $(fieldToUse).val("")
+
+    if (messageToDisplay) {
+        temporaryAlert('', messageToDisplay + " to " + valueToUse, "success")
+    }
 
 }
 

@@ -123,8 +123,8 @@
 					</button>
 				</li>
 				<li class="nav-item m-1">
-					<button class="btn btn-success" onclick="window.open('https://msfs2020.cc','_blank');" type="button" aria-label="Information about Cockpit Companion data-microtip-position="bottom" role="tooltip">
-						<i class="<i class="fas fa-info"></i>"></i>
+					<button class="btn btn-success ml-3" onclick="window.open('https://msfs2020.cc','_blank');" type="button" aria-label="Information about Cockpit Companion" data-microtip-position="bottom-left" role="tooltip">
+						<i class="fab fa-github fa-lg"></i>
 					</button>
 				</li>
 			</ul>
@@ -241,7 +241,7 @@
 										<div class="card-body">
 											<button onclick="triggerSimEvent('')" id="seatbelt-sign" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Seatbelt sign</button>
 											<button onclick="triggerSimEvent('')" id="seatbelt-sign" type="button" class="btn mt-1 btn-block btn-danger btn-lg">No smoking sign</button>
-											<button onclick="temporaryAlert('', 'Cabin crew please contact cockpit', 'info')" id="seatbelt-sign" type="button" class="btn mt-5 btn-block btn-primary btn-lg">Cabin crew call</button>
+											<button onclick="temporaryAlert('', 'Cabin crew please contact cockpit', 'success')" id="cabin-crew-contact" type="button" class="btn mt-5 btn-block btn-primary btn-lg">Cabin crew call</button>
 										</div>
 									</div>
 								</div>
@@ -342,7 +342,7 @@
 														<div class="input-group sim-input-field">
 															<input id="autopilot-heading-lock-dir" type="text" class="form-control" placeholder="?" aria-describedby="basic-addon2">
 															<div class="input-group-append">
-																<button onclick='triggerSimEventFromField ("KEY_HEADING_BUG_SET", "autopilot-heading-lock-dir")' class="btn btn-outline-primary" type="button">Set</button>
+																<button onclick='triggerSimEventFromField ("KEY_HEADING_BUG_SET", "autopilot-heading-lock-dir", "Setting heading lock")' class="btn btn-outline-primary" type="button">Set</button>
 															</div>
 														</div>
 													</td>
@@ -354,7 +354,7 @@
 														<div class="input-group sim-input-field">
 															<input id="autopilot-altitude-lock-var" type="text" class="form-control" placeholder="?" aria-describedby="basic-addon2">
 															<div class="input-group-append">
-																<button onclick='triggerSimEventFromField ("KEY_AP_VS_VAR_SET_ENGLISH", "autopilot-altitude-lock-var")' class="btn btn-outline-primary" type="button">Set</button>
+																<button onclick='triggerSimEventFromField ("KEY_AP_VS_VAR_SET_ENGLISH", "autopilot-altitude-lock-var", "Setting altitude lock")' class="btn btn-outline-primary" type="button">Set</button>
 															</div>
 														</div>
 													</td>
@@ -366,7 +366,7 @@
 														<div class="input-group sim-input-field">
 															<input id="autopilot-airspeed-hold-var" type="text" class="form-control" placeholder="?" aria-describedby="basic-addon2">
 															<div class="input-group-append">
-																<button onclick='triggerSimEventFromField ("KEY_AP_SPD_VAR_SET", "autopilot-airspeed-hold-var")' class="btn btn-outline-primary" type="button">Set</button>
+																<button onclick='triggerSimEventFromField ("KEY_AP_SPD_VAR_SET", "autopilot-airspeed-hold-var", "Setting airspeed hold")' class="btn btn-outline-primary" type="button">Set</button>
 															</div>
 														</div>
 													</td>

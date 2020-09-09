@@ -125,10 +125,6 @@ function displayData() {
     $("#rudder-trim-pct").text(rudder_trim_pct);
     $("#rudder-trim-slider").slider({values: [rudder_trim_pct]})
 
-
-
-
-
 }
 
 function checkAndUpdateButton(buttonName, variableToCheck, onText="On", offText="Off") {
@@ -171,11 +167,24 @@ function setSimDatapoint(datapointToSet, valueToUse) {
 }
 
 function triggerSimEvent(eventToTrigger, valueToUse){
+    alert (valueToUse)
     url_to_call = "/event/"+eventToTrigger+"/trigger";
     $.post( url_to_call, { value_to_use: valueToUse } );
 }
 
+function triggerSimEventFromField(eventToTrigger, fieldToUse){
+    // Get the field and the value in there
+    fieldToUse = "#" + fieldToUse
+    valueToUse = $(fieldToUse).val();
+    alert(valueToUse)
 
+    // Pass it to the API
+    url_to_call = "/event/"+eventToTrigger+"/trigger";
+    $.post( url_to_call, { value_to_use: valueToUse } );
 
+    // Clear the field so it can be repopulated with the placeholder
+    $(fieldToUse).val("")
+
+}
 
 

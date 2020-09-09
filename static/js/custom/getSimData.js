@@ -172,7 +172,7 @@ function triggerSimEvent(eventToTrigger, valueToUse){
     $.post( url_to_call, { value_to_use: valueToUse } );
 }
 
-function triggerSimEventFromField(eventToTrigger, fieldToUse){
+function triggerSimEventFromField(eventToTrigger, fieldToUse, messageToDisplay = null){
     // Get the field and the value in there
     fieldToUse = "#" + fieldToUse
     valueToUse = $(fieldToUse).val();

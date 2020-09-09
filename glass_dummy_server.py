@@ -53,6 +53,10 @@ def output_ui_variables():
     else:
         ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "DOWN"
 
+    ui_friendly_dictionary["ELEVATOR_TRIM_PCT"] = random.randint(-10,10)
+    ui_friendly_dictionary["RUDDER_TRIM_PCT"] = random.randint(-10,10)
+    ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = random.randint(0,100)
+
     longitude = longitude + 0.01
 
     return jsonify(ui_friendly_dictionary)

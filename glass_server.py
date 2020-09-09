@@ -290,12 +290,15 @@ def output_ui_variables():
 	ui_friendly_dictionary["FUEL_PERCENTAGE"] = round(fuel_percentage)
 	ui_friendly_dictionary["AIRSPEED_INDICATE"] = round(aq.get("AIRSPEED_INDICATED"))
 	ui_friendly_dictionary["ALTITUDE"] = thousandify(round(aq.get("PLANE_ALTITUDE")))
-	ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(aq.get("FLAPS_HANDLE_PERCENT")*100)
+
 
 	if aq.get("GEAR_HANDLE_POSITION") == 1:
 		ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "DOWN"
 	else:
 		ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "UP"
+	ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(aq.get("FLAPS_HANDLE_PERCENT") * 100)
+	# add elevator trim
+	# add rudder trim
 
 	ui_friendly_dictionary["LATITUDE"] = aq.get("PLANE_LATITUDE")
 	ui_friendly_dictionary["LONGITUDE"] = aq.get("PLANE_LONGITUDE")

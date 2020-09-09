@@ -26,6 +26,9 @@ let autopilot_airspeed_hold;
 let autopilot_airspeed_hold_var;
 
 let gear_handle_position;
+let elevator_trim_pct;
+let rudder_trim_pct;
+let flaps_handle_pct;
 
 window.setInterval(function(){
     getSimulatorData();
@@ -70,6 +73,9 @@ function getSimulatorData() {
 
         //Control surfaces
         gear_handle_position = data.GEAR_HANDLE_POSITION
+        elevator_trim_pct = data.ELEVATOR_TRIM_PCT
+        rudder_trim_pct = data.RUDDER_TRIM_PCT
+        flaps_handle_pct = data.FLAPS_HANDLE_PERCENT
 
     });
     return false;
@@ -109,6 +115,15 @@ function displayData() {
     } else {
         $("#gear-handle-position").removeClass("btn-danger").addClass("btn-success");
     }
+
+    $("#flaps-handle-pct").text(flaps_handle_pct);
+    $("#flaps-slider").slider({values: [flaps_handle_pct]})
+
+    $("#elevator-trim-pct").text(elevator_trim_pct);
+    $("#elevator-trim-slider").slider({values: [elevator_trim_pct]})
+
+    $("#rudder-trim-pct").text(rudder_trim_pct);
+    $("#rudder-trim-slider").slider({values: [rudder_trim_pct]})
 
 }
 
@@ -152,11 +167,24 @@ function setSimDatapoint(datapointToSet, valueToUse) {
 }
 
 function triggerSimEvent(eventToTrigger, valueToUse){
+    alert (valueToUse)
     url_to_call = "/event/"+eventToTrigger+"/trigger";
     $.post( url_to_call, { value_to_use: valueToUse } );
 }
 
+function triggerSimEventFromField(eventToTrigger, fieldToUse){
+    // Get the field and the value in there
+    fieldToUse = "#" + fieldToUse
+    valueToUse = $(fieldToUse).val();
+    alert(valueToUse)
 
+    // Pass it to the API
+    url_to_call = "/event/"+eventToTrigger+"/trigger";
+    $.post( url_to_call, { value_to_use: valueToUse } );
 
+    // Clear the field so it can be repopulated with the placeholder
+    $(fieldToUse).val("")
+
+}
 
 

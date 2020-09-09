@@ -1,7 +1,7 @@
 from .SimConnect import SimConnect, Request, Event, millis, DWORD
-from .Entities import Plane
 from .RequestList import AircraftRequests
 from .EventList import AircraftEvents
+
 
 def int_or_str(value):
 	try:
@@ -10,7 +10,7 @@ def int_or_str(value):
 		return value
 
 
-__version__ = "0.3.4"
+__version__ = "0.3.5"
 VERSION = tuple(map(int_or_str, __version__.split(".")))
 
-__all__ = ["SimConnect", "Request", "Event", "millis", "DWORD", "Plane", "AircraftRequests", "AircraftEvents"]
+__all__ = ["SimConnect", "Request", "Event", "millis", "DWORD", "AircraftRequests", "AircraftEvents"]

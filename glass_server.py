@@ -337,7 +337,7 @@ def output_detailed_json_data(dataset_name):
 	return jsonify(map)
 
 
-@app.route('/datapoint/<datapoint_name>/get')
+@app.route('/datapoint/<datapoint_name>/get', methods=["GET", "POST"])
 def get_datapoint_endpoint(datapoint_name):
 
 	index = request.form.get('index')

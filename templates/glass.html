@@ -5,10 +5,10 @@
 	<title>Glass Cockpit</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<!--	Bootstrap CSS-->
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+	<!-- Bootstrap CSS-->
+	<link rel="stylesheet" href="/static/vendor/bootstrap/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
 
-	<!--	Range Slider CSS-->
+	<!-- Range Slider CSS-->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rangeslider.js/2.3.3/rangeslider.css" integrity="sha512-FkNnPJevAkIHB3NqUiMadWNcoMcOCPQUMyF55JeAFZmPcSR6wK6TgZ0qL6bMrRqGNaaVS8CAwBYceORhdTUILQ==" crossorigin="anonymous" />
 
 	<!-- Leaflet CSS and JS -->
@@ -389,21 +389,32 @@
         accessToken: 'CQVU4GpEMHf6XeTxVy2x2zRCDJpr6zFX61tYzcs27Jeus4kfc9XBUNfz3mhPakJZ'
     });
 
+    var openaip_cached_basemap = new L.TileLayer("http://{s}.tile.maps.openaip.net/geowebcache/service/tms/1.0.0/openaip_basemap@EPSG%3A900913@png/{z}/{x}/{y}.png", {
+        maxZoom: 14,
+        minZoom: 4,
+        tms: true,
+        detectRetina: true,
+        subdomains: '12',
+        format: 'image/png',
+        transparent: true
+    });
+
     // Adding layers to the map
-    map.addLayer(simple);
-    map.addLayer(grayscale);
-    map.addLayer(openstreet);
     map.addLayer(basic);
+    map.addLayer(openaip_cached_basemap)
 
     var baseLayers = {
         "Grayscale": grayscale,
         "Open Street": openstreet,
         "Pale": simple,
-        "Default": basic
+        "Default": basic,
+    }
+    var overlays = {
+        "Aviation": openaip_cached_basemap
     }
 
     // Add control
-    L.control.layers(baseLayers).addTo(map)
+    L.control.layers(baseLayers, overlays).addTo(map)
 
     // Icon options
     var iconOptions = {
@@ -473,7 +484,7 @@
 
 <!--Boostrap JS-->
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+<script src="/static/vendor/bootstrap/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
 
 <!--Bootstrap Toggle JS-->
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>

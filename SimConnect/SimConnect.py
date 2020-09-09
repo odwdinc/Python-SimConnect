@@ -197,6 +197,7 @@ class SimConnect:
 		self.hSimConnect = HANDLE()
 		self.quit = 0
 		self.ok = False
+		self.DEFINITION_POS = None
 		self.my_dispatch_proc_rd = self.dll.DispatchProc(self.my_dispatch_proc)
 		if auto_connect:
 			self.connect()
@@ -312,11 +313,14 @@ class SimConnect:
 		else:
 			return False
 
+	def new_def_id(self, _name):
+		names = [m.name for m in self.dll.DATA_DEFINITION_ID] + [_name]
+		self.dll.DATA_DEFINITION_ID = Enum(self.dll.DATA_DEFINITION_ID.__name__, names)
+		return list(self.dll.DATA_DEFINITION_ID)[-1]
+
 	def new_request_id(self):
 		name = "Request" + str(len(self.Requests))
-		names = [m.name for m in self.dll.DATA_DEFINITION_ID] + [name]
-		self.dll.DATA_DEFINITION_ID = Enum(self.dll.DATA_DEFINITION_ID.__name__, names)
-		DEFINITION_ID = list(self.dll.DATA_DEFINITION_ID)[-1]
+		DEFINITION_ID = self.new_def_id(name)
 
 		names = [m.name for m in self.dll.DATA_REQUEST_ID] + [name]
 		self.dll.DATA_REQUEST_ID = Enum(self.dll.DATA_REQUEST_ID.__name__, names)
@@ -326,3 +330,50 @@ class SimConnect:
 
 	def new_request_holder(self, _time=2000):
 		return requestHolder(self, _time)
+
+	def set_pos(
+		self,
+		_Altitude,
+		_Latitude,
+		_Longitude,
+		_Airspeed,
+		_Pitch=0.0,
+		_Bank=0.0,
+		_Heading=0,
+		_OnGround=0,
+	):
+		Init = SIMCONNECT_DATA_INITPOSITION()
+		Init.Altitude = _Altitude
+		Init.Latitude = _Latitude
+		Init.Longitude = _Longitude
+		Init.Pitch = _Pitch
+		Init.Bank = _Bank
+		Init.Heading = _Heading
+		Init.OnGround = _OnGround
+		Init.Airspeed = _Airspeed
+
+		if self.DEFINITION_POS is None:
+			self.DEFINITION_POS = self.new_def_id("DEFINITION_POS")
+			err = self.dll.AddToDataDefinition(
+				self.hSimConnect,
+				self.DEFINITION_POS.value,
+				b'Initial Position',
+				b'',
+				SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_INITPOSITION,
+				0,
+				SIMCONNECT_UNUSED,
+			)
+
+		hr = self.dll.SetDataOnSimObject(
+			self.hSimConnect,
+			self.DEFINITION_POS.value,
+			SIMCONNECT_OBJECT_ID_USER,
+			0,
+			0,
+			sizeof(Init),
+			pointer(Init)
+		)
+		if IsHR(err, 0):
+			return True
+		else:
+			return False

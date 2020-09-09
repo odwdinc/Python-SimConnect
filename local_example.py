@@ -13,6 +13,20 @@ ct_g = millis()
 # creat simconnection and pass used user classes
 sm = SimConnect()
 
+
+sm.set_pos(
+	_Altitude=1000.0,
+	_Latitude=47.614699,
+	_Longitude=-122.358473,
+	_Airspeed=130,
+	_Heading=70.0,
+	# _Pitch=0.0,
+	# _Bank=0.0,
+	# _OnGround=0
+)
+
+sm.exit()
+quit()
 ae = AircraftEvents(sm)
 # PARKING_BRAKES = Event(b'PARKING_BRAKES', sm)
 # long path

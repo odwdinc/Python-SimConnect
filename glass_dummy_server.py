@@ -20,7 +20,7 @@ def thousandify(x):
 
 @app.route ('/')
 def glass():
-    return render_template("glass.html")
+    return render_template("glassp.html")
 
 @app.route('/ui')
 def output_ui_variables():

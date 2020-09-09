@@ -167,7 +167,6 @@ function setSimDatapoint(datapointToSet, valueToUse) {
 }
 
 function triggerSimEvent(eventToTrigger, valueToUse){
-    //alert (valueToUse)
     url_to_call = "/event/"+eventToTrigger+"/trigger";
     $.post( url_to_call, { value_to_use: valueToUse } );
 

@@ -365,6 +365,28 @@ def get_datapoint_endpoint(datapoint_name):
 	return jsonify(aq.get(datapoint_name))
 
 
+def set_datapoint(datapoint_name, index=None, value_to_use):
+	# This function actually does the work of setting the datapoint
+
+	if index is not None and ':index' in datapoint_name:
+		clas = aq._find(datapoint_name)
+		if clas is not None:
+			clas.obj(datapoint_name).setIndex(int(index))
+
+	sent = False
+	if value_to_use is None:
+		sent = aq.set(datapoint_name, 0)
+	else:
+		sent = aq.set(datapoint_name, int(value_to_use))
+
+	if sent is True:
+		status = "success"
+	else:
+		status = "Error with sending request: %s" % (datapoint_name)
+
+	return status
+
+
 @app.route('/datapoint/<datapoint_name>/set', methods=["POST"])
 def set_datapoint_endpoint(datapoint_name):
 	ds = request.get_json() if request.is_json else request.form
@@ -414,7 +436,11 @@ def custom_emergency(emergency_type):
 		number_of_engines = aq.get("NUMBER_OF_ENGINES")
 		print ("Number of engines: " + str(number_of_engines))
 
+		if number_of_engines < 0: return "error, no engines found"
+
 		engine_to_set_on_fire = random.randint(1,number_of_engines)
+
+		set_datapoint ("ENG_ON_FIRE:index", 1, 1)
 
 	return str(number_of_engines)
 

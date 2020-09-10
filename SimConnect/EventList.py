@@ -72,8 +72,9 @@ class AircraftEvents():
 	def find(self, key):
 		for clas in self.list:
 			for test in clas.list:
-				if key in str(test[0]):
+				if key == test[0].decode():
 					return getattr(clas, key)
+		return None
 
 	class __Engine(EventHelper):
 		list = [

@@ -253,6 +253,11 @@ request_autopilot = [
 	'FLY_BY_WIRE_SEC_FAILED'
 ]
 
+request_cabin = [
+	'CABIN_SEATBELTS_ALERT_SWITCH',
+	'CABIN_NO_SMOKING_ALERT_SWITCH'
+]
+
 
 def thousandify(x):
 	return f"{x:,}"
@@ -274,6 +279,7 @@ def get_dataset(data_type):
 	if data_type == "gear": request_to_action = request_gear
 	if data_type == "trim": request_to_action = request_trim
 	if data_type == "autopilot": request_to_action = request_autopilot
+	if data_type == 'cabin': request_to_action = request_cabin
 	if data_type == "ui": request_to_action = request_ui
 
 	return request_to_action
@@ -283,29 +289,33 @@ def get_dataset(data_type):
 def output_ui_variables():
 	data_dictionary = aq
 
+	# Initialise dictionaru
 	ui_friendly_dictionary = {}
 	ui_friendly_dictionary["STATUS"] = "success"
 
+	# Fuel
 	fuel_percentage = (aq.get("FUEL_TOTAL_QUANTITY") / aq.get("FUEL_TOTAL_CAPACITY")) * 100
 	ui_friendly_dictionary["FUEL_PERCENTAGE"] = round(fuel_percentage)
 	ui_friendly_dictionary["AIRSPEED_INDICATE"] = round(aq.get("AIRSPEED_INDICATED"))
 	ui_friendly_dictionary["ALTITUDE"] = thousandify(round(aq.get("PLANE_ALTITUDE")))
 
-
+	# Control surfaces
 	if aq.get("GEAR_HANDLE_POSITION") == 1:
 		ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "DOWN"
 	else:
 		ui_friendly_dictionary["GEAR_HANDLE_POSITION"] = "UP"
 	ui_friendly_dictionary["FLAPS_HANDLE_PERCENT"] = round(aq.get("FLAPS_HANDLE_PERCENT") * 100)
-	# add elevator trim
-	# add rudder trim
 
+	ui_friendly_dictionary["ELEVATOR_TRIM_PCT"] = round(aq.get("ELEVATOR_TRIM_PCT") * 100)
+	ui_friendly_dictionary["RUDDER_TRIM_PCT"] = round(aq.get("RUDDER_TRIM_PCT") * 100)
+
+	# Navigation
 	ui_friendly_dictionary["LATITUDE"] = aq.get("PLANE_LATITUDE")
 	ui_friendly_dictionary["LONGITUDE"] = aq.get("PLANE_LONGITUDE")
-
 	ui_friendly_dictionary["MAGNETIC_COMPASS"] = round(aq.get("MAGNETIC_COMPASS"))
 	ui_friendly_dictionary["VERTICAL_SPEED"] = round(aq.get("VERTICAL_SPEED"))
 
+	# Autopilot
 	ui_friendly_dictionary["AUTOPILOT_MASTER"] = aq.get("AUTOPILOT_MASTER")
 	ui_friendly_dictionary["AUTOPILOT_NAV_SELECTED"] = aq.get("AUTOPILOT_NAV_SELECTED")
 	ui_friendly_dictionary["AUTOPILOT_WING_LEVELER"] = aq.get("AUTOPILOT_WING_LEVELER")
@@ -325,6 +335,9 @@ def output_ui_variables():
 	ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD"] = aq.get("AUTOPILOT_AIRSPEED_HOLD")
 	ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD_VAR"] = round(aq.get("AUTOPILOT_AIRSPEED_HOLD_VAR"))
 
+	# Cabin
+	# Add cabin variables once tested through JSON
+
 	return jsonify(ui_friendly_dictionary)
 
 
@@ -337,7 +350,7 @@ def output_detailed_json_data(dataset_name):
 	return jsonify(map)
 
 
-@app.route('/datapoint/<datapoint_name>/get', methods=["GET", "POST"])
+@app.route('/datapoint/<datapoint_name>/get', methods=["GET"])
 def get_datapoint_endpoint(datapoint_name):
 	ds = request.get_json() if request.is_json else request.form
 	index = ds.get('index')

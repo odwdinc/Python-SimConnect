@@ -29,6 +29,7 @@ let gear_handle_position;
 let elevator_trim_pct;
 let rudder_trim_pct;
 let flaps_handle_pct;
+let flaps_handle_pct_reversed;
 
 window.setInterval(function(){
     getSimulatorData();
@@ -67,15 +68,16 @@ function getSimulatorData() {
         autopilot_vertical_hold_var = data.AUTOPILOT_VERTICAL_HOLD_VAR;
         autopilot_pitch_hold = data.AUTOPILOT_PITCH_HOLD;
         autopilot_pitch_hold_ref = data.AUTOPILOT_PITCH_HOLD_REF;
-        autopilot_flight_director_active = data.AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE
-        autopilot_airspeed_hold = data.AUTOPILOT_AIRSPEED_HOLD
-        autopilot_airspeed_hold_var = data.AUTOPILOT_AIRSPEED_HOLD_VAR
+        autopilot_flight_director_active = data.AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE;
+        autopilot_airspeed_hold = data.AUTOPILOT_AIRSPEED_HOLD;
+        autopilot_airspeed_hold_var = data.AUTOPILOT_AIRSPEED_HOLD_VAR;
 
         //Control surfaces
-        gear_handle_position = data.GEAR_HANDLE_POSITION
-        elevator_trim_pct = data.ELEVATOR_TRIM_PCT
-        rudder_trim_pct = data.RUDDER_TRIM_PCT
-        flaps_handle_pct = data.FLAPS_HANDLE_PERCENT
+        gear_handle_position = data.GEAR_HANDLE_POSITION;
+        elevator_trim_pct = data.ELEVATOR_TRIM_PCT;
+        rudder_trim_pct = data.RUDDER_TRIM_PCT;
+        flaps_handle_pct = data.FLAPS_HANDLE_PERCENT;
+        flaps_handle_pct_reversed = - flaps_handle_pct;
 
     });
     return false;
@@ -105,8 +107,8 @@ function displayData() {
 
     $("#autopilot-heading-lock-dir").attr('placeholder', autopilot_heading_lock_dir);
     $("#autopilot-altitude-lock-var").attr('placeholder', autopilot_altitude_lock_var);
-    $("#autopilot-airspeed-hold_var").attr('placeholder', autopilot_airspeed_hold_var);
-    $("#autopilot-pitch-hold_ref").attr('placeholder', autopilot_pitch_hold_ref);
+    $("#autopilot-airspeed-hold-var").attr('placeholder', autopilot_airspeed_hold_var);
+    $("#autopilot-pitch-hold-ref").attr('placeholder', autopilot_pitch_hold_ref);
 
     //Control surfaces
     $("#gear-handle-position").html(gear_handle_position);
@@ -117,7 +119,7 @@ function displayData() {
     }
 
     $("#flaps-handle-pct").text(flaps_handle_pct);
-    $("#flaps-slider").slider({values: [flaps_handle_pct]})
+    $("#flaps-slider").slider({values: [flaps_handle_pct_reversed]})
 
     $("#elevator-trim-pct").text(elevator_trim_pct);
     $("#elevator-trim-slider").slider({values: [elevator_trim_pct]})

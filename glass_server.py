@@ -391,22 +391,10 @@ def set_datapoint(datapoint_name, index=None, value_to_use=None):
 def set_datapoint_endpoint(datapoint_name):
 	ds = request.get_json() if request.is_json else request.form
 	index = ds.get('index')
-	if index is not None and ':index' in datapoint_name:
-		clas = aq._find(datapoint_name)
-		if clas is not None:
-			clas.obj(datapoint_name).setIndex(int(index))
-
 	value_to_use = ds.get('value_to_use')
-	sent = False
-	if value_to_use is None:
-		sent = aq.set(datapoint_name, 0)
-	else:
-		sent = aq.set(datapoint_name, int(value_to_use))
 
-	if sent is True:
-		status = "success"
-	else:
-		status = "Error with sending request: %s" % (datapoint_name)
+	status = set_datapoint (datapoint_name, index, value_to_use)
+
 	return jsonify(status)
 
 

@@ -389,6 +389,8 @@ def set_datapoint(datapoint_name, index=None, value_to_use=None):
 
 @app.route('/datapoint/<datapoint_name>/set', methods=["POST"])
 def set_datapoint_endpoint(datapoint_name):
+	# This is the http endpoint wrapper for setting a datapoint
+
 	ds = request.get_json() if request.is_json else request.form
 	index = ds.get('index')
 	value_to_use = ds.get('value_to_use')
@@ -428,8 +430,8 @@ def custom_emergency(emergency_type):
 
 		engine_to_set_on_fire = random.randint(1,number_of_engines)
 
-		set_datapoint ("ENG_ON_FIRE:index", 1, 1)
+		set_datapoint ("ENG_ON_FIRE:index", engine_to_set_on_fire, 1)
 
-	return str(number_of_engines)
+	return str(engine_to_set_on_fire)
 
 app.run(host='0.0.0.0', port=5000, debug=True)

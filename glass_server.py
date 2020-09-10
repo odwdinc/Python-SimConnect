@@ -365,7 +365,7 @@ def get_datapoint_endpoint(datapoint_name):
 	return jsonify(aq.get(datapoint_name))
 
 
-def set_datapoint(datapoint_name, index=None, value_to_use):
+def set_datapoint(datapoint_name, index=None, value_to_use=None):
 	# This function actually does the work of setting the datapoint
 
 	if index is not None and ':index' in datapoint_name:

@@ -216,6 +216,10 @@ function triggerSimEventFromField(eventToTrigger, fieldToUse, messageToDisplay =
 function triggerCustomEmergency(emergency_type) {
     url_to_call = "/custom_emergency/" + emergency_type
     $.post (url_to_call)
+
+    if (emergency_type === "random_engine_fire") {
+        temporaryAlert("Fire!", "Random engine fire trigger sent", "error")
+    }
 }
 
 

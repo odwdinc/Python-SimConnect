@@ -10,7 +10,6 @@ with open("requirements_dev.txt") as f:
 
 setup(
 	install_requires=install_requires,
-	tests_require=tests_require,
-	data_files=[("./SimConnect", ["./SimConnect/SimConnect.dll"])],
+	tests_require=tests_require
 )
 print(distutils.sysconfig.get_python_lib())

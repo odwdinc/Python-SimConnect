@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, render_template, request
 from SimConnect import *
 from time import sleep
+import random
 
 app = Flask(__name__)
 
@@ -407,8 +408,14 @@ def trigger_event(event_name):
 
 @app.route('/custom_emergency/<emergency_type>')
 def custom_emergency(emergency_type):
-	
 
-	return
+	if emergency_type == "engine_fire":
+		# Calculate number of engines
+		number_of_engines = aq.get("NUMBER_OF_ENGINES")
+		print ("Number of engines: " + str(number_of_engines))
+
+		engine_to_set_on_fire = random.randint(1,number_of_engines)
+
+	return str(number_of_engines)
 
 app.run(host='0.0.0.0', port=5000, debug=True)

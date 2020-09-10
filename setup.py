@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup
+import distutils.sysconfig
 
 with open("requirements.txt") as f:
 	install_requires = f.read()[1:].splitlines()[1:]
@@ -7,4 +8,9 @@ with open("requirements.txt") as f:
 with open("requirements_dev.txt") as f:
 	tests_require = f.read().splitlines()[1:]
 
-setup(install_requires=install_requires, tests_require=tests_require)
+setup(
+	install_requires=install_requires,
+	tests_require=tests_require,
+	data_files=[(distutils.sysconfig.get_python_lib() + "\\SimConnect", [".\\SimConnect\\SimConnect.dll"])],
+)
+print(distutils.sysconfig.get_python_lib())

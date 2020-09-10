@@ -5,6 +5,8 @@ import time
 from .Enum import *
 from .Constants import *
 from .Attributes import *
+import os
+_library_path = os.path.abspath(__file__).replace(".py", ".dll")
 
 LOGGER = logging.getLogger(__name__)
 
@@ -191,7 +193,7 @@ class SimConnect:
 			LOGGER.debug("Received:", dwID)
 		return
 
-	def __init__(self, auto_connect=True, library_path="./SimConnect.dll"):
+	def __init__(self, auto_connect=True, library_path=_library_path):
 
 		self.Requests = []
 		self.out_data = {}

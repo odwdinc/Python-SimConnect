@@ -213,6 +213,10 @@ function triggerSimEventFromField(eventToTrigger, fieldToUse, messageToDisplay =
 
 }
 
+function triggerCustomEmergency(emergency_type) {
+
+}
+
 
 function temporaryAlert(title, message, icon) {
     let timerInterval

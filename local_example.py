@@ -13,7 +13,7 @@ ct_g = millis()
 # creat simconnection and pass used user classes
 sm = SimConnect()
 
-
+# Set pos arund space nedle in WA.
 sm.set_pos(
 	_Altitude=1000.0,
 	_Latitude=47.614699,
@@ -25,8 +25,6 @@ sm.set_pos(
 	# _OnGround=0
 )
 
-sm.exit()
-quit()
 ae = AircraftEvents(sm)
 # PARKING_BRAKES = Event(b'PARKING_BRAKES', sm)
 # long path
@@ -73,13 +71,13 @@ while not sm.quit:
 	# THROTTLE1(1500)
 
 	# Send Event toggle AP_MASTER
-	AP_MASTER()
+	# AP_MASTER()
 
 	# send new data inine @ 5s
-	if ct_g + 5000 < millis():
-		if Throttle.value < 100:
-			Throttle.value += 5
-			print("THROTTLE SET")
-		ct_g = millis()
+	#if ct_g + 5000 < millis():
+	#	if Throttle.value < 100:
+	#		Throttle.value += 5
+	#		print("THROTTLE SET")
+	#	ct_g = millis()
 
 sm.exit()

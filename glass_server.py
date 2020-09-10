@@ -336,6 +336,8 @@ def output_ui_variables():
 	ui_friendly_dictionary["AUTOPILOT_AIRSPEED_HOLD_VAR"] = round(aq.get("AUTOPILOT_AIRSPEED_HOLD_VAR"))
 
 	# Cabin
+	ui_friendly_dictionary["CABIN_SEATBELTS_ALERT_SWITCH"] = aq.get("CABIN_SEATBELTS_ALERT_SWITCH")
+	ui_friendly_dictionary["CABIN_NO_SMOKING_ALERT_SWITCH"] = aq.get("CABIN_NO_SMOKING_ALERT_SWITCH")
 	# Add cabin variables once tested through JSON
 
 	return jsonify(ui_friendly_dictionary)

@@ -27,9 +27,13 @@ let autopilot_airspeed_hold_var;
 
 let gear_handle_position;
 let elevator_trim_pct;
+let elevator_trim_pct_reversed;
 let rudder_trim_pct;
 let flaps_handle_pct;
 let flaps_handle_pct_reversed;
+
+let cabin_seatbelts_alert_switch;
+let cabin_no_smoking_alert_switch;
 
 window.setInterval(function(){
     getSimulatorData();
@@ -75,9 +79,14 @@ function getSimulatorData() {
         //Control surfaces
         gear_handle_position = data.GEAR_HANDLE_POSITION;
         elevator_trim_pct = data.ELEVATOR_TRIM_PCT;
-        rudder_trim_pct = data.RUDDER_TRIM_PCT;
+        elevator_trim_pct_reversed = - elevator_trim_pct
+        //rudder_trim_pct = data.RUDDER_TRIM_PCT;
         flaps_handle_pct = data.FLAPS_HANDLE_PERCENT;
         flaps_handle_pct_reversed = - flaps_handle_pct;
+
+        //Cabin
+        cabin_no_smoking_alert_switch = data.CABIN_NO_SMOKING_ALERT_SWITCH;
+        cabin_seatbelts_alert_switch = data.CABIN_SEATBELTS_ALERT_SWITCH;
 
     });
     return false;
@@ -122,12 +131,23 @@ function displayData() {
     $("#flaps-slider").slider({values: [flaps_handle_pct_reversed]})
 
     $("#elevator-trim-pct").text(elevator_trim_pct);
-    $("#elevator-trim-slider").slider({values: [elevator_trim_pct]})
+    $("#elevator-trim-slider").slider({values: [elevator_trim_pct_reversed]})
 
-    $("#rudder-trim-pct").text(rudder_trim_pct);
-    $("#rudder-trim-slider").slider({values: [rudder_trim_pct]})
+    //$("#rudder-trim-pct").text(rudder_trim_pct);
+    //$("#rudder-trim-slider").slider({values: [rudder_trim_pct]})
 
-}
+    //Cabin
+    if (cabin_seatbelts_alert_switch === 1){
+        $("#seatbelt-sign").removeClass("btn-outline-danger").addClass("btn-danger").html("Seatbelt sign on");
+    } else {
+        $("#seatbelt-sign").removeClass("btn-danger").addClass("btn-outline-danger").html("Seatbelt sign off");
+    }
+
+    if (cabin_no_smoking_alert_switch === 1){
+        $("#no-smoking-sign").removeClass("btn-outline-danger").addClass("btn-danger").html("No smoking sign on");
+    } else {
+        $("#no-smoking-sign").removeClass("btn-danger").addClass("btn-outline-danger").html("No smoking sign off");
+    }}
 
 function checkAndUpdateButton(buttonName, variableToCheck, onText="On", offText="Off") {
     if (variableToCheck === 1) {

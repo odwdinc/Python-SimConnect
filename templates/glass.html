@@ -238,8 +238,8 @@
 								<div class="col-12">
 									<div class="card bg-light mb-3">
 										<div class="card-body">
-											<button onclick="triggerSimEvent('CABIN_SEATBELTS_ALERT_SWITCH_TOGGLE')" id="seatbelt-sign" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Seatbelt sign</button>
-											<button onclick="triggerSimEvent('CABIN_NO_SMOKING_ALERT_SWITCH_TOGGLE')" id="no-smoking-sign" type="button" class="btn mt-1 btn-block btn-danger btn-lg">No smoking sign</button>
+											<button onclick="triggerSimEvent('CABIN_SEATBELTS_ALERT_SWITCH_TOGGLE')" id="seatbelt-sign" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Seatbelt sign ?</button>
+											<button onclick="triggerSimEvent('CABIN_NO_SMOKING_ALERT_SWITCH_TOGGLE')" id="no-smoking-sign" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">No smoking sign ?</button>
 											<button onclick="temporaryAlert('', 'Cabin crew please contact cockpit', 'success')" id="cabin-crew-contact" type="button" class="btn mt-5 btn-block btn-primary btn-lg">Cabin crew call</button>
 										</div>
 									</div>
@@ -294,6 +294,7 @@
 										</div>
 									</div>
 								</div>
+								<!--
 								<div class="col-12">
 									<div class="card bg-light">
 										<div class="card-body"">
@@ -303,6 +304,7 @@
 										</div>
 									</div>
 								</div>
+								-->
 
 							</div>
 						</div>
@@ -504,12 +506,12 @@
 
     $("#rudder-trim-slider")
         .slider({
-            min: -30,
-            max: 30,
+            min: -50,
+            max: 50,
             orientation: "horizontal"
         })
         .slider("pips", {
-            step: "10",
+            step: "25",
             first: "pip",
             last: "pip"
         });

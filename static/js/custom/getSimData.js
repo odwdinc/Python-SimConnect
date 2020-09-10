@@ -27,8 +27,13 @@ let autopilot_airspeed_hold_var;
 
 let gear_handle_position;
 let elevator_trim_pct;
+let elevator_trim_pct_reversed;
 let rudder_trim_pct;
 let flaps_handle_pct;
+let flaps_handle_pct_reversed;
+
+let cabin_seatbelts_alert_switch;
+let cabin_no_smoking_alert_switch;
 
 window.setInterval(function(){
     getSimulatorData();
@@ -67,15 +72,21 @@ function getSimulatorData() {
         autopilot_vertical_hold_var = data.AUTOPILOT_VERTICAL_HOLD_VAR;
         autopilot_pitch_hold = data.AUTOPILOT_PITCH_HOLD;
         autopilot_pitch_hold_ref = data.AUTOPILOT_PITCH_HOLD_REF;
-        autopilot_flight_director_active = data.AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE
-        autopilot_airspeed_hold = data.AUTOPILOT_AIRSPEED_HOLD
-        autopilot_airspeed_hold_var = data.AUTOPILOT_AIRSPEED_HOLD_VAR
+        autopilot_flight_director_active = data.AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE;
+        autopilot_airspeed_hold = data.AUTOPILOT_AIRSPEED_HOLD;
+        autopilot_airspeed_hold_var = data.AUTOPILOT_AIRSPEED_HOLD_VAR;
 
         //Control surfaces
-        gear_handle_position = data.GEAR_HANDLE_POSITION
-        elevator_trim_pct = data.ELEVATOR_TRIM_PCT
-        rudder_trim_pct = data.RUDDER_TRIM_PCT
-        flaps_handle_pct = data.FLAPS_HANDLE_PERCENT
+        gear_handle_position = data.GEAR_HANDLE_POSITION;
+        elevator_trim_pct = data.ELEVATOR_TRIM_PCT;
+        elevator_trim_pct_reversed = - elevator_trim_pct
+        //rudder_trim_pct = data.RUDDER_TRIM_PCT;
+        flaps_handle_pct = data.FLAPS_HANDLE_PERCENT;
+        flaps_handle_pct_reversed = - flaps_handle_pct;
+
+        //Cabin
+        cabin_no_smoking_alert_switch = data.CABIN_NO_SMOKING_ALERT_SWITCH;
+        cabin_seatbelts_alert_switch = data.CABIN_SEATBELTS_ALERT_SWITCH;
 
     });
     return false;
@@ -105,8 +116,8 @@ function displayData() {
 
     $("#autopilot-heading-lock-dir").attr('placeholder', autopilot_heading_lock_dir);
     $("#autopilot-altitude-lock-var").attr('placeholder', autopilot_altitude_lock_var);
-    $("#autopilot-airspeed-hold_var").attr('placeholder', autopilot_airspeed_hold_var);
-    $("#autopilot-pitch-hold_ref").attr('placeholder', autopilot_pitch_hold_ref);
+    $("#autopilot-airspeed-hold-var").attr('placeholder', autopilot_airspeed_hold_var);
+    $("#autopilot-pitch-hold-ref").attr('placeholder', autopilot_pitch_hold_ref);
 
     //Control surfaces
     $("#gear-handle-position").html(gear_handle_position);
@@ -117,15 +128,26 @@ function displayData() {
     }
 
     $("#flaps-handle-pct").text(flaps_handle_pct);
-    $("#flaps-slider").slider({values: [flaps_handle_pct]})
+    $("#flaps-slider").slider({values: [flaps_handle_pct_reversed]})
 
     $("#elevator-trim-pct").text(elevator_trim_pct);
-    $("#elevator-trim-slider").slider({values: [elevator_trim_pct]})
+    $("#elevator-trim-slider").slider({values: [elevator_trim_pct_reversed]})
 
-    $("#rudder-trim-pct").text(rudder_trim_pct);
-    $("#rudder-trim-slider").slider({values: [rudder_trim_pct]})
+    //$("#rudder-trim-pct").text(rudder_trim_pct);
+    //$("#rudder-trim-slider").slider({values: [rudder_trim_pct]})
 
-}
+    //Cabin
+    if (cabin_seatbelts_alert_switch === 1){
+        $("#seatbelt-sign").removeClass("btn-outline-danger").addClass("btn-danger").html("Seatbelt sign on");
+    } else {
+        $("#seatbelt-sign").removeClass("btn-danger").addClass("btn-outline-danger").html("Seatbelt sign off");
+    }
+
+    if (cabin_no_smoking_alert_switch === 1){
+        $("#no-smoking-sign").removeClass("btn-outline-danger").addClass("btn-danger").html("No smoking sign on");
+    } else {
+        $("#no-smoking-sign").removeClass("btn-danger").addClass("btn-outline-danger").html("No smoking sign off");
+    }}
 
 function checkAndUpdateButton(buttonName, variableToCheck, onText="On", offText="Off") {
     if (variableToCheck === 1) {
@@ -189,6 +211,15 @@ function triggerSimEventFromField(eventToTrigger, fieldToUse, messageToDisplay =
         temporaryAlert('', messageToDisplay + " to " + valueToUse, "success")
     }
 
+}
+
+function triggerCustomEmergency(emergency_type) {
+    url_to_call = "/custom_emergency/" + emergency_type
+    $.post (url_to_call)
+
+    if (emergency_type === "random_engine_fire") {
+        temporaryAlert("Fire!", "Random engine fire trigger sent", "error")
+    }
 }
 
 

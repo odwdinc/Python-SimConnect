@@ -212,10 +212,13 @@
 								<div class="col-12">
 									<div class="card bg-light mb-3">
 										<div class="card-body">
-											<button onclick="triggerSimEvent('')" id="emergency-engine-fire" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg" disabled>Engine Fire</button>
+											<button onclick="triggerCustomEmergency('random_engine_fire')" id="emergency-engine-fire" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Engine Fire</button>
 											<div class="row">
 												<div class="col-6"><button onclick="triggerSimEvent('TOGGLE_ENGINE1_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Engine 1 Fail</button></div>
 												<div class="col-6">	<button onclick="triggerSimEvent('TOGGLE_ENGINE2_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Engine 2 Fail</button></div>
+												<div class="col-6">	<button onclick="triggerSimEvent('TOGGLE_ENGINE3_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Engine 3 Fail</button></div>
+												<div class="col-6">	<button onclick="triggerSimEvent('TOGGLE_ENGINE4_FAILURE')" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Engine 3 Fail</button></div>
+
 											</div>
 
 											<button onclick="triggerSimEvent('TOGGLE_ELECTRICAL_FAILURE')" type="button" class="btn mt-5 btn-block btn-outline-danger btn-lg">Electrical Fail</button>
@@ -238,9 +241,9 @@
 								<div class="col-12">
 									<div class="card bg-light mb-3">
 										<div class="card-body">
-											<button onclick="triggerSimEvent('')" id="seatbelt-sign" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Seatbelt sign</button>
-											<button onclick="triggerSimEvent('')" id="seatbelt-sign" type="button" class="btn mt-1 btn-block btn-danger btn-lg">No smoking sign</button>
-											<button onclick="temporaryAlert('', 'Cabin crew please contact cockpit', 'success')" id="cabin-crew-contact" type="button" class="btn mt-5 btn-block btn-primary btn-lg">Cabin crew call</button>
+											<button onclick="triggerSimEvent('CABIN_SEATBELTS_ALERT_SWITCH_TOGGLE')" id="seatbelt-sign" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">Seatbelt sign ?</button>
+											<button onclick="triggerSimEvent('CABIN_NO_SMOKING_ALERT_SWITCH_TOGGLE')" id="no-smoking-sign" type="button" class="btn mt-1 btn-block btn-outline-danger btn-lg">No smoking sign ?</button>
+											<button onclick="temporaryAlert('', 'Cabin crew please contact cockpit', 'success')" id="cabin-crew-contact" type="button" class="btn mt-5 btn-block btn-primary btn-lg">Cabin crew chime</button>
 										</div>
 									</div>
 								</div>
@@ -294,6 +297,7 @@
 										</div>
 									</div>
 								</div>
+								<!--
 								<div class="col-12">
 									<div class="card bg-light">
 										<div class="card-body"">
@@ -303,6 +307,7 @@
 										</div>
 									</div>
 								</div>
+								-->
 
 							</div>
 						</div>
@@ -491,8 +496,8 @@
 
     $("#flaps-slider")
         .slider({
-            min: 0,
-            max: 100,
+            min: -100,
+            max: 0,
             orientation: "vertical",
 	        value: 10
         })
@@ -504,12 +509,12 @@
 
     $("#rudder-trim-slider")
         .slider({
-            min: -30,
-            max: 30,
+            min: -50,
+            max: 50,
             orientation: "horizontal"
         })
         .slider("pips", {
-            step: "10",
+            step: "25",
             first: "pip",
             last: "pip"
         });

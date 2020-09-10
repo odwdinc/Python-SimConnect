@@ -292,7 +292,6 @@ def get_dataset(data_type):
 
 @app.route('/ui')
 def output_ui_variables():
-	data_dictionary = aq   #Does this do anything?
 
 	# Initialise dictionaru
 	ui_friendly_dictionary = {}
@@ -360,9 +359,9 @@ def get_datapoint(datapoint_name, index=None):
 	# This function actually does the work of getting the datapoint
 
 	if index is not None and ':index' in datapoint_name:
-		clas = aq._find(datapoint_name)
-		if clas is not None:
-			clas.obj(datapoint_name).setIndex(int(index))
+		dp = aq.find(datapoint_name)
+		if dp is not None:
+			dp.setIndex(int(index))
 
 	return aq.get(datapoint_name)
 

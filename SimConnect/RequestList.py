@@ -1,3879 +1,1320 @@
+from SimConnect import *
+
+
+class RequestHelper:
+	def __init__(self, _sm):
+		self.sm = _sm
+		self.dic = []
+
+	def __getattribute__(self, _name):
+		return super().__getattribute__(_name)
+
+	def __getattr__(self, _name):
+		for key in self.list:
+			if _name == key[0]:
+				setable = False
+				if key[4] == 'Y':
+					setable = True
+				ne = Request((key[2], key[3]), self.sm, _dec=key[1], _settable=setable)
+				setattr(self, _name, ne)
+				return ne
+		return None
+
+	def get(self, _name):
+		if getattr(self, _name) is None:
+			return None
+		return getattr(self, _name).value
+
+	def set(self, _name, _value=0):
+		temp = getattr(self, _name)
+		if temp is None:
+			return False
+		if not getattr(temp, "settable"):
+			return False
+
+		setattr(temp, "value", _value)
+		return True
+
+	def json(self):
+		map = {}
+		for att in self.list:
+			val = self.get(att[0])
+			if val is not None:
+				map[att[0]] = val
+		return map
+
 
 class AircraftRequests():
-	# NOTE AUTOGEN form SDK
-	# Any AircraftRequests that has :index
-	# need futher work and will return None
-	# if Request.defined is false there was
-	# errors with the Request definition.
-	# Request.description hold a small dec of the Request
-	def _find(self, key):
-		for requ in list(self.__dict__):
-			rq_holder = getattr(self, requ)
-			for rq in rq_holder.dic:
-				if key in rq:
-					return rq_holder
+	def find(self, key):
+		for clas in self.list:
+			for test in clas.list:
+				if key == test[0]:
+					return getattr(clas, key)
+		return None
 
 	def get(self, key):
-		event = self._find(key)
-		if event is None:
+		request = self.find(key)
+		if request is None:
 			return None
-		return event.get(key)
+		return request.value
 
 	def set(self, key, _value):
-		return self._find(key).set(key, _value)
+		request = self.find(key)
+		if request is None:
+			return False
+		request.value = _value
+		return True
 
-	def getall(self):
-		for requ in list(self.__dict__):
-			holder = getattr(self, requ)
-			print(requ)
-			for rq in holder.dic:
-				(val, dec) = holder.get(rq, True)
-				if val is None:
-					continue
-				print("\t%s: %f\n\t\t%s" % (rq, val, dec))
+	def __init__(self, _sm):
+		self.sm = _sm
+		self.list = []
+		self.EngineData = self.__AircraftEngineData(_sm)
+		self.list.append(self.EngineData)
+		self.FuelTankSelection = self.__FuelTankSelection(_sm)
+		self.list.append(self.FuelTankSelection)
+		self.FuelData = self.__AircraftFuelData(_sm)
+		self.list.append(self.FuelData)
+		self.LightsData = self.__AircraftLightsData(_sm)
+		self.list.append(self.LightsData)
+		self.PositionandSpeedData = self.__AircraftPositionandSpeedData(_sm)
+		self.list.append(self.PositionandSpeedData)
+		self.FlightInstrumentationData = self.__AircraftFlightInstrumentationData(_sm)
+		self.list.append(self.FlightInstrumentationData)
+		self.AvionicsData = self.__AircraftAvionicsData(_sm)
+		self.list.append(self.AvionicsData)
+		self.ControlsData = self.__AircraftControlsData(_sm)
+		self.list.append(self.ControlsData)
+		self.AutopilotData = self.__AircraftAutopilotData(_sm)
+		self.list.append(self.AutopilotData)
+		self.LandingGearData = self.__AircraftLandingGearData(_sm)
+		self.list.append(self.LandingGearData)
+		self.EnvironmentData = self.__AircraftEnvironmentData(_sm)
+		self.list.append(self.EnvironmentData)
+		self.HelicopterSpecificData = self.__HelicopterSpecificData(_sm)
+		self.list.append(self.HelicopterSpecificData)
+		self.MiscellaneousSystemsData = self.__AircraftMiscellaneousSystemsData(_sm)
+		self.list.append(self.MiscellaneousSystemsData)
+		self.MiscellaneousData = self.__AircraftMiscellaneousData(_sm)
+		self.list.append(self.MiscellaneousData)
+		self.StringData = self.__AircraftStringData(_sm)
+		self.list.append(self.StringData)
+		self.AIControlledAircraft = self.__AIControlledAircraft(_sm)
+		self.list.append(self.AIControlledAircraft)
+		self.CarrierOperations = self.__CarrierOperations(_sm)
+		self.list.append(self.CarrierOperations)
+		self.Racing = self.__Racing(_sm)
+		self.list.append(self.Racing)
+		self.EnvironmentData = self.__EnvironmentData(_sm)
+		self.list.append(self.EnvironmentData)
+		self.SlingsandHoists = self.__SlingsandHoists(_sm)
+		self.list.append(self.SlingsandHoists)
 
-	def __init__(self, sm):
-		self.Environment = sm.new_request_holder()
-		self.Environment.add(
-			'AMBIENT_DENSITY',
-			(b'AMBIENT DENSITY', b'Slugs per cubic feet'),
-			_dec='Ambient density'
-		)
-		self.Environment.add(
-			'AMBIENT_TEMPERATURE',
-			(b'AMBIENT TEMPERATURE', b'Celsius'),
-			_dec='Ambient temperature'
-		)
-		self.Environment.add(
-			'AMBIENT_PRESSURE',
-			(b'AMBIENT PRESSURE', b'Inches of mercury, inHg'),
-			_dec='Ambient pressure'
-		)
-		self.Environment.add(
-			'AMBIENT_WIND_VELOCITY',
-			(b'AMBIENT WIND VELOCITY', b'Knots'),
-			_dec='Wind velocity'
-		)
-		self.Environment.add(
-			'AMBIENT_WIND_DIRECTION',
-			(b'AMBIENT WIND DIRECTION', b'Degrees'),
-			_dec='Wind direction'
-		)
-		self.Environment.add(
-			'AMBIENT_WIND_X',
-			(b'AMBIENT WIND X', b'Meters per second'),
-			_dec='Wind component in East/West direction.'
-		)
-		self.Environment.add(
-			'AMBIENT_WIND_Y',
-			(b'AMBIENT WIND Y', b'Meters per second'),
-			_dec='Wind component in vertical direction.'
-		)
-		self.Environment.add(
-			'AMBIENT_WIND_Z',
-			(b'AMBIENT WIND Z', b'Meters per second'),
-			_dec='Wind component in North/South direction.'
-		)
-		self.Environment.add(
-			'STRUCT_AMBIENT_WIND',
-			(b'STRUCT AMBIENT WIND', b'Feet_per_second'),
-			_dec='''
-			X (latitude),
-			Y (vertical) and Z (longitude)
-			components of the wind.'''
-		)
-		self.Environment.add(
-			'AIRCRAFT_WIND_X',
-			(b'AIRCRAFT WIND X', b'Knots'),
-			_dec='Wind component in aircraft lateral axis'
-		)
-		self.Environment.add(
-			'AIRCRAFT_WIND_Y',
-			(b'AIRCRAFT WIND Y', b'Knots'),
-			_dec='Wind component in aircraft vertical axis'
-		)
-		self.Environment.add(
-			'AIRCRAFT_WIND_Z',
-			(b'AIRCRAFT WIND Z', b'Knots'),
-			_dec='Wind component in aircraft longitudinal axis'
-		)
-		self.Environment.add(
-			'BAROMETER_PRESSURE',
-			(b'BAROMETER PRESSURE', b'Millibars'),
-			_dec='Barometric pressure'
-		)
-		self.Environment.add(
-			'SEA_LEVEL_PRESSURE',
-			(b'SEA LEVEL PRESSURE', b'Millibars'),
-			_dec='Barometric pressure at sea level'
-		)
-		self.Environment.add(
-			'TOTAL_AIR_TEMPERATURE',
-			(b'TOTAL AIR TEMPERATURE', b'Celsius'),
-			_dec='''
-				Total air temperature is the air temperature
-				at the front of the aircraft where the ram
-				pressure from the speed of the aircraft
-				is taken into account.'''
-		)
-		self.Environment.add(
-			'WINDSHIELD_RAIN_EFFECT_AVAILABLE',
-			(b'WINDSHIELD RAIN EFFECT AVAILABLE', b'Bool'),
-			_dec='Is visual effect available on this aircraft'
-		)
-		self.Environment.add(
-			'AMBIENT_IN_CLOUD',
-			(b'AMBIENT IN CLOUD', b'Bool'),
-			_dec='True if the aircraft is in a cloud.'
-		)
-		self.Environment.add(
-			'AMBIENT_VISIBILITY',
-			(b'AMBIENT VISIBILITY', b'Meters'),
-			_dec='Ambient visibility'
-		)
-		self.Environment.add(
-			'STANDARD_ATM_TEMPERATURE',
-			(b'STANDARD ATM TEMPERATURE', b'Rankine'),
-			_dec='Outside temperature on the standard ATM scale'
-		)
+	class __AircraftEngineData(RequestHelper):
+		list = [
+			("NUMBER_OF_ENGINES", "Number of engines (minimum 0, maximum 4)", b'NUMBER OF ENGINES', b'Number', 'N'),
+			# ['ENGINE CONTROL SELECT', 'Selected engines (combination of bit flags)']
+			# ['1 = Engine 1']
+			# ['2 = Engine 2']
+			# ['4 = Engine 3']
+			# ['8 = Engine 4', 'Mask', 'Y', '-']
+			("THROTTLE_LOWER_LIMIT", "Percent throttle defining lower limit (negative for reverse thrust equipped airplanes)", b'THROTTLE LOWER LIMIT', b'Percent', 'N'),
+			# ['ENGINE TYPE', 'Engine type:']
+			# ['0 = Piston']
+			# ['1 = Jet']
+			# ['2 = None']
+			# ['3 = Helo(Bell) turbine']
+			# ['4 = Unsupported']
+			# ['5 = Turboprop', 'Enum', 'N', '-']
+			("MASTER_IGNITION_SWITCH", "Aircraft master ignition switch (grounds all engines magnetos)", b'MASTER IGNITION SWITCH', b'Bool', 'N'),
+			("GENERAL_ENG_COMBUSTION:index", "Combustion flag", b'GENERAL ENG COMBUSTION:index', b'Bool', 'Y'),
+			("GENERAL_ENG_MASTER_ALTERNATOR:index", "Alternator (generator) switch", b'GENERAL ENG MASTER ALTERNATOR:index', b'Bool', 'N'),
+			("GENERAL_ENG_FUEL_PUMP_SWITCH:index", "Fuel pump switch", b'GENERAL ENG FUEL PUMP SWITCH:index', b'Bool', 'N'),
+			("GENERAL_ENG_FUEL_PUMP_ON:index", "Fuel pump on/off", b'GENERAL ENG FUEL PUMP ON:index', b'Bool', 'N'),
+			("GENERAL_ENG_RPM:index", "Engine rpm", b'GENERAL ENG RPM:index', b'Rpm', 'N'),
+			("GENERAL_ENG_PCT_MAX_RPM:index", "Percent of max rated rpm", b'GENERAL ENG PCT MAX RPM:index', b'Percent', 'N'),
+			("GENERAL_ENG_MAX_REACHED_RPM:index", "Maximum attained rpm", b'GENERAL ENG MAX REACHED RPM:index', b'Rpm', 'N'),
+			("GENERAL_ENG_THROTTLE_LEVER_POSITION:index", "Percent of max throttle position", b'GENERAL ENG THROTTLE LEVER POSITION:index', b'Percent', 'Y'),
+			("GENERAL_ENG_MIXTURE_LEVER_POSITION:index", "Percent of max mixture lever position", b'GENERAL ENG MIXTURE LEVER POSITION:index', b'Percent', 'Y'),
+			("GENERAL_ENG_PROPELLER_LEVER_POSITION:index", "Percent of max prop lever position", b'GENERAL ENG PROPELLER LEVER POSITION:index', b'Percent', 'Y'),
+			("GENERAL_ENG_STARTER:index", "Engine starter on/off", b'GENERAL ENG STARTER:index', b'Bool', 'N'),
+			("GENERAL_ENG_EXHAUST_GAS_TEMPERATURE:index", "Engine exhaust gas temperature.", b'GENERAL ENG EXHAUST GAS TEMPERATURE:index', b'Rankine', 'Y'),
+			("GENERAL_ENG_OIL_PRESSURE:index", "Engine oil pressure", b'GENERAL ENG OIL PRESSURE:index', b'Psf', 'Y'),
+			("GENERAL_ENG_OIL_LEAKED_PERCENT:index", "Percent of max oil capacity leaked", b'GENERAL ENG OIL LEAKED PERCENT:index', b'Percent', 'N'),
+			("GENERAL_ENG_COMBUSTION_SOUND_PERCENT:index", "Percent of maximum engine sound", b'GENERAL ENG COMBUSTION SOUND PERCENT:index', b'Percent', 'N'),
+			("GENERAL_ENG_DAMAGE_PERCENT:index", "Percent of total engine damage", b'GENERAL ENG DAMAGE PERCENT:index', b'Percent', 'N'),
+			("GENERAL_ENG_OIL_TEMPERATURE:index", "Engine oil temperature", b'GENERAL ENG OIL TEMPERATURE:index', b'Rankine', 'Y'),
+			("GENERAL_ENG_FAILED:index", "Fail flag", b'GENERAL ENG FAILED:index', b'Bool', 'N'),
+			("GENERAL_ENG_GENERATOR_SWITCH:index", "Alternator (generator) switch", b'GENERAL ENG GENERATOR SWITCH:index', b'Bool', 'N'),
+			("GENERAL_ENG_GENERATOR_ACTIVE:index", "Alternator (generator) on/off", b'GENERAL ENG GENERATOR ACTIVE:index', b'Bool', 'Y'),
+			("GENERAL_ENG_ANTI_ICE_POSITION:index", "Engine anti-ice switch", b'GENERAL ENG ANTI ICE POSITION:index', b'Bool', 'N'),
+			("GENERAL_ENG_FUEL_VALVE:index", "Fuel valve state", b'GENERAL ENG FUEL VALVE:index', b'Bool', 'N'),
+			("GENERAL_ENG_FUEL_PRESSURE:index", "Engine fuel pressure", b'GENERAL ENG FUEL PRESSURE:index', b'Psi', 'Y'),
+			("GENERAL_ENG_ELAPSED_TIME:index", "Total engine elapsed time", b'GENERAL ENG ELAPSED TIME:index', b'Hours', 'N'),
+			("RECIP_ENG_COWL_FLAP_POSITION:index", "Percent cowl flap opened", b'RECIP ENG COWL FLAP POSITION:index', b'Percent', 'Y'),
+			("RECIP_ENG_PRIMER:index", "Engine primer position", b'RECIP ENG PRIMER:index', b'Bool', 'Y'),
+			("RECIP_ENG_MANIFOLD_PRESSURE:index", "Engine manifold pressure", b'RECIP ENG MANIFOLD PRESSURE:index', b'Psi', 'Y'),
+			("RECIP_ENG_ALTERNATE_AIR_POSITION:index", "Alternate air control", b'RECIP ENG ALTERNATE AIR POSITION:index', b'Position', 'Y'),
+			("RECIP_ENG_COOLANT_RESERVOIR_PERCENT:index", "Percent coolant available", b'RECIP ENG COOLANT RESERVOIR PERCENT:index', b'Percent', 'Y'),
+			("RECIP_ENG_LEFT_MAGNETO:index", "Left magneto state", b'RECIP ENG LEFT MAGNETO:index', b'Bool', 'Y'),
+			("RECIP_ENG_RIGHT_MAGNETO:index", "Right magneto state", b'RECIP ENG RIGHT MAGNETO:index', b'Bool', 'Y'),
+			("RECIP_ENG_BRAKE_POWER:index", "Brake power produced by engine", b'RECIP ENG BRAKE POWER:index', b'Foot pounds per second', 'Y'),
+			("RECIP_ENG_STARTER_TORQUE:index", "Torque produced by engine", b'RECIP ENG STARTER TORQUE:index', b'Foot pound', 'Y'),
+			("RECIP_ENG_TURBOCHARGER_FAILED:index", "Turbo failed state", b'RECIP ENG TURBOCHARGER FAILED:index', b'Bool', 'Y'),
+			("RECIP_ENG_EMERGENCY_BOOST_ACTIVE:index", "War emergency power active", b'RECIP ENG EMERGENCY BOOST ACTIVE:index', b'Bool', 'Y'),
+			("RECIP_ENG_EMERGENCY_BOOST_ELAPSED_TIME:index", "Elapsed time war emergency power active", b'RECIP ENG EMERGENCY BOOST ELAPSED TIME:index', b'Hours', 'Y'),
+			("RECIP_ENG_WASTEGATE_POSITION:index", "Percent turbo wastegate closed", b'RECIP ENG WASTEGATE POSITION:index', b'Percent', 'Y'),
+			("RECIP_ENG_TURBINE_INLET_TEMPERATURE:index", "Engine turbine inlet temperature", b'RECIP ENG TURBINE INLET TEMPERATURE:index', b'Celsius', 'Y'),
+			("RECIP_ENG_CYLINDER_HEAD_TEMPERATURE:index", "Engine cylinder head temperature", b'RECIP ENG CYLINDER HEAD TEMPERATURE:index', b'Celsius', 'Y'),
+			("RECIP_ENG_RADIATOR_TEMPERATURE:index", "Engine radiator temperature", b'RECIP ENG RADIATOR TEMPERATURE:index', b'Celsius', 'Y'),
+			("RECIP_ENG_FUEL_AVAILABLE:index", "True if fuel is available", b'RECIP ENG FUEL AVAILABLE:index', b'Bool', 'Y'),
+			("RECIP_ENG_FUEL_FLOW:index", "Engine fuel flow", b'RECIP ENG FUEL FLOW:index', b'Pounds per hour', 'Y'),
+			("RECIP_ENG_FUEL_TANK_SELECTOR:index", "Fuel tank selected for engine. See fuel tank list.", b'RECIP ENG FUEL TANK SELECTOR:index', b'Enum', 'N'),
+			# ['RECIP ENG FUEL TANKS USED:index', 'Fuel tanks used, one or more of the following bit flags:']
+			# ['Center 1 Bit 0']
+			# ['Center 2 Bit 1']
+			# ['Center 3 Bit 2']
+			# ['Left Main Bit 3']
+			# ['Left Aux Bit 4']
+			# ['Left Tip Bit 5']
+			# ['Right Main Bit 6']
+			# ['Right Aux Bit 7']
+			# ['Right Tip Bit 8']
+			# ['External 1 Bit 9']
+			# ['External 2 Bit 10', 'Mask', 'Y', '-']
+			("RECIP_ENG_FUEL_NUMBER_TANKS_USED:index", "Number of tanks currently being used", b'RECIP ENG FUEL NUMBER TANKS USED:index', b'Number', 'N'),
+			("RECIP_CARBURETOR_TEMPERATURE:index", "Carburetor temperature", b'RECIP CARBURETOR TEMPERATURE:index', b'Celsius', 'Y'),
+			("RECIP_MIXTURE_RATIO:index", "Fuel / Air mixture ratio", b'RECIP MIXTURE RATIO:index', b'Ratio', 'Y'),
+			("TURB_ENG_N1:index", "Turbine engine N1", b'TURB ENG N1:index', b'Percent', 'Y'),
+			("TURB_ENG_N2:index", "Turbine engine N2", b'TURB ENG N2:index', b'Percent', 'Y'),
+			("TURB_ENG_CORRECTED_N1:index", "Turbine engine corrected N1", b'TURB ENG CORRECTED N1:index', b'Percent', 'Y'),
+			("TURB_ENG_CORRECTED_N2:index", "Turbine engine corrected N2", b'TURB ENG CORRECTED N2:index', b'Percent', 'Y'),
+			("TURB_ENG_CORRECTED_FF:index", "Corrected fuel flow", b'TURB ENG CORRECTED FF:index', b'Pounds per hour', 'Y'),
+			("TURB_ENG_MAX_TORQUE_PERCENT:index", "Percent of max rated torque", b'TURB ENG MAX TORQUE PERCENT:index', b'Percent', 'Y'),
+			("TURB_ENG_PRESSURE_RATIO:index", "Engine pressure ratio", b'TURB ENG PRESSURE RATIO:index', b'Ratio', 'Y'),
+			("TURB_ENG_ITT:index", "Engine ITT", b'TURB ENG ITT:index', b'Rankine', 'Y'),
+			("TURB_ENG_AFTERBURNER:index", "Afterburner state", b'TURB ENG AFTERBURNER:index', b'Bool', 'N'),
+			("TURB_ENG_JET_THRUST:index", "Engine jet thrust", b'TURB ENG JET THRUST:index', b'Pounds', 'N'),
+			("TURB_ENG_BLEED_AIR:index", "Bleed air pressure", b'TURB ENG BLEED AIR:index', b'Psi', 'N'),
+			("TURB_ENG_TANK_SELECTOR:index", "Fuel tank selected for engine. See fuel tank list.", b'TURB ENG TANK SELECTOR:index', b'Enum', 'N'),
+			# ['TURB ENG TANKS USED:index', 'Fuel tanks used, one or more of the following bit flags:']
+			# ['Center 1 Bit 0']
+			# ['Center 2 Bit 1']
+			# ['Center 3 Bit 2']
+			# ['Left Main Bit 3']
+			# ['Left Aux Bit 4']
+			# ['Left Tip Bit 5']
+			# ['Right Main Bit 6']
+			# ['Right Aux Bit 7']
+			# ['Right Tip Bit 8']
+			# ['External 1 Bit 9']
+			# ['External 2 Bit 10', 'Mask', 'N', '-']
+			("TURB_ENG_NUM_TANKS_USED:index", "Number of tanks currently being used", b'TURB ENG NUM TANKS USED:index', b'Number', 'N'),
+			("TURB_ENG_FUEL_FLOW_PPH:index", "Engine fuel flow", b'TURB ENG FUEL FLOW PPH:index', b'Pounds per hour', 'N'),
+			("TURB_ENG_FUEL_AVAILABLE:index", "True if fuel is available", b'TURB ENG FUEL AVAILABLE:index', b'Bool', 'N'),
+			("TURB_ENG_REVERSE_NOZZLE_PERCENT:index", "Percent thrust reverser nozzles deployed", b'TURB ENG REVERSE NOZZLE PERCENT:index', b'Percent', 'N'),
+			("TURB_ENG_VIBRATION:index", "Engine vibration value", b'TURB ENG VIBRATION:index', b'Number', 'N'),
+			("ENG_FAILED:index", "Failure flag", b'ENG FAILED:index', b'Number', 'N'),
+			("ENG_RPM_ANIMATION_PERCENT:index", "Percent max rated rpm used for visual animation", b'ENG RPM ANIMATION PERCENT:index', b'Percent', 'N'),
+			("ENG_ON_FIRE:index", "On fire state", b'ENG ON FIRE:index', b'Bool', 'Y'),
+			("ENG_FUEL_FLOW_BUG_POSITION:index", "Fuel flow reference", b'ENG FUEL FLOW BUG POSITION:index', b'Pounds per hour', 'N'),
+			("PROP_RPM:index", "Propeller rpm", b'PROP RPM:index', b'Rpm', 'Y'),
+			("PROP_MAX_RPM_PERCENT:index", "Percent of max rated rpm", b'PROP MAX RPM PERCENT:index', b'Percent', 'N'),
+			("PROP_THRUST:index", "Propeller thrust", b'PROP THRUST:index', b'Pounds', 'N'),
+			("PROP_BETA:index", "Prop blade pitch angle", b'PROP BETA:index', b'Radians', 'N'),
+			("PROP_FEATHERING_INHIBIT:index", "Feathering inhibit flag", b'PROP FEATHERING INHIBIT:index', b'Bool', 'N'),
+			("PROP_FEATHERED:index", "Feathered state", b'PROP FEATHERED:index', b'Bool', 'N'),
+			("PROP_SYNC_DELTA_LEVER:index", "Corrected prop correction input on slaved engine", b'PROP SYNC DELTA LEVER:index', b'Position', 'N'),
+			("PROP_AUTO_FEATHER_ARMED:index", "Auto-feather armed state", b'PROP AUTO FEATHER ARMED:index', b'Bool', 'N'),
+			("PROP_FEATHER_SWITCH:index", "Prop feather switch", b'PROP FEATHER SWITCH:index', b'Bool', 'N'),
+			("PANEL_AUTO_FEATHER_SWITCH:index", "Auto-feather arming switch", b'PANEL AUTO FEATHER SWITCH:index', b'Bool', 'N'),
+			("PROP_SYNC_ACTIVE:index", "True if prop sync is active", b'PROP SYNC ACTIVE:index', b'Bool', 'N'),
+			("PROP_DEICE_SWITCH:index", "True if prop deice switch on", b'PROP DEICE SWITCH:index', b'Bool', 'N'),
+			("ENG_COMBUSTION", "True if the engine is running", b'ENG COMBUSTION', b'Bool', 'N'),
+			("ENG_N1_RPM:index", "Engine N1 rpm", b'ENG N1 RPM:index', b'Rpm (0 to 16384 = 0 to 100%)', 'N'),
+			("ENG_N2_RPM:index", "Engine N2 rpm", b'ENG N2 RPM:index', b'Rpm(0 to 16384 = 0 to 100%)', 'N'),
+			("ENG_FUEL_FLOW_GPH:index", "Engine fuel flow", b'ENG FUEL FLOW GPH:index', b'Gallons per hour', 'N'),
+			("ENG_FUEL_FLOW_PPH:index", "Engine fuel flow", b'ENG FUEL FLOW PPH:index', b'Pounds per hour', 'N'),
+			("ENG_TORQUE:index", "Torque", b'ENG TORQUE:index', b'Foot pounds', 'N'),
+			("ENG_ANTI_ICE:index", "Anti-ice switch", b'ENG ANTI ICE:index', b'Bool', 'N'),
+			("ENG_PRESSURE_RATIO:index", "Engine pressure ratio", b'ENG PRESSURE RATIO:index', b'Ratio (0-16384)', 'N'),
+			("ENG_EXHAUST_GAS_TEMPERATURE:index", "Exhaust gas temperature", b'ENG EXHAUST GAS TEMPERATURE:index', b'Rankine', 'N'),
+			("ENG_EXHAUST_GAS_TEMPERATURE_GES:index", "Governed engine setting", b'ENG EXHAUST GAS TEMPERATURE GES:index', b'Percent over 100', 'N'),
+			("ENG_CYLINDER_HEAD_TEMPERATURE:index", "Engine cylinder head temperature", b'ENG CYLINDER HEAD TEMPERATURE:index', b'Rankine', 'N'),
+			("ENG_OIL_TEMPERATURE:index", "Engine oil temperature", b'ENG OIL TEMPERATURE:index', b'Rankine', 'N'),
+			("ENG_OIL_PRESSURE:index", "Engine oil pressure", b'ENG OIL PRESSURE:index', b'Pounds per square foot', 'N'),
+			("ENG_OIL_QUANTITY:index", "Engine oil quantitiy as a percentage of full capacity", b'ENG OIL QUANTITY:index', b'Percent over 100', 'N'),
+			("ENG_HYDRAULIC_PRESSURE:index", "Engine hydraulic pressure", b'ENG HYDRAULIC PRESSURE:index', b'Pounds per square foot', 'N'),
+			("ENG_HYDRAULIC_QUANTITY:index", "Engine hydraulic fluid quantity, as a percentage of total capacity", b'ENG HYDRAULIC QUANTITY:index', b'Percent over 100', 'N'),
+			("ENG_MANIFOLD_PRESSURE:index", "Engine manifold pressure.", b'ENG MANIFOLD PRESSURE:index', b'inHG.', 'N'),
+			("ENG_VIBRATION:index", "Engine vibration", b'ENG VIBRATION:index', b'Number', 'N'),
+			("ENG_RPM_SCALER:index", "Obsolete", b'ENG RPM SCALER:index', b'Scalar', 'N'),
+			("ENG_MAX_RPM", "Maximum rpm", b'ENG MAX RPM', b'Rpm', 'N'),
+			("GENERAL_ENG_STARTER_ACTIVE", "True if engine starter is active", b'GENERAL ENG STARTER ACTIVE', b'Bool', 'N'),
+			("GENERAL_ENG_FUEL_USED_SINCE_START", "Fuel used since the engines were last started", b'GENERAL ENG FUEL USED SINCE START', b'Pounds', 'N'),
+			("TURB_ENG_PRIMARY_NOZZLE_PERCENT:index", "Percent thrust of primary nozzle", b'TURB ENG PRIMARY NOZZLE PERCENT:index', b'Percent over 100', 'N'),
+			("TURB_ENG_IGNITION_SWITCH", "True if the turbine engine ignition switch is on", b'TURB ENG IGNITION SWITCH', b'Bool', 'N'),
+			("TURB_ENG_MASTER_STARTER_SWITCH", "True if the turbine engine master starter switch is on", b'TURB ENG MASTER STARTER SWITCH', b'Bool', 'N'),
+			("TURB_ENG_AFTERBURNER_STAGE_ACTIVE", "The stage of the afterburner, or 0 if the afterburner is not active.", b'TURB ENG AFTERBURNER STAGE ACTIVE', b'Number', 'N'),
+			("TURB_ENG_AFTERBURNER_PCT_ACTIVE", "The percentage that the afterburner is running at.", b'TURB ENG AFTERBURNER PCT ACTIVE', b'Percent_over_100', 'N'),
+		]
 
-		self.Engine = sm.new_request_holder()
-		self.Engine.add(
-			'NUMBER_OF_ENGINES',
-			(b'NUMBER OF ENGINES', b'Number'),
-			_dec='Number of engines (minimum 0, maximum 4)'
-		)
-		self.Engine.add(
-			'THROTTLE_LOWER_LIMIT',
-			(b'THROTTLE LOWER LIMIT', b'Percent'),
-			_dec='''
-				Percent throttle defining lower limit
-				(negative for reverse thrust equipped airplanes)'''
-		)
-		self.Engine.add(
-			'MASTER_IGNITION_SWITCH',
-			(b'MASTER IGNITION SWITCH', b'Bool'),
-			_dec='''
-				Aircraft master ignition switch
-				(grounds all engines magnetos)'''
-		)
-		self.Engine.add(
-			'GENERAL_ENG_COMBUSTION:index',
-			(b'GENERAL ENG COMBUSTION:index', b'Bool'),
-			_dec='Combustion flag'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_MASTER_ALTERNATOR:index',
-			(b'GENERAL ENG MASTER ALTERNATOR:index', b'Bool'),
-			_dec='Alternator (generator) switch'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_FUEL_PUMP_SWITCH:index',
-			(b'GENERAL ENG FUEL PUMP SWITCH:index', b'Bool'),
-			_dec='Fuel pump switch'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_FUEL_PUMP_ON:index',
-			(b'GENERAL ENG FUEL PUMP ON:index', b'Bool'),
-			_dec='Fuel pump on/off'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_RPM:index',
-			(b'GENERAL ENG RPM:index', b'Rpm'),
-			_dec='Engine rpm'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_PCT_MAX_RPM:index',
-			(b'GENERAL ENG PCT MAX RPM:index', b'Percent'),
-			_dec='Percent of max rated rpm'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_MAX_REACHED_RPM:index',
-			(b'GENERAL ENG MAX REACHED RPM:index', b'Rpm'),
-			_dec='Maximum attained rpm'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_THROTTLE_LEVER_POSITION:index',
-			(b'GENERAL ENG THROTTLE LEVER POSITION:index', b'Percent'),
-			_dec='Percent of max throttle position'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_MIXTURE_LEVER_POSITION:index',
-			(b'GENERAL ENG MIXTURE LEVER POSITION:index', b'Percent'),
-			_dec='Percent of max mixture lever position'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_PROPELLER_LEVER_POSITION:index',
-			(b'GENERAL ENG PROPELLER LEVER POSITION:index', b'Percent'),
-			_dec='Percent of max prop lever position'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_STARTER:index',
-			(b'GENERAL ENG STARTER:index', b'Bool'),
-			_dec='Engine starter on/off'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_EXHAUST_GAS_TEMPERATURE:index',
-			(b'GENERAL ENG EXHAUST GAS TEMPERATURE:index', b'Rankine'),
-			_dec='Engine exhaust gas temperature.'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_OIL_PRESSURE:index',
-			(b'GENERAL ENG OIL PRESSURE:index', b'Psf'),
-			_dec='Engine oil pressure'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_OIL_LEAKED_PERCENT:index',
-			(b'GENERAL ENG OIL LEAKED PERCENT:index', b'Percent'),
-			_dec='Percent of max oil capacity leaked'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_COMBUSTION_SOUND_PERCENT:index',
-			(b'GENERAL ENG COMBUSTION SOUND PERCENT:index', b'Percent'),
-			_dec='Percent of maximum engine sound'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_DAMAGE_PERCENT:index',
-			(b'GENERAL ENG DAMAGE PERCENT:index', b'Percent'),
-			_dec='Percent of total engine damage'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_OIL_TEMPERATURE:index',
-			(b'GENERAL ENG OIL TEMPERATURE:index', b'Rankine'),
-			_dec='Engine oil temperature'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_FAILED:index',
-			(b'GENERAL ENG FAILED:index', b'Bool'),
-			_dec='Fail flag'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_GENERATOR_SWITCH:index',
-			(b'GENERAL ENG GENERATOR SWITCH:index', b'Bool'),
-			_dec='Alternator (generator) switch'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_GENERATOR_ACTIVE:index',
-			(b'GENERAL ENG GENERATOR ACTIVE:index', b'Bool'),
-			_dec='Alternator (generator) on/off'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_ANTI_ICE_POSITION:index',
-			(b'GENERAL ENG ANTI ICE POSITION:index', b'Bool'),
-			_dec='Engine anti-ice switch'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_FUEL_VALVE:index',
-			(b'GENERAL ENG FUEL VALVE:index', b'Bool'),
-			_dec='Fuel valve state'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_FUEL_PRESSURE:index',
-			(b'GENERAL ENG FUEL PRESSURE:index', b'Psi'),
-			_dec='Engine fuel pressure'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_ELAPSED_TIME:index',
-			(b'GENERAL ENG ELAPSED TIME:index', b'Hours'),
-			_dec='Total engine elapsed time'
-		)
-		self.Engine.add(
-			'RECIP_ENG_COWL_FLAP_POSITION:index',
-			(b'RECIP ENG COWL FLAP POSITION:index', b'Percent'),
-			_dec='Percent cowl flap opened'
-		)
-		self.Engine.add(
-			'RECIP_ENG_PRIMER:index',
-			(b'RECIP ENG PRIMER:index', b'Bool'),
-			_dec='Engine primer position'
-		)
-		self.Engine.add(
-			'RECIP_ENG_MANIFOLD_PRESSURE:index',
-			(b'RECIP ENG MANIFOLD PRESSURE:index', b'Psi'),
-			_dec='Engine manifold pressure'
-		)
-		self.Engine.add(
-			'RECIP_ENG_ALTERNATE_AIR_POSITION:index',
-			(b'RECIP ENG ALTERNATE AIR POSITION:index', b'Position'),
-			_dec='Alternate air control'
-		)
-		self.Engine.add(
-			'RECIP_ENG_COOLANT_RESERVOIR_PERCENT:index',
-			(b'RECIP ENG COOLANT RESERVOIR PERCENT:index', b'Percent'),
-			_dec='Percent coolant available'
-		)
-		self.Engine.add(
-			'RECIP_ENG_LEFT_MAGNETO:index',
-			(b'RECIP ENG LEFT MAGNETO:index', b'Bool'),
-			_dec='Left magneto state'
-		)
-		self.Engine.add(
-			'RECIP_ENG_RIGHT_MAGNETO:index',
-			(b'RECIP ENG RIGHT MAGNETO:index', b'Bool'),
-			_dec='Right magneto state'
-		)
-		self.Engine.add(
-			'RECIP_ENG_BRAKE_POWER:index',
-			(b'RECIP ENG BRAKE POWER:index', b'Foot pounds per second'),
-			_dec='Brake power produced by engine'
-		)
-		self.Engine.add(
-			'RECIP_ENG_STARTER_TORQUE:index',
-			(b'RECIP ENG STARTER TORQUE:index', b'Foot pound'),
-			_dec='Torque produced by engine'
-		)
-		self.Engine.add(
-			'RECIP_ENG_TURBOCHARGER_FAILED:index',
-			(b'RECIP ENG TURBOCHARGER FAILED:index', b'Bool'),
-			_dec='Turbo failed state'
-		)
-		self.Engine.add(
-			'RECIP_ENG_EMERGENCY_BOOST_ACTIVE:index',
-			(b'RECIP ENG EMERGENCY BOOST ACTIVE:index', b'Bool'),
-			_dec='War emergency power active'
-		)
-		self.Engine.add(
-			'RECIP_ENG_EMERGENCY_BOOST_ELAPSED_TIME:index',
-			(b'RECIP ENG EMERGENCY BOOST ELAPSED TIME:index', b'Hours'),
-			_dec='Elapsed time war emergency power active'
-		)
-		self.Engine.add(
-			'RECIP_ENG_WASTEGATE_POSITION:index',
-			(b'RECIP ENG WASTEGATE POSITION:index', b'Percent'),
-			_dec='Percent turbo wastegate closed'
-		)
-		self.Engine.add(
-			'RECIP_ENG_TURBINE_INLET_TEMPERATURE:index',
-			(b'RECIP ENG TURBINE INLET TEMPERATURE:index', b'Celsius'),
-			_dec='Engine turbine inlet temperature'
-		)
-		self.Engine.add(
-			'RECIP_ENG_CYLINDER_HEAD_TEMPERATURE:index',
-			(b'RECIP ENG CYLINDER HEAD TEMPERATURE:index', b'Celsius'),
-			_dec='Engine cylinder head temperature'
-		)
-		self.Engine.add(
-			'RECIP_ENG_RADIATOR_TEMPERATURE:index',
-			(b'RECIP ENG RADIATOR TEMPERATURE:index', b'Celsius'),
-			_dec='Engine radiator temperature'
-		)
-		self.Engine.add(
-			'RECIP_ENG_FUEL_AVAILABLE:index',
-			(b'RECIP ENG FUEL AVAILABLE:index', b'Bool'),
-			_dec='True if fuel is available'
-		)
-		self.Engine.add(
-			'RECIP_ENG_FUEL_FLOW:index',
-			(b'RECIP ENG FUEL FLOW:index', b'Pounds per hour'),
-			_dec='Engine fuel flow'
-		)
-		self.Engine.add(
-			'RECIP_ENG_FUEL_TANK_SELECTOR:index',
-			(b'RECIP ENG FUEL TANK SELECTOR:index', b'Enum'),
-			_dec='Fuel tank selected for engine. See fuel tank list.'
-		)
-		self.Engine.add(
-			'RECIP_ENG_FUEL_NUMBER_TANKS_USED:index',
-			(b'RECIP ENG FUEL NUMBER TANKS USED:index', b'Number'),
-			_dec='Number of tanks currently being used'
-		)
-		self.Engine.add(
-			'RECIP_CARBURETOR_TEMPERATURE:index',
-			(b'RECIP CARBURETOR TEMPERATURE:index', b'Celsius'),
-			_dec='Carburetor temperature'
-		)
-		self.Engine.add(
-			'RECIP_MIXTURE_RATIO:index',
-			(b'RECIP MIXTURE RATIO:index', b'Ratio'),
-			_dec='Fuel / Air mixture ratio'
-		)
-		self.Engine.add(
-			'TURB_ENG_N1:index',
-			(b'TURB ENG N1:index', b'Percent'),
-			_dec='Turbine engine N1'
-		)
-		self.Engine.add(
-			'TURB_ENG_N2:index',
-			(b'TURB ENG N2:index', b'Percent'),
-			_dec='Turbine engine N2'
-		)
-		self.Engine.add(
-			'TURB_ENG_CORRECTED_N1:index',
-			(b'TURB ENG CORRECTED N1:index', b'Percent'),
-			_dec='Turbine engine corrected N1'
-		)
-		self.Engine.add(
-			'TURB_ENG_CORRECTED_N2:index',
-			(b'TURB ENG CORRECTED N2:index', b'Percent'),
-			_dec='Turbine engine corrected N2'
-		)
-		self.Engine.add(
-			'TURB_ENG_CORRECTED_FF:index',
-			(b'TURB ENG CORRECTED FF:index', b'Pounds per hour'),
-			_dec='Corrected fuel flow'
-		)
-		self.Engine.add(
-			'TURB_ENG_MAX_TORQUE_PERCENT:index',
-			(b'TURB ENG MAX TORQUE PERCENT:index', b'Percent'),
-			_dec='Percent of max rated torque'
-		)
-		self.Engine.add(
-			'TURB_ENG_PRESSURE_RATIO:index',
-			(b'TURB ENG PRESSURE RATIO:index', b'Ratio'),
-			_dec='Engine pressure ratio'
-		)
-		self.Engine.add(
-			'TURB_ENG_ITT:index',
-			(b'TURB ENG ITT:index', b'Rankine'),
-			_dec='Engine ITT'
-		)
-		self.Engine.add(
-			'TURB_ENG_AFTERBURNER:index',
-			(b'TURB ENG AFTERBURNER:index', b'Bool'),
-			_dec='Afterburner state'
-		)
-		self.Engine.add(
-			'TURB_ENG_JET_THRUST:index',
-			(b'TURB ENG JET THRUST:index', b'Pounds'),
-			_dec='Engine jet thrust'
-		)
-		self.Engine.add(
-			'TURB_ENG_BLEED_AIR:index',
-			(b'TURB ENG BLEED AIR:index', b'Psi'),
-			_dec='Bleed air pressure'
-		)
-		self.Engine.add(
-			'TURB_ENG_TANK_SELECTOR:index',
-			(b'TURB ENG TANK SELECTOR:index', b'Enum'),
-			_dec='Fuel tank selected for engine. See fuel tank list.'
-		)
-		self.Engine.add(
-			'TURB_ENG_NUM_TANKS_USED:index',
-			(b'TURB ENG NUM TANKS USED:index', b'Number'),
-			_dec='Number of tanks currently being used'
-		)
-		self.Engine.add(
-			'TURB_ENG_FUEL_FLOW_PPH:index',
-			(b'TURB ENG FUEL FLOW PPH:index', b'Pounds per hour'),
-			_dec='Engine fuel flow'
-		)
-		self.Engine.add(
-			'TURB_ENG_FUEL_AVAILABLE:index',
-			(b'TURB ENG FUEL AVAILABLE:index', b'Bool'),
-			_dec='True if fuel is available'
-		)
-		self.Engine.add(
-			'TURB_ENG_REVERSE_NOZZLE_PERCENT:index',
-			(b'TURB ENG REVERSE NOZZLE PERCENT:index', b'Percent'),
-			_dec='Percent thrust reverser nozzles deployed'
-		)
-		self.Engine.add(
-			'TURB_ENG_VIBRATION:index',
-			(b'TURB ENG VIBRATION:index', b'Number'),
-			_dec='Engine vibration value'
-		)
-		self.Engine.add(
-			'ENG_FAILED:index',
-			(b'ENG FAILED:index', b'Number'),
-			_dec='Failure flag'
-		)
-		self.Engine.add(
-			'ENG_RPM_ANIMATION_PERCENT:index',
-			(b'ENG RPM ANIMATION PERCENT:index', b'Percent'),
-			_dec='Percent max rated rpm used for visual animation'
-		)
-		self.Engine.add(
-			'ENG_ON_FIRE:index',
-			(b'ENG ON FIRE:index', b'Bool'),
-			_dec='On fire state'
-		)
-		self.Engine.add(
-			'ENG_FUEL_FLOW_BUG_POSITION:index',
-			(b'ENG FUEL FLOW BUG POSITION:index', b'Pounds per hour'),
-			_dec='Fuel flow reference'
-		)
-		self.Engine.add(
-			'PROP_RPM:index',
-			(b'PROP RPM:index', b'Rpm'),
-			_dec='Propeller rpm'
-		)
-		self.Engine.add(
-			'PROP_MAX_RPM_PERCENT:index',
-			(b'PROP MAX RPM PERCENT:index', b'Percent'),
-			_dec='Percent of max rated rpm'
-		)
-		self.Engine.add(
-			'PROP_THRUST:index',
-			(b'PROP THRUST:index', b'Pounds'),
-			_dec='Propeller thrust'
-		)
-		self.Engine.add(
-			'PROP_BETA:index',
-			(b'PROP BETA:index', b'Radians'),
-			_dec='Prop blade pitch angle'
-		)
-		self.Engine.add(
-			'PROP_FEATHERING_INHIBIT:index',
-			(b'PROP FEATHERING INHIBIT:index', b'Bool'),
-			_dec='Feathering inhibit flag'
-		)
-		self.Engine.add(
-			'PROP_FEATHERED:index',
-			(b'PROP FEATHERED:index', b'Bool'),
-			_dec='Feathered state'
-		)
-		self.Engine.add(
-			'PROP_SYNC_DELTA_LEVER:index',
-			(b'PROP SYNC DELTA LEVER:index', b'Position'),
-			_dec='Corrected prop correction input on slaved engine'
-		)
-		self.Engine.add(
-			'PROP_AUTO_FEATHER_ARMED:index',
-			(b'PROP AUTO FEATHER ARMED:index', b'Bool'),
-			_dec='Auto-feather armed state'
-		)
-		self.Engine.add(
-			'PROP_FEATHER_SWITCH:index',
-			(b'PROP FEATHER SWITCH:index', b'Bool'),
-			_dec='Prop feather switch'
-		)
-		self.Engine.add(
-			'PANEL_AUTO_FEATHER_SWITCH:index',
-			(b'PANEL AUTO FEATHER SWITCH:index', b'Bool'),
-			_dec='Auto-feather arming switch'
-		)
-		self.Engine.add(
-			'PROP_SYNC_ACTIVE:index',
-			(b'PROP SYNC ACTIVE:index', b'Bool'),
-			_dec='True if prop sync is active'
-		)
-		self.Engine.add(
-			'PROP_DEICE_SWITCH:index',
-			(b'PROP DEICE SWITCH:index', b'Bool'),
-			_dec='True if prop deice switch on'
-		)
-		self.Engine.add(
-			'ENG_COMBUSTION',
-			(b'ENG COMBUSTION', b'Bool'),
-			_dec='True if the engine is running'
-		)
-		self.Engine.add(
-			'ENG_N1_RPM:index',
-			(b'ENG N1 RPM:index', b'Rpm (0 to 16384 = 0 to 100%)'),
-			_dec='Engine N1 rpm'
-		)
-		self.Engine.add(
-			'ENG_N2_RPM:index',
-			(b'ENG N2 RPM:index', b'Rpm(0 to 16384 = 0 to 100%)'),
-			_dec='Engine N2 rpm'
-		)
-		self.Engine.add(
-			'ENG_FUEL_FLOW_GPH:index',
-			(b'ENG FUEL FLOW GPH:index', b'Gallons per hour'),
-			_dec='Engine fuel flow'
-		)
-		self.Engine.add(
-			'ENG_FUEL_FLOW_PPH:index',
-			(b'ENG FUEL FLOW PPH:index', b'Pounds per hour'),
-			_dec='Engine fuel flow'
-		)
-		self.Engine.add(
-			'ENG_TORQUE:index',
-			(b'ENG TORQUE:index', b'Foot pounds'),
-			_dec='Torque'
-		)
-		self.Engine.add(
-			'ENG_ANTI_ICE:index',
-			(b'ENG ANTI ICE:index', b'Bool'),
-			_dec='Anti-ice switch'
-		)
-		self.Engine.add(
-			'ENG_PRESSURE_RATIO:index',
-			(b'ENG PRESSURE RATIO:index', b'Ratio (0-16384)'),
-			_dec='Engine pressure ratio'
-		)
-		self.Engine.add(
-			'ENG_EXHAUST_GAS_TEMPERATURE:index',
-			(b'ENG EXHAUST GAS TEMPERATURE:index', b'Rankine'),
-			_dec='Exhaust gas temperature'
-		)
-		self.Engine.add(
-			'ENG_EXHAUST_GAS_TEMPERATURE_GES:index',
-			(b'ENG EXHAUST GAS TEMPERATURE GES:index', b'Percent over 100'),
-			_dec='Governed engine setting'
-		)
-		self.Engine.add(
-			'ENG_CYLINDER_HEAD_TEMPERATURE:index',
-			(b'ENG CYLINDER HEAD TEMPERATURE:index', b'Rankine'),
-			_dec='Engine cylinder head temperature'
-		)
-		self.Engine.add(
-			'ENG_OIL_TEMPERATURE:index',
-			(b'ENG OIL TEMPERATURE:index', b'Rankine'),
-			_dec='Engine oil temperature'
-		)
-		self.Engine.add(
-			'ENG_OIL_PRESSURE:index',
-			(b'ENG OIL PRESSURE:index', b'Pounds per square foot'),
-			_dec='Engine oil pressure'
-		)
-		self.Engine.add(
-			'ENG_OIL_QUANTITY:index',
-			(b'ENG OIL QUANTITY:index', b'Percent over 100'),
-			_dec='Engine oil quantitiy as a percentage of full capacity'
-		)
-		self.Engine.add(
-			'ENG_HYDRAULIC_PRESSURE:index',
-			(b'ENG HYDRAULIC PRESSURE:index', b'Pounds per square foot'),
-			_dec='Engine hydraulic pressure'
-		)
-		self.Engine.add(
-			'ENG_HYDRAULIC_QUANTITY:index',
-			(b'ENG HYDRAULIC QUANTITY:index', b'Percent over 100'),
-			_dec='Engine hydraulic fluid quantity, as a percentage of total capacity'
-		)
-		self.Engine.add(
-			'ENG_MANIFOLD_PRESSURE:index',
-			(b'ENG MANIFOLD PRESSURE:index', b'inHG.'),
-			_dec='Engine manifold pressure.'
-		)
-		self.Engine.add(
-			'ENG_VIBRATION:index',
-			(b'ENG VIBRATION:index', b'Number'),
-			_dec='Engine vibration'
-		)
-		self.Engine.add(
-			'ENG_RPM_SCALER:index',
-			(b'ENG RPM SCALER:index', b'Scalar'),
-			_dec='Obsolete'
-		)
-		self.Engine.add(
-			'ENG_MAX_RPM',
-			(b'ENG MAX RPM', b'Rpm'),
-			_dec='Maximum rpm'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_STARTER_ACTIVE',
-			(b'GENERAL ENG STARTER ACTIVE', b'Bool'),
-			_dec='True if engine starter is active'
-		)
-		self.Engine.add(
-			'GENERAL_ENG_FUEL_USED_SINCE_START',
-			(b'GENERAL ENG FUEL USED SINCE START', b'Pounds'),
-			_dec='Fuel used since the engines were last started'
-		)
-		self.Engine.add(
-			'TURB_ENG_PRIMARY_NOZZLE_PERCENT:index',
-			(b'TURB ENG PRIMARY NOZZLE PERCENT:index', b'Percent over 100'),
-			_dec='Percent thrust of primary nozzle'
-		)
-		self.Engine.add(
-			'TURB_ENG_IGNITION_SWITCH',
-			(b'TURB ENG IGNITION SWITCH', b'Bool'),
-			_dec='True if the turbine engine ignition switch is on'
-		)
-		self.Engine.add(
-			'TURB_ENG_MASTER_STARTER_SWITCH',
-			(b'TURB ENG MASTER STARTER SWITCH', b'Bool'),
-			_dec='True if the turbine engine master starter switch is on'
-		)
-		self.Engine.add(
-			'TURB_ENG_AFTERBURNER_STAGE_ACTIVE',
-			(b'TURB ENG AFTERBURNER STAGE ACTIVE', b'Number'),
-			_dec='The stage of the afterburner, or 0 if the afterburner is not active.'
-		)
-		self.Engine.add(
-			'TURB_ENG_AFTERBURNER_PCT_ACTIVE',
-			(b'TURB ENG AFTERBURNER PCT ACTIVE', b'Percent_over_100'),
-			_dec='The percentage that the afterburner is running at.'
-		)
+	class __FuelTankSelection(RequestHelper):
+		list = [
+			# ['Number']
+			# ['0', 'Off']
+			# ['1', 'All']
+			# ['2', 'Left']
+			# ['3', 'Right']
+			# ['4', 'Left auxiliary']
+			# ['5', 'Right auxiliary']
+			# ['6', 'Center']
+			# ['7', 'Center2']
+			# ['8', 'Center3']
+			# ['9', 'External1']
+			# ['10', 'External2']
+			# ['11', 'Right tip']
+			# ['12', 'Left tip']
+			# ['13', 'Crossfeed']
+			# ['14', 'Crossfeed left to right']
+			# ['15', 'Crossfeed right to left']
+			# ['16', 'Both']
+			# ['17', 'External']
+			# ['18', 'Isolate']
+			# ['19', 'Left main']
+			# ['20', 'Right main']
+		]
 
-		self.Fuel = sm.new_request_holder()
-		self.Fuel.add(
-			'FUEL_TANK_CENTER_LEVEL',
-			(b'FUEL TANK CENTER LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_CENTER2_LEVEL',
-			(b'FUEL TANK CENTER2 LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_CENTER3_LEVEL',
-			(b'FUEL TANK CENTER3 LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_LEFT_MAIN_LEVEL',
-			(b'FUEL TANK LEFT MAIN LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_LEFT_AUX_LEVEL',
-			(b'FUEL TANK LEFT AUX LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_LEFT_TIP_LEVEL',
-			(b'FUEL TANK LEFT TIP LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_RIGHT_MAIN_LEVEL',
-			(b'FUEL TANK RIGHT MAIN LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_RIGHT_AUX_LEVEL',
-			(b'FUEL TANK RIGHT AUX LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_RIGHT_TIP_LEVEL',
-			(b'FUEL TANK RIGHT TIP LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_EXTERNAL1_LEVEL',
-			(b'FUEL TANK EXTERNAL1 LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_EXTERNAL2_LEVEL',
-			(b'FUEL TANK EXTERNAL2 LEVEL', b'Percent Over 100'),
-			_dec='Percent of maximum capacity'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_CENTER_CAPACITY',
-			(b'FUEL TANK CENTER CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_CENTER2_CAPACITY',
-			(b'FUEL TANK CENTER2 CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_CENTER3_CAPACITY',
-			(b'FUEL TANK CENTER3 CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_LEFT_MAIN_CAPACITY',
-			(b'FUEL TANK LEFT MAIN CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_LEFT_AUX_CAPACITY',
-			(b'FUEL TANK LEFT AUX CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_LEFT_TIP_CAPACITY',
-			(b'FUEL TANK LEFT TIP CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_RIGHT_MAIN_CAPACITY',
-			(b'FUEL TANK RIGHT MAIN CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_RIGHT_AUX_CAPACITY',
-			(b'FUEL TANK RIGHT AUX CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_RIGHT_TIP_CAPACITY',
-			(b'FUEL TANK RIGHT TIP CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_EXTERNAL1_CAPACITY',
-			(b'FUEL TANK EXTERNAL1 CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_EXTERNAL2_CAPACITY',
-			(b'FUEL TANK EXTERNAL2 CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_LEFT_CAPACITY',
-			(b'FUEL LEFT CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_RIGHT_CAPACITY',
-			(b'FUEL RIGHT CAPACITY', b'Gallons'),
-			_dec='Maximum capacity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_CENTER_QUANTITY',
-			(b'FUEL TANK CENTER QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_CENTER2_QUANTITY',
-			(b'FUEL TANK CENTER2 QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_CENTER3_QUANTITY',
-			(b'FUEL TANK CENTER3 QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_LEFT_MAIN_QUANTITY',
-			(b'FUEL TANK LEFT MAIN QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_LEFT_AUX_QUANTITY',
-			(b'FUEL TANK LEFT AUX QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_LEFT_TIP_QUANTITY',
-			(b'FUEL TANK LEFT TIP QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_RIGHT_MAIN_QUANTITY',
-			(b'FUEL TANK RIGHT MAIN QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_RIGHT_AUX_QUANTITY',
-			(b'FUEL TANK RIGHT AUX QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_RIGHT_TIP_QUANTITY',
-			(b'FUEL TANK RIGHT TIP QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_EXTERNAL1_QUANTITY',
-			(b'FUEL TANK EXTERNAL1 QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_EXTERNAL2_QUANTITY',
-			(b'FUEL TANK EXTERNAL2 QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_LEFT_QUANTITY',
-			(b'FUEL LEFT QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_RIGHT_QUANTITY',
-			(b'FUEL RIGHT QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_TOTAL_QUANTITY',
-			(b'FUEL TOTAL QUANTITY', b'Gallons'),
-			_dec='Current quantity in volume'
-		)
-		self.Fuel.add(
-			'FUEL_WEIGHT_PER_GALLON',
-			(b'FUEL WEIGHT PER GALLON', b'Pounds'),
-			_dec='Fuel weight per gallon'
-		)
-		self.Fuel.add(
-			'FUEL_TANK_SELECTOR:index',
-			(b'FUEL TANK SELECTOR:index', b'Enum'),
-			_dec='Which tank is selected. See fuel tank list.'
-		)
-		self.Fuel.add(
-			'FUEL_TOTAL_CAPACITY',
-			(b'FUEL TOTAL CAPACITY', b'Gallons'),
-			_dec='Total capacity of the aircraft'
-		)
-		self.Fuel.add(
-			'FUEL_SELECTED_QUANTITY_PERCENT',
-			(b'FUEL SELECTED QUANTITY PERCENT', b'Percent Over 100'),
-			_dec='Percent or capacity for selected tank'
-		)
-		self.Fuel.add(
-			'FUEL_SELECTED_QUANTITY',
-			(b'FUEL SELECTED QUANTITY', b'Gallons'),
-			_dec='Quantity of selected tank'
-		)
-		self.Fuel.add(
-			'FUEL_TOTAL_QUANTITY_WEIGHT',
-			(b'FUEL TOTAL QUANTITY WEIGHT', b'Pounds'),
-			_dec='Current total fuel weight of the aircraft'
-		)
-		self.Fuel.add(
-			'NUM_FUEL_SELECTORS',
-			(b'NUM FUEL SELECTORS', b'Number'),
-			_dec='Number of selectors on the aircraft'
-		)
-		self.Fuel.add(
-			'UNLIMITED_FUEL',
-			(b'UNLIMITED FUEL', b'Bool'),
-			_dec='Unlimited fuel flag'
-		)
-		self.Fuel.add(
-			'ESTIMATED_FUEL_FLOW',
-			(b'ESTIMATED FUEL FLOW', b'Pounds per hour'),
-			_dec='Estimated fuel flow at cruise'
-		)
+	class __AircraftFuelData(RequestHelper):
+		list = [
+			("FUEL_TANK_CENTER_LEVEL", "Percent of maximum capacity", b'FUEL TANK CENTER LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_CENTER2_LEVEL", "Percent of maximum capacity", b'FUEL TANK CENTER2 LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_CENTER3_LEVEL", "Percent of maximum capacity", b'FUEL TANK CENTER3 LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_LEFT_MAIN_LEVEL", "Percent of maximum capacity", b'FUEL TANK LEFT MAIN LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_LEFT_AUX_LEVEL", "Percent of maximum capacity", b'FUEL TANK LEFT AUX LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_LEFT_TIP_LEVEL", "Percent of maximum capacity", b'FUEL TANK LEFT TIP LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_RIGHT_MAIN_LEVEL", "Percent of maximum capacity", b'FUEL TANK RIGHT MAIN LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_RIGHT_AUX_LEVEL", "Percent of maximum capacity", b'FUEL TANK RIGHT AUX LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_RIGHT_TIP_LEVEL", "Percent of maximum capacity", b'FUEL TANK RIGHT TIP LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_EXTERNAL1_LEVEL", "Percent of maximum capacity", b'FUEL TANK EXTERNAL1 LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_EXTERNAL2_LEVEL", "Percent of maximum capacity", b'FUEL TANK EXTERNAL2 LEVEL', b'Percent Over 100', 'Y'),
+			("FUEL_TANK_CENTER_CAPACITY", "Maximum capacity in volume", b'FUEL TANK CENTER CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_CENTER2_CAPACITY", "Maximum capacity in volume", b'FUEL TANK CENTER2 CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_CENTER3_CAPACITY", "Maximum capacity in volume", b'FUEL TANK CENTER3 CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_LEFT_MAIN_CAPACITY", "Maximum capacity in volume", b'FUEL TANK LEFT MAIN CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_LEFT_AUX_CAPACITY", "Maximum capacity in volume", b'FUEL TANK LEFT AUX CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_LEFT_TIP_CAPACITY", "Maximum capacity in volume", b'FUEL TANK LEFT TIP CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_RIGHT_MAIN_CAPACITY", "Maximum capacity in volume", b'FUEL TANK RIGHT MAIN CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_RIGHT_AUX_CAPACITY", "Maximum capacity in volume", b'FUEL TANK RIGHT AUX CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_RIGHT_TIP_CAPACITY", "Maximum capacity in volume", b'FUEL TANK RIGHT TIP CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_EXTERNAL1_CAPACITY", "Maximum capacity in volume", b'FUEL TANK EXTERNAL1 CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_EXTERNAL2_CAPACITY", "Maximum capacity in volume", b'FUEL TANK EXTERNAL2 CAPACITY', b'Gallons', 'N'),
+			("FUEL_LEFT_CAPACITY", "Maximum capacity in volume", b'FUEL LEFT CAPACITY', b'Gallons', 'N'),
+			("FUEL_RIGHT_CAPACITY", "Maximum capacity in volume", b'FUEL RIGHT CAPACITY', b'Gallons', 'N'),
+			("FUEL_TANK_CENTER_QUANTITY", "Current quantity in volume", b'FUEL TANK CENTER QUANTITY', b'Gallons', 'Y'),
+			("FUEL_TANK_CENTER2_QUANTITY", "Current quantity in volume", b'FUEL TANK CENTER2 QUANTITY', b'Gallons', 'Y'),
+			("FUEL_TANK_CENTER3_QUANTITY", "Current quantity in volume", b'FUEL TANK CENTER3 QUANTITY', b'Gallons', 'Y'),
+			("FUEL_TANK_LEFT_MAIN_QUANTITY", "Current quantity in volume", b'FUEL TANK LEFT MAIN QUANTITY', b'Gallons', 'Y'),
+			("FUEL_TANK_LEFT_AUX_QUANTITY", "Current quantity in volume", b'FUEL TANK LEFT AUX QUANTITY', b'Gallons', 'Y'),
+			("FUEL_TANK_LEFT_TIP_QUANTITY", "Current quantity in volume", b'FUEL TANK LEFT TIP QUANTITY', b'Gallons', 'Y'),
+			("FUEL_TANK_RIGHT_MAIN_QUANTITY", "Current quantity in volume", b'FUEL TANK RIGHT MAIN QUANTITY', b'Gallons', 'Y'),
+			("FUEL_TANK_RIGHT_AUX_QUANTITY", "Current quantity in volume", b'FUEL TANK RIGHT AUX QUANTITY', b'Gallons', 'Y'),
+			("FUEL_TANK_RIGHT_TIP_QUANTITY", "Current quantity in volume", b'FUEL TANK RIGHT TIP QUANTITY', b'Gallons', 'Y'),
+			("FUEL_TANK_EXTERNAL1_QUANTITY", "Current quantity in volume", b'FUEL TANK EXTERNAL1 QUANTITY', b'Gallons', 'Y'),
+			("FUEL_TANK_EXTERNAL2_QUANTITY", "Current quantity in volume", b'FUEL TANK EXTERNAL2 QUANTITY', b'Gallons', 'Y'),
+			("FUEL_LEFT_QUANTITY", "Current quantity in volume", b'FUEL LEFT QUANTITY', b'Gallons', 'N'),
+			("FUEL_RIGHT_QUANTITY", "Current quantity in volume", b'FUEL RIGHT QUANTITY', b'Gallons', 'N'),
+			("FUEL_TOTAL_QUANTITY", "Current quantity in volume", b'FUEL TOTAL QUANTITY', b'Gallons', 'N'),
+			("FUEL_WEIGHT_PER_GALLON", "Fuel weight per gallon", b'FUEL WEIGHT PER GALLON', b'Pounds', 'N'),
+			("FUEL_TANK_SELECTOR:index", "Which tank is selected. See fuel tank list.", b'FUEL TANK SELECTOR:index', b'Enum', 'N'),
+			# ['FUEL CROSS FEED', 'Cross feed valve:']
+			# ['0 = Closed']
+			# ['1 = Open', 'Enum', 'N', '-']
+			("FUEL_TOTAL_CAPACITY", "Total capacity of the aircraft", b'FUEL TOTAL CAPACITY', b'Gallons', 'N'),
+			("FUEL_SELECTED_QUANTITY_PERCENT", "Percent or capacity for selected tank", b'FUEL SELECTED QUANTITY PERCENT', b'Percent Over 100', 'N'),
+			("FUEL_SELECTED_QUANTITY", "Quantity of selected tank", b'FUEL SELECTED QUANTITY', b'Gallons', 'N'),
+			("FUEL_TOTAL_QUANTITY_WEIGHT", "Current total fuel weight of the aircraft", b'FUEL TOTAL QUANTITY WEIGHT', b'Pounds', 'N'),
+			("NUM_FUEL_SELECTORS", "Number of selectors on the aircraft", b'NUM FUEL SELECTORS', b'Number', 'N'),
+			("UNLIMITED_FUEL", "Unlimited fuel flag", b'UNLIMITED FUEL', b'Bool', 'N'),
+			("ESTIMATED_FUEL_FLOW", "Estimated fuel flow at cruise", b'ESTIMATED FUEL FLOW', b'Pounds per hour', 'N'),
+		]
 
-		self.Lights = sm.new_request_holder()
-		self.Lights.add(
-			'LIGHT_STROBE',
-			(b'LIGHT STROBE', b'Bool'),
-			_dec='Light switch state'
-		)
-		self.Lights.add(
-			'LIGHT_PANEL',
-			(b'LIGHT PANEL', b'Bool'),
-			_dec='Light switch state'
-		)
-		self.Lights.add(
-			'LIGHT_LANDING',
-			(b'LIGHT LANDING', b'Bool'),
-			_dec='Light switch state'
-		)
-		self.Lights.add(
-			'LIGHT_TAXI',
-			(b'LIGHT TAXI', b'Bool'),
-			_dec='Light switch state'
-		)
-		self.Lights.add(
-			'LIGHT_BEACON',
-			(b'LIGHT BEACON', b'Bool'),
-			_dec='Light switch state'
-		)
-		self.Lights.add(
-			'LIGHT_NAV',
-			(b'LIGHT NAV', b'Bool'),
-			_dec='Light switch state'
-		)
-		self.Lights.add(
-			'LIGHT_LOGO',
-			(b'LIGHT LOGO', b'Bool'),
-			_dec='Light switch state'
-		)
-		self.Lights.add(
-			'LIGHT_WING',
-			(b'LIGHT WING', b'Bool'),
-			_dec='Light switch state'
-		)
-		self.Lights.add(
-			'LIGHT_RECOGNITION',
-			(b'LIGHT RECOGNITION', b'Bool'),
-			_dec='Light switch state'
-		)
-		self.Lights.add(
-			'LIGHT_CABIN',
-			(b'LIGHT CABIN', b'Bool'),
-			_dec='Light switch state'
-		)
-		self.Lights.add(
-			'LIGHT_STATES',
-			(b'LIGHT STATES', b'Mask'),
-			_dec='Same as LIGHT ON STATES'
-		)
-		self.Lights.add(
-			'LANDING_LIGHT_PBH',
-			(b'LANDING LIGHT PBH', b'SIMCONNECT_DATA_XYZ structure'),
-			_dec='Landing light pitch bank and heading'
-		)
-		self.Lights.add(
-			'LIGHT_TAXI_ON',
-			(b'LIGHT TAXI ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_STROBE_ON',
-			(b'LIGHT STROBE ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_PANEL_ON',
-			(b'LIGHT PANEL ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_RECOGNITION_ON',
-			(b'LIGHT RECOGNITION ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_WING_ON',
-			(b'LIGHT WING ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_LOGO_ON',
-			(b'LIGHT LOGO ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_CABIN_ON',
-			(b'LIGHT CABIN ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_HEAD_ON',
-			(b'LIGHT HEAD ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_BRAKE_ON',
-			(b'LIGHT BRAKE ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_NAV_ON',
-			(b'LIGHT NAV ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_BEACON_ON',
-			(b'LIGHT BEACON ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
-		self.Lights.add(
-			'LIGHT_LANDING_ON',
-			(b'LIGHT LANDING ON', b'Bool'),
-			_dec='Return true if the light is on.'
-		)
+	class __AircraftLightsData(RequestHelper):
+		list = [
+			("LIGHT_STROBE", "Light switch state", b'LIGHT STROBE', b'Bool', 'N'),
+			("LIGHT_PANEL", "Light switch state", b'LIGHT PANEL', b'Bool', 'N'),
+			("LIGHT_LANDING", "Light switch state", b'LIGHT LANDING', b'Bool', 'N'),
+			("LIGHT_TAXI", "Light switch state", b'LIGHT TAXI', b'Bool', 'N'),
+			("LIGHT_BEACON", "Light switch state", b'LIGHT BEACON', b'Bool', 'N'),
+			("LIGHT_NAV", "Light switch state", b'LIGHT NAV', b'Bool', 'N'),
+			("LIGHT_LOGO", "Light switch state", b'LIGHT LOGO', b'Bool', 'N'),
+			("LIGHT_WING", "Light switch state", b'LIGHT WING', b'Bool', 'N'),
+			("LIGHT_RECOGNITION", "Light switch state", b'LIGHT RECOGNITION', b'Bool', 'N'),
+			("LIGHT_CABIN", "Light switch state", b'LIGHT CABIN', b'Bool', 'N'),
+			# ['LIGHT ON STATES', 'Bit mask:']
+			# ['0x0001: Nav']
+			# ['0x0002: Beacon']
+			# ['0x0004: Landing']
+			# ['0x0008: Taxi']
+			# ['0x0010: Strobe']
+			# ['0x0020: Panel']
+			# ['0x0040: Recognition']
+			# ['0x0080: Wing']
+			# ['0x0100: Logo']
+			# ['0x0200: Cabin', 'Mask', 'N', '-']
+			("LIGHT_STATES", "Same as LIGHT ON STATES", b'LIGHT STATES', b'Mask', 'N'),
+			("LANDING_LIGHT_PBH", "Landing light pitch bank and heading", b'LANDING LIGHT PBH', b'SIMCONNECT_DATA_XYZ structure', 'N'),
+			("LIGHT_TAXI_ON", "Return true if the light is on.", b'LIGHT TAXI ON', b'Bool', 'N'),
+			("LIGHT_STROBE_ON", "Return true if the light is on.", b'LIGHT STROBE ON', b'Bool', 'N'),
+			("LIGHT_PANEL_ON", "Return true if the light is on.", b'LIGHT PANEL ON', b'Bool', 'N'),
+			("LIGHT_RECOGNITION_ON", "Return true if the light is on.", b'LIGHT RECOGNITION ON', b'Bool', 'N'),
+			("LIGHT_WING_ON", "Return true if the light is on.", b'LIGHT WING ON', b'Bool', 'N'),
+			("LIGHT_LOGO_ON", "Return true if the light is on.", b'LIGHT LOGO ON', b'Bool', 'N'),
+			("LIGHT_CABIN_ON", "Return true if the light is on.", b'LIGHT CABIN ON', b'Bool', 'N'),
+			("LIGHT_HEAD_ON", "Return true if the light is on.", b'LIGHT HEAD ON', b'Bool', 'N'),
+			("LIGHT_BRAKE_ON", "Return true if the light is on.", b'LIGHT BRAKE ON', b'Bool', 'N'),
+			("LIGHT_NAV_ON", "Return true if the light is on.", b'LIGHT NAV ON', b'Bool', 'N'),
+			("LIGHT_BEACON_ON", "Return true if the light is on.", b'LIGHT BEACON ON', b'Bool', 'N'),
+			("LIGHT_LANDING_ON", "Return true if the light is on.", b'LIGHT LANDING ON', b'Bool', 'N'),
+		]
 
-		self.Position_and_Speed = sm.new_request_holder()
-		self.Position_and_Speed.add(
-			'GROUND_VELOCITY',
-			(b'GROUND VELOCITY', b'Knots'),
-			_dec='Speed relative to the earths surface'
-		)
-		self.Position_and_Speed.add(
-			'TOTAL_WORLD_VELOCITY',
-			(b'TOTAL WORLD VELOCITY', b'Feet per second'),
-			_dec='Speed relative to the earths center'
-		)
-		self.Position_and_Speed.add(
-			'VELOCITY_BODY_Z',
-			(b'VELOCITY BODY Z', b'Feet per second'),
-			_dec='True longitudinal speed, relative to aircraft axis'
-		)
-		self.Position_and_Speed.add(
-			'VELOCITY_BODY_X',
-			(b'VELOCITY BODY X', b'Feet per second'),
-			_dec='True lateral speed, relative to aircraft axis'
-		)
-		self.Position_and_Speed.add(
-			'VELOCITY_BODY_Y',
-			(b'VELOCITY BODY Y', b'Feet per second'),
-			_dec='True vertical speed, relative to aircraft axis'
-		)
-		self.Position_and_Speed.add(
-			'VELOCITY_WORLD_Z',
-			(b'VELOCITY WORLD Z', b'Feet per second'),
-			_dec='Speed relative to earth, in North/South direction'
-		)
-		self.Position_and_Speed.add(
-			'VELOCITY_WORLD_X',
-			(b'VELOCITY WORLD X', b'Feet per second'),
-			_dec='Speed relative to earth, in East/West direction'
-		)
-		self.Position_and_Speed.add(
-			'VELOCITY_WORLD_Y',
-			(b'VELOCITY WORLD Y', b'Feet per second'),
-			_dec='Speed relative to earth, in vertical direction'
-		)
-		self.Position_and_Speed.add(
-			'ACCELERATION_WORLD_X',
-			(b'ACCELERATION WORLD X', b'Feet per second squared'),
-			_dec='Acceleration relative to earth, in east/west direction'
-		)
-		self.Position_and_Speed.add(
-			'ACCELERATION_WORLD_Y',
-			(b'ACCELERATION WORLD Y', b'Feet per second squared'),
-			_dec='Acceleration relative to earch, in vertical direction'
-		)
-		self.Position_and_Speed.add(
-			'ACCELERATION_WORLD_Z',
-			(b'ACCELERATION WORLD Z', b'Feet per second squared'),
-			_dec='Acceleration relative to earth, in north/south direction'
-		)
-		self.Position_and_Speed.add(
-			'ACCELERATION_BODY_X',
-			(b'ACCELERATION BODY X', b'Feet per second squared'),
-			_dec='Acceleration relative to aircraft axix, in east/west direction'
-		)
-		self.Position_and_Speed.add(
-			'ACCELERATION_BODY_Y',
-			(b'ACCELERATION BODY Y', b'Feet per second squared'),
-			_dec='Acceleration relative to aircraft axis, in vertical direction'
-		)
-		self.Position_and_Speed.add(
-			'ACCELERATION_BODY_Z',
-			(b'ACCELERATION BODY Z', b'Feet per second squared'),
-			_dec='Acceleration relative to aircraft axis, in north/south direction'
-		)
-		self.Position_and_Speed.add(
-			'ROTATION_VELOCITY_BODY_X',
-			(b'ROTATION VELOCITY BODY X', b'Feet per second'),
-			_dec='Rotation relative to aircraft axis'
-		)
-		self.Position_and_Speed.add(
-			'ROTATION_VELOCITY_BODY_Y',
-			(b'ROTATION VELOCITY BODY Y', b'Feet per second'),
-			_dec='Rotation relative to aircraft axis'
-		)
-		self.Position_and_Speed.add(
-			'ROTATION_VELOCITY_BODY_Z',
-			(b'ROTATION VELOCITY BODY Z', b'Feet per second'),
-			_dec='Rotation relative to aircraft axis'
-		)
-		self.Position_and_Speed.add(
-			'RELATIVE_WIND_VELOCITY_BODY_X',
-			(b'RELATIVE WIND VELOCITY BODY X', b'Feet per second'),
-			_dec='Lateral speed relative to wind'
-		)
-		self.Position_and_Speed.add(
-			'RELATIVE_WIND_VELOCITY_BODY_Y',
-			(b'RELATIVE WIND VELOCITY BODY Y', b'Feet per second'),
-			_dec='Vertical speed relative to wind'
-		)
-		self.Position_and_Speed.add(
-			'RELATIVE_WIND_VELOCITY_BODY_Z',
-			(b'RELATIVE WIND VELOCITY BODY Z', b'Feet per second'),
-			_dec='Longitudinal speed relative to wind'
-		)
-		self.Position_and_Speed.add(
-			'PLANE_ALT_ABOVE_GROUND',
-			(b'PLANE ALT ABOVE GROUND', b'Feet'),
-			_dec='Altitude above the surface'
-		)
-		self.Position_and_Speed.add(
-			'PLANE_LATITUDE',
-			(b'PLANE LATITUDE', b'Degrees'),
-			_dec='Latitude of aircraft, North is positive, South negative'
-		)
-		self.Position_and_Speed.add(
-			'PLANE_LONGITUDE',
-			(b'PLANE LONGITUDE', b'Degrees'),
-			_dec='Longitude of aircraft, East is positive, West negative'
-		)
-		self.Position_and_Speed.add(
-			'PLANE_ALTITUDE',
-			(b'PLANE ALTITUDE', b'Feet'),
-			_dec='Altitude of aircraft'
-		)
-		self.Position_and_Speed.add(
-			'PLANE_PITCH_DEGREES',
-			(b'PLANE PITCH DEGREES', b'Radians'),
-			_dec='Pitch angle, although the name mentions degrees the units used are radians'
-		)
-		self.Position_and_Speed.add(
-			'PLANE_BANK_DEGREES',
-			(b'PLANE BANK DEGREES', b'Radians'),
-			_dec='Bank angle, although the name mentions degrees the units used are radians'
-		)
-		self.Position_and_Speed.add(
-			'PLANE_HEADING_DEGREES_TRUE',
-			(b'PLANE HEADING DEGREES TRUE', b'Radians'),
-			_dec='Heading relative to true north, although the name mentions degrees the units used are radians'
-		)
-		self.Position_and_Speed.add(
-			'PLANE_HEADING_DEGREES_MAGNETIC',
-			(b'PLANE HEADING DEGREES MAGNETIC', b'Radians'),
-			_dec='Heading relative to magnetic north, although the name mentions degrees the units used are radians'
-		)
-		self.Position_and_Speed.add(
-			'MAGVAR',
-			(b'MAGVAR', b'Degrees'),
-			_dec='Magnetic variation'
-		)
-		self.Position_and_Speed.add(
-			'GROUND_ALTITUDE',
-			(b'GROUND ALTITUDE', b'Meters'),
-			_dec='Altitude of surface'
-		)
-		self.Position_and_Speed.add(
-			'SIM_ON_GROUND',
-			(b'SIM ON GROUND', b'Bool'),
-			_dec='On ground flag'
-		)
-		self.Position_and_Speed.add(
-			'INCIDENCE_ALPHA',
-			(b'INCIDENCE ALPHA', b'Radians'),
-			_dec='Angle of attack'
-		)
-		self.Position_and_Speed.add(
-			'INCIDENCE_BETA',
-			(b'INCIDENCE BETA', b'Radians'),
-			_dec='Sideslip angle'
-		)
-		self.Position_and_Speed.add(
-			'WING_FLEX_PCT:index',
-			(b'WING FLEX PCT:index', b'Percent over 100'),
-			_dec='''
-				The current wing flex.
-				Different values can be set for each wing
-				(for example, during banking).
-				Set an index of 1 for the left wing,
-				and 2 for the right wing.'''
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_LATLONALT',
-			(b'STRUCT LATLONALT', b'SIMCONNECT_DATA_LATLONALTstructure'),
-			_dec='Returns the latitude, longitude and altitude of the user aircraft.'
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_LATLONALTPBH',
-			(b'STRUCT LATLONALTPBH', b'SIMCONNECT_DATA_LATLONALTstructure'),
-			_dec='Returns the pitch, bank and heading of the user aircraft.'
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_SURFACE_RELATIVE_VELOCITY',
-			(b'STRUCT SURFACE RELATIVE VELOCITY', b'SIMCONNECT_DATA_XYZ structure, feet per second'),
-			_dec='The relative surface velocity.'
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_WORLDVELOCITY',
-			(b'STRUCT WORLDVELOCITY', b'SIMCONNECT_DATA_XYZ structure, feet per second'),
-			_dec='The world velocity.'
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_WORLD_ROTATION_VELOCITY',
-			(b'STRUCT WORLD ROTATION VELOCITY', b'SIMCONNECT_DATA_XYZ structure, radians per second'),
-			_dec='The world rotation velocity.'
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_BODY_VELOCITY',
-			(b'STRUCT BODY VELOCITY', b'SIMCONNECT_DATA_XYZ structure, feet per second'),
-			_dec='The object body velocity.'
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_BODY_ROTATION_VELOCITY',
-			(b'STRUCT BODY ROTATION VELOCITY', b'SIMCONNECT_DATA_XYZ structure, radians per second'),
-			_dec='The body rotation velocity. Individual body rotation values are in the Aircraft Position and Speed section.'
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_WORLD_ACCELERATION',
-			(b'STRUCT WORLD ACCELERATION', b'SIMCONNECT_DATA_XYZ structure, feet per second squared'),
-			_dec='The world acceleration for each axis. Individual world acceleration values are in the Aircraft Position and Speed section.'
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_ENGINE_POSITION:index',
-			(b'STRUCT ENGINE POSITION:index', b'SIMCONNECT_DATA_XYZ structure, feet.'),
-			_dec='The engine position relative to the reference datum position for the aircraft.'
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_EYEPOINT_DYNAMIC_ANGLE',
-			(b'STRUCT EYEPOINT DYNAMIC ANGLE', b'SIMCONNECT_DATA_XYZ structure, radians'),
-			_dec='The angle of the eyepoint view. Zero, zero, zero is straight ahead.'
-		)
-		self.Position_and_Speed.add(
-			'STRUCT_EYEPOINT_DYNAMIC_OFFSET',
-			(b'STRUCT EYEPOINT DYNAMIC OFFSET', b'SIMCONNECT_DATA_XYZ structure, feet'),
-			_dec='A variable offset away from the EYEPOINT POSITION'
-		)
-		self.Position_and_Speed.add(
-			'EYEPOINT_POSITION',
-			(b'EYEPOINT POSITION', b'SIMCONNECT_DATA_XYZ structure, feet'),
-			_dec='The eyepoint position relative to the reference datum position for the aircraft.'
-		)
+	class __AircraftPositionandSpeedData(RequestHelper):
+		list = [
+			("GROUND_VELOCITY", "Speed relative to the earths surface", b'GROUND VELOCITY', b'Knots', 'N'),
+			("TOTAL_WORLD_VELOCITY", "Speed relative to the earths center", b'TOTAL WORLD VELOCITY', b'Feet per second', 'N'),
+			("VELOCITY_BODY_Z", "True longitudinal speed, relative to aircraft axis", b'VELOCITY BODY Z', b'Feet per second', 'Y'),
+			("VELOCITY_BODY_X", "True lateral speed, relative to aircraft axis", b'VELOCITY BODY X', b'Feet per second', 'Y'),
+			("VELOCITY_BODY_Y", "True vertical speed, relative to aircraft axis", b'VELOCITY BODY Y', b'Feet per second', 'Y'),
+			("VELOCITY_WORLD_Z", "Speed relative to earth, in North/South direction", b'VELOCITY WORLD Z', b'Feet per second', 'Y'),
+			("VELOCITY_WORLD_X", "Speed relative to earth, in East/West direction", b'VELOCITY WORLD X', b'Feet per second', 'Y'),
+			("VELOCITY_WORLD_Y", "Speed relative to earth, in vertical direction", b'VELOCITY WORLD Y', b'Feet per second', 'Y'),
+			("ACCELERATION_WORLD_X", "Acceleration relative to earth, in east/west direction", b'ACCELERATION WORLD X', b'Feet per second squared', 'Y'),
+			("ACCELERATION_WORLD_Y", "Acceleration relative to earch, in vertical direction", b'ACCELERATION WORLD Y', b'Feet per second squared', 'Y'),
+			("ACCELERATION_WORLD_Z", "Acceleration relative to earth, in north/south direction", b'ACCELERATION WORLD Z', b'Feet per second squared', 'Y'),
+			("ACCELERATION_BODY_X", "Acceleration relative to aircraft axix, in east/west direction", b'ACCELERATION BODY X', b'Feet per second squared', 'Y'),
+			("ACCELERATION_BODY_Y", "Acceleration relative to aircraft axis, in vertical direction", b'ACCELERATION BODY Y', b'Feet per second squared', 'Y'),
+			("ACCELERATION_BODY_Z", "Acceleration relative to aircraft axis, in north/south direction", b'ACCELERATION BODY Z', b'Feet per second squared', 'Y'),
+			("ROTATION_VELOCITY_BODY_X", "Rotation relative to aircraft axis", b'ROTATION VELOCITY BODY X', b'Feet per second', 'Y'),
+			("ROTATION_VELOCITY_BODY_Y", "Rotation relative to aircraft axis", b'ROTATION VELOCITY BODY Y', b'Feet per second', 'Y'),
+			("ROTATION_VELOCITY_BODY_Z", "Rotation relative to aircraft axis", b'ROTATION VELOCITY BODY Z', b'Feet per second', 'Y'),
+			("RELATIVE_WIND_VELOCITY_BODY_X", "Lateral speed relative to wind", b'RELATIVE WIND VELOCITY BODY X', b'Feet per second', 'N'),
+			("RELATIVE_WIND_VELOCITY_BODY_Y", "Vertical speed relative to wind", b'RELATIVE WIND VELOCITY BODY Y', b'Feet per second', 'N'),
+			("RELATIVE_WIND_VELOCITY_BODY_Z", "Longitudinal speed relative to wind", b'RELATIVE WIND VELOCITY BODY Z', b'Feet per second', 'N'),
+			("PLANE_ALT_ABOVE_GROUND", "Altitude above the surface", b'PLANE ALT ABOVE GROUND', b'Feet', 'Y'),
+			("PLANE_LATITUDE", "Latitude of aircraft, North is positive, South negative", b'PLANE LATITUDE', b'Degrees', 'Y'),
+			("PLANE_LONGITUDE", "Longitude of aircraft, East is positive, West negative", b'PLANE LONGITUDE', b'Degrees', 'Y'),
+			("PLANE_ALTITUDE", "Altitude of aircraft", b'PLANE ALTITUDE', b'Feet', 'Y'),
+			("PLANE_PITCH_DEGREES", "Pitch angle, although the name mentions degrees the units used are radians", b'PLANE PITCH DEGREES', b'Radians', 'Y'),
+			("PLANE_BANK_DEGREES", "Bank angle, although the name mentions degrees the units used are radians", b'PLANE BANK DEGREES', b'Radians', 'Y'),
+			("PLANE_HEADING_DEGREES_TRUE", "Heading relative to true north, although the name mentions degrees the units used are radians", b'PLANE HEADING DEGREES TRUE', b'Radians', 'Y'),
+			("PLANE_HEADING_DEGREES_MAGNETIC", "Heading relative to magnetic north, although the name mentions degrees the units used are radians", b'PLANE HEADING DEGREES MAGNETIC', b'Radians', 'Y'),
+			("MAGVAR", "Magnetic variation", b'MAGVAR', b'Degrees', 'N'),
+			("GROUND_ALTITUDE", "Altitude of surface", b'GROUND ALTITUDE', b'Meters', 'N'),
+			# ['SURFACE TYPE', 'Type of surface:']
+			# ['0 = Concrete']
+			# ['1 = Grass']
+			# ['2 = Water']
+			# ['3 = Grass_bumpy']
+			# ['4 = Asphalt']
+			# ['5 = Short_grass']
+			# ['6 = Long_grass']
+			# ['7 = Hard_turf']
+			# ['8 = Snow']
+			# ['9 = Ice']
+			# ['10 = Urban']
+			# ['11 = Forest']
+			# ['12 = Dirt']
+			# ['13 = Coral']
+			# ['14 = Gravel']
+			# ['15 = Oil_treated']
+			# ['16 = Steel_mats']
+			# ['17 = Bituminus']
+			# ['18 = Brick']
+			# ['19 = Macadam']
+			# ['20 = Planks']
+			# ['21 = Sand']
+			# ['22 = Shale']
+			# ['23 = Tarmac']
+			# ['24 = Wright_flyer_track']
+			# ['Enum', 'N', '-']
+			("SIM_ON_GROUND", "On ground flag", b'SIM ON GROUND', b'Bool', 'N'),
+			("INCIDENCE_ALPHA", "Angle of attack", b'INCIDENCE ALPHA', b'Radians', 'N'),
+			("INCIDENCE_BETA", "Sideslip angle", b'INCIDENCE BETA', b'Radians', 'N'),
+			("WING_FLEX_PCT:index", "The current wing flex. Different values can be set for each wing (for example, during banking). Set an index of 1 for the left wing, and 2 for the right wing.", b'WING FLEX PCT:index', b'Percent over 100', 'Y'),
+			("STRUCT_LATLONALT", "Returns the latitude, longitude and altitude of the user aircraft.", b'STRUCT LATLONALT', b'SIMCONNECT_DATA_LATLONALTstructure', 'N'),
+			("STRUCT_LATLONALTPBH", "Returns the pitch, bank and heading of the user aircraft.", b'STRUCT LATLONALTPBH', b'SIMCONNECT_DATA_LATLONALTstructure', 'N'),
+			("STRUCT_SURFACE_RELATIVE_VELOCITY", "The relative surface velocity.", b'STRUCT SURFACE RELATIVE VELOCITY', b'SIMCONNECT_DATA_XYZ structure, feet per second', 'N'),
+			("STRUCT_WORLDVELOCITY", "The world velocity.", b'STRUCT WORLDVELOCITY', b'SIMCONNECT_DATA_XYZ structure, feet per second', 'N'),
+			("STRUCT_WORLD_ROTATION_VELOCITY", "The world rotation velocity.", b'STRUCT WORLD ROTATION VELOCITY', b'SIMCONNECT_DATA_XYZ structure, radians per second', 'N'),
+			("STRUCT_BODY_VELOCITY", "The object body velocity.", b'STRUCT BODY VELOCITY', b'SIMCONNECT_DATA_XYZ structure, feet per second', 'N'),
+			("STRUCT_BODY_ROTATION_VELOCITY", "The body rotation velocity. Individual body rotation values are in the Aircraft Position and Speed section.", b'STRUCT BODY ROTATION VELOCITY', b'SIMCONNECT_DATA_XYZ structure, radians per second', 'N'),
+			("STRUCT_WORLD_ACCELERATION", "The world acceleration for each axis. Individual world acceleration values are in the Aircraft Position and Speed section.", b'STRUCT WORLD ACCELERATION', b'SIMCONNECT_DATA_XYZ structure, feet per second squared', 'N'),
+			("STRUCT_ENGINE_POSITION:index", "The engine position relative to the reference datum position for the aircraft.", b'STRUCT ENGINE POSITION:index', b'SIMCONNECT_DATA_XYZ structure, feet.', 'N'),
+			("STRUCT_EYEPOINT_DYNAMIC_ANGLE", "The angle of the eyepoint view. Zero, zero, zero is straight ahead.", b'STRUCT EYEPOINT DYNAMIC ANGLE', b'SIMCONNECT_DATA_XYZ structure, radians', 'N'),
+			("STRUCT_EYEPOINT_DYNAMIC_OFFSET", "A variable offset away from the EYEPOINT POSITION", b'STRUCT EYEPOINT DYNAMIC OFFSET', b'SIMCONNECT_DATA_XYZ structure, feet', 'N'),
+			("EYEPOINT_POSITION", "The eyepoint position relative to the reference datum position for the aircraft.", b'EYEPOINT POSITION', b'SIMCONNECT_DATA_XYZ structure, feet', 'N'),
+		]
 
-		self.Flight_Instrumentation = sm.new_request_holder()
-		self.Flight_Instrumentation.add(
-			'AIRSPEED_TRUE',
-			(b'AIRSPEED TRUE', b'Knots'),
-			_dec='True airspeed'
-		)
-		self.Flight_Instrumentation.add(
-			'AIRSPEED_INDICATED',
-			(b'AIRSPEED INDICATED', b'Knots'),
-			_dec='Indicated airspeed'
-		)
-		self.Flight_Instrumentation.add(
-			'AIRSPEED_TRUE_CALIBRATE',
-			(b'AIRSPEED TRUE CALIBRATE', b'Degrees'),
-			_dec='Angle of True calibration scale on airspeed indicator'
-		)
-		self.Flight_Instrumentation.add(
-			'AIRSPEED_BARBER_POLE',
-			(b'AIRSPEED BARBER POLE', b'Knots'),
-			_dec='Redline airspeed (dynamic on some aircraft)'
-		)
-		self.Flight_Instrumentation.add(
-			'AIRSPEED_MACH',
-			(b'AIRSPEED MACH', b'Mach'),
-			_dec='Current mach'
-		)
-		self.Flight_Instrumentation.add(
-			'VERTICAL_SPEED',
-			(b'VERTICAL SPEED', b'feet/minute'),
-			_dec='Vertical speed indication'
-		)
-		self.Flight_Instrumentation.add(
-			'MACH_MAX_OPERATE',
-			(b'MACH MAX OPERATE', b'Mach'),
-			_dec='Maximum design mach'
-		)
-		self.Flight_Instrumentation.add(
-			'STALL_WARNING',
-			(b'STALL WARNING', b'Bool'),
-			_dec='Stall warning state'
-		)
-		self.Flight_Instrumentation.add(
-			'OVERSPEED_WARNING',
-			(b'OVERSPEED WARNING', b'Bool'),
-			_dec='Overspeed warning state'
-		)
-		self.Flight_Instrumentation.add(
-			'BARBER_POLE_MACH',
-			(b'BARBER POLE MACH', b'Mach'),
-			_dec='Mach associated with maximum airspeed'
-		)
-		self.Flight_Instrumentation.add(
-			'INDICATED_ALTITUDE',
-			(b'INDICATED ALTITUDE', b'Feet'),
-			_dec='Altimeter indication'
-		)
-		self.Flight_Instrumentation.add(
-			'KOHLSMAN_SETTING_MB',
-			(b'KOHLSMAN SETTING MB', b'Millibars'),
-			_dec='Altimeter setting'
-		)
-		self.Flight_Instrumentation.add(
-			'KOHLSMAN_SETTING_HG',
-			(b'KOHLSMAN SETTING HG', b'inHg'),
-			_dec='Altimeter setting'
-		)
-		self.Flight_Instrumentation.add(
-			'ATTITUDE_INDICATOR_PITCH_DEGREES',
-			(b'ATTITUDE INDICATOR PITCH DEGREES', b'Radians'),
-			_dec='AI pitch indication'
-		)
-		self.Flight_Instrumentation.add(
-			'ATTITUDE_INDICATOR_BANK_DEGREES',
-			(b'ATTITUDE INDICATOR BANK DEGREES', b'Radians'),
-			_dec='AI bank indication'
-		)
-		self.Flight_Instrumentation.add(
-			'ATTITUDE_BARS_POSITION',
-			(b'ATTITUDE BARS POSITION', b'Percent Over 100'),
-			_dec='AI reference pitch reference bars'
-		)
-		self.Flight_Instrumentation.add(
-			'ATTITUDE_CAGE',
-			(b'ATTITUDE CAGE', b'Bool'),
-			_dec='AI caged state'
-		)
-		self.Flight_Instrumentation.add(
-			'WISKEY_COMPASS_INDICATION_DEGREES',
-			(b'WISKEY COMPASS INDICATION DEGREES', b'Degrees'),
-			_dec='Magnetic compass indication'
-		)
-		self.Flight_Instrumentation.add(
-			'PLANE_HEADING_DEGREES_GYRO',
-			(b'PLANE HEADING DEGREES GYRO', b'Radians'),
-			_dec='Heading indicator (directional gyro) indication'
-		)
-		self.Flight_Instrumentation.add(
-			'HEADING_INDICATOR',
-			(b'HEADING INDICATOR', b'Radians'),
-			_dec='Heading indicator (directional gyro) indication'
-		)
-		self.Flight_Instrumentation.add(
-			'GYRO_DRIFT_ERROR',
-			(b'GYRO DRIFT ERROR', b'Radians'),
-			_dec='Angular error of heading indicator'
-		)
-		self.Flight_Instrumentation.add(
-			'DELTA_HEADING_RATE',
-			(b'DELTA HEADING RATE', b'Radians per second'),
-			_dec='Rate of turn of heading indicator'
-		)
-		self.Flight_Instrumentation.add(
-			'TURN_COORDINATOR_BALL',
-			(b'TURN COORDINATOR BALL', b'Position 128 (-127 to 127)'),
-			_dec='Turn coordinator ball position'
-		)
-		self.Flight_Instrumentation.add(
-			'ANGLE_OF_ATTACK_INDICATOR',
-			(b'ANGLE OF ATTACK INDICATOR', b'Radians'),
-			_dec='AoA indication'
-		)
-		self.Flight_Instrumentation.add(
-			'RADIO_HEIGHT',
-			(b'RADIO HEIGHT', b'Feet'),
-			_dec='Radar altitude'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_ADF',
-			(b'PARTIAL PANEL ADF', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_AIRSPEED',
-			(b'PARTIAL PANEL AIRSPEED', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_ALTIMETER',
-			(b'PARTIAL PANEL ALTIMETER', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_ATTITUDE',
-			(b'PARTIAL PANEL ATTITUDE', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_COMM',
-			(b'PARTIAL PANEL COMM', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_COMPASS',
-			(b'PARTIAL PANEL COMPASS', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_ELECTRICAL',
-			(b'PARTIAL PANEL ELECTRICAL', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_AVIONICS',
-			(b'PARTIAL PANEL AVIONICS', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_ENGINE',
-			(b'PARTIAL PANEL ENGINE', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_FUEL_INDICATOR',
-			(b'PARTIAL PANEL FUEL INDICATOR', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_HEADING',
-			(b'PARTIAL PANEL HEADING', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_VERTICAL_VELOCITY',
-			(b'PARTIAL PANEL VERTICAL VELOCITY', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_TRANSPONDER',
-			(b'PARTIAL PANEL TRANSPONDER', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_NAV',
-			(b'PARTIAL PANEL NAV', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_PITOT',
-			(b'PARTIAL PANEL PITOT', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_TURN_COORDINATOR',
-			(b'PARTIAL PANEL TURN COORDINATOR', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'PARTIAL_PANEL_VACUUM',
-			(b'PARTIAL PANEL VACUUM', b'Enum'),
-			_dec='Gauge fail flag (0 = ok, 1 = fail, 2 = blank)'
-		)
-		self.Flight_Instrumentation.add(
-			'MAX_G_FORCE',
-			(b'MAX G FORCE', b'Gforce'),
-			_dec='Maximum G force attained'
-		)
-		self.Flight_Instrumentation.add(
-			'MIN_G_FORCE',
-			(b'MIN G FORCE', b'Gforce'),
-			_dec='Minimum G force attained'
-		)
-		self.Flight_Instrumentation.add(
-			'SUCTION_PRESSURE',
-			(b'SUCTION PRESSURE', b'Inches of Mercury, inHg'),
-			_dec='Vacuum system suction pressure'
-		)
+	class __AircraftFlightInstrumentationData(RequestHelper):
+		list = [
+			("AIRSPEED_TRUE", "True airspeed", b'AIRSPEED TRUE', b'Knots', 'Y'),
+			("AIRSPEED_INDICATED", "Indicated airspeed", b'AIRSPEED INDICATED', b'Knots', 'Y'),
+			("AIRSPEED_TRUE_CALIBRATE", "Angle of True calibration scale on airspeed indicator", b'AIRSPEED TRUE CALIBRATE', b'Degrees', 'Y'),
+			("AIRSPEED_BARBER_POLE", "Redline airspeed (dynamic on some aircraft)", b'AIRSPEED BARBER POLE', b'Knots', 'N'),
+			("AIRSPEED_MACH", "Current mach", b'AIRSPEED MACH', b'Mach', 'N'),
+			("VERTICAL_SPEED", "Vertical speed indication", b'VERTICAL SPEED', b'feet/minute', 'Y'),
+			("MACH_MAX_OPERATE", "Maximum design mach", b'MACH MAX OPERATE', b'Mach', 'N'),
+			("STALL_WARNING", "Stall warning state", b'STALL WARNING', b'Bool', 'N'),
+			("OVERSPEED_WARNING", "Overspeed warning state", b'OVERSPEED WARNING', b'Bool', 'N'),
+			("BARBER_POLE_MACH", "Mach associated with maximum airspeed", b'BARBER POLE MACH', b'Mach', 'N'),
+			("INDICATED_ALTITUDE", "Altimeter indication", b'INDICATED ALTITUDE', b'Feet', 'Y'),
+			("KOHLSMAN_SETTING_MB", "Altimeter setting", b'KOHLSMAN SETTING MB', b'Millibars', 'Y'),
+			("KOHLSMAN_SETTING_HG", "Altimeter setting", b'KOHLSMAN SETTING HG', b'inHg', 'N'),
+			("ATTITUDE_INDICATOR_PITCH_DEGREES", "AI pitch indication", b'ATTITUDE INDICATOR PITCH DEGREES', b'Radians', 'N'),
+			("ATTITUDE_INDICATOR_BANK_DEGREES", "AI bank indication", b'ATTITUDE INDICATOR BANK DEGREES', b'Radians', 'N'),
+			("ATTITUDE_BARS_POSITION", "AI reference pitch reference bars", b'ATTITUDE BARS POSITION', b'Percent Over 100', 'N'),
+			("ATTITUDE_CAGE", "AI caged state", b'ATTITUDE CAGE', b'Bool', 'N'),
+			("WISKEY_COMPASS_INDICATION_DEGREES", "Magnetic compass indication", b'WISKEY COMPASS INDICATION DEGREES', b'Degrees', 'Y'),
+			("PLANE_HEADING_DEGREES_GYRO", "Heading indicator (directional gyro) indication", b'PLANE HEADING DEGREES GYRO', b'Radians', 'Y'),
+			("HEADING_INDICATOR", "Heading indicator (directional gyro) indication", b'HEADING INDICATOR', b'Radians', 'N'),
+			("GYRO_DRIFT_ERROR", "Angular error of heading indicator", b'GYRO DRIFT ERROR', b'Radians', 'N'),
+			("DELTA_HEADING_RATE", "Rate of turn of heading indicator", b'DELTA HEADING RATE', b'Radians per second', 'Y'),
+			("TURN_COORDINATOR_BALL", "Turn coordinator ball position", b'TURN COORDINATOR BALL', b'Position 128 (-127 to 127)', 'N'),
+			("ANGLE_OF_ATTACK_INDICATOR", "AoA indication", b'ANGLE OF ATTACK INDICATOR', b'Radians', 'N'),
+			("RADIO_HEIGHT", "Radar altitude", b'RADIO HEIGHT', b'Feet', 'N'),
+			("PARTIAL_PANEL_ADF", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL ADF', b'Enum', 'Y'),
+			("PARTIAL_PANEL_AIRSPEED", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL AIRSPEED', b'Enum', 'Y'),
+			("PARTIAL_PANEL_ALTIMETER", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL ALTIMETER', b'Enum', 'Y'),
+			("PARTIAL_PANEL_ATTITUDE", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL ATTITUDE', b'Enum', 'Y'),
+			("PARTIAL_PANEL_COMM", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL COMM', b'Enum', 'Y'),
+			("PARTIAL_PANEL_COMPASS", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL COMPASS', b'Enum', 'Y'),
+			("PARTIAL_PANEL_ELECTRICAL", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL ELECTRICAL', b'Enum', 'Y'),
+			("PARTIAL_PANEL_AVIONICS", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL AVIONICS', b'Enum', 'N'),
+			("PARTIAL_PANEL_ENGINE", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL ENGINE', b'Enum', 'Y'),
+			("PARTIAL_PANEL_FUEL_INDICATOR", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL FUEL INDICATOR', b'Enum', 'N'),
+			("PARTIAL_PANEL_HEADING", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL HEADING', b'Enum', 'Y'),
+			("PARTIAL_PANEL_VERTICAL_VELOCITY", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL VERTICAL VELOCITY', b'Enum', 'Y'),
+			("PARTIAL_PANEL_TRANSPONDER", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL TRANSPONDER', b'Enum', 'Y'),
+			("PARTIAL_PANEL_NAV", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL NAV', b'Enum', 'Y'),
+			("PARTIAL_PANEL_PITOT", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL PITOT', b'Enum', 'Y'),
+			("PARTIAL_PANEL_TURN_COORDINATOR", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL TURN COORDINATOR', b'Enum', 'N'),
+			("PARTIAL_PANEL_VACUUM", "Gauge fail flag (0 = ok, 1 = fail, 2 = blank)", b'PARTIAL PANEL VACUUM', b'Enum', 'Y'),
+			("MAX_G_FORCE", "Maximum G force attained", b'MAX G FORCE', b'Gforce', 'N'),
+			("MIN_G_FORCE", "Minimum G force attained", b'MIN G FORCE', b'Gforce', 'N'),
+			("SUCTION_PRESSURE", "Vacuum system suction pressure", b'SUCTION PRESSURE', b'Inches of Mercury, inHg', 'Y'),
+		]
 
-		self.Avionics = sm.new_request_holder()
-		self.Avionics.add(
-			'AVIONICS_MASTER_SWITCH',
-			(b'AVIONICS MASTER SWITCH', b'Bool'),
-			_dec='Avionics switch state'
-		)
-		self.Avionics.add(
-			'NAV_SOUND:index',
-			(b'NAV SOUND:index', b'Bool'),
-			_dec='Nav audio flag. Index of 1 or 2.'
-		)
-		self.Avionics.add(
-			'DME_SOUND',
-			(b'DME SOUND', b'Bool'),
-			_dec='DME audio flag'
-		)
-		self.Avionics.add(
-			'ADF_SOUND:index',
-			(b'ADF SOUND:index', b'Bool'),
-			_dec='ADF audio flag. Index of 0 or 1.'
-		)
-		self.Avionics.add(
-			'MARKER_SOUND',
-			(b'MARKER SOUND', b'Bool'),
-			_dec='Marker audio flag'
-		)
-		self.Avionics.add(
-			'COM_TRANSMIT:index',
-			(b'COM TRANSMIT:index', b'Bool'),
-			_dec='Audio panel com transmit state. Index of 1 or 2.'
-		)
-		self.Avionics.add(
-			'COM_RECIEVE_ALL',
-			(b'COM RECIEVE ALL', b'Bool'),
-			_dec='Flag if all Coms receiving'
-		)
-		self.Avionics.add(
-			'COM_ACTIVE_FREQUENCY:index',
-			(b'COM ACTIVE FREQUENCY:index', b'Frequency BCD16'),
-			_dec='Com frequency. Index is 1 or 2.'
-		)
-		self.Avionics.add(
-			'COM_STANDBY_FREQUENCY:index',
-			(b'COM STANDBY FREQUENCY:index', b'Frequency BCD16'),
-			_dec='Com standby frequency. Index is 1 or 2.'
-		)
-		self.Avionics.add(
-			'NAV_AVAILABLE:index',
-			(b'NAV AVAILABLE:index', b'Bool'),
-			_dec='Flag if Nav equipped on aircraft'
-		)
-		self.Avionics.add(
-			'NAV_ACTIVE_FREQUENCY:index',
-			(b'NAV ACTIVE FREQUENCY:index', b'MHz'),
-			_dec='Nav active frequency. Index is 1 or 2.'
-		)
-		self.Avionics.add(
-			'NAV_STANDBY_FREQUENCY:index',
-			(b'NAV STANDBY FREQUENCY:index', b'MHz'),
-			_dec='Nav standby frequency. Index is 1 or 2.'
-		)
-		self.Avionics.add(
-			'NAV_SIGNAL:index',
-			(b'NAV SIGNAL:index', b'Number'),
-			_dec='Nav signal strength'
-		)
-		self.Avionics.add(
-			'NAV_HAS_NAV:index',
-			(b'NAV HAS NAV:index', b'Bool'),
-			_dec='Flag if Nav has signal'
-		)
-		self.Avionics.add(
-			'NAV_HAS_LOCALIZER:index',
-			(b'NAV HAS LOCALIZER:index', b'Bool'),
-			_dec='Flag if tuned station is a localizer'
-		)
-		self.Avionics.add(
-			'NAV_HAS_DME:index',
-			(b'NAV HAS DME:index', b'Bool'),
-			_dec='Flag if tuned station has a DME'
-		)
-		self.Avionics.add(
-			'NAV_HAS_GLIDE_SLOPE:index',
-			(b'NAV HAS GLIDE SLOPE:index', b'Bool'),
-			_dec='Flag if tuned station has a glideslope'
-		)
-		self.Avionics.add(
-			'NAV_MAGVAR:index',
-			(b'NAV MAGVAR:index', b'Degrees'),
-			_dec='Magnetic variation of tuned nav station'
-		)
-		self.Avionics.add(
-			'NAV_RADIAL:index',
-			(b'NAV RADIAL:index', b'Degrees'),
-			_dec='Radial that aircraft is on'
-		)
-		self.Avionics.add(
-			'NAV_RADIAL_ERROR:index',
-			(b'NAV RADIAL ERROR:index', b'Degrees'),
-			_dec='Difference between current radial and OBS tuned radial'
-		)
-		self.Avionics.add(
-			'NAV_LOCALIZER:index',
-			(b'NAV LOCALIZER:index', b'Degrees'),
-			_dec='Localizer course heading'
-		)
-		self.Avionics.add(
-			'NAV_GLIDE_SLOPE_ERROR:index',
-			(b'NAV GLIDE SLOPE ERROR:index', b'Degrees'),
-			_dec='''
-				Difference between current position and glideslope angle.
-				Note that this provides 32 bit floating point precision,
-				rather than the 8 bit integer precision of NAV GSI.'''
-		)
-		self.Avionics.add(
-			'NAV_CDI:index',
-			(b'NAV CDI:index', b'Number'),
-			_dec='CDI needle deflection (+/- 127)'
-		)
-		self.Avionics.add(
-			'NAV_GSI:index',
-			(b'NAV GSI:index', b'Number'),
-			_dec='''
-			Glideslope needle deflection (+/- 119).
-			Note that this provides only 8 bit precision,
-			whereas NAV GLIDE SLOPE ERROR provides
-			32 bit floating point precision.'''
-		)
-		self.Avionics.add(
-			'NAV_GS_FLAG:index',
-			(b'NAV GS FLAG:index', b'Bool'),
-			_dec='Glideslope flag'
-		)
-		self.Avionics.add(
-			'NAV_OBS:index',
-			(b'NAV OBS:index', b'Degrees'),
-			_dec='OBS setting. Index of 1 or 2.'
-		)
-		self.Avionics.add(
-			'NAV_DME:index',
-			(b'NAV DME:index', b'Nautical miles'),
-			_dec='DME distance'
-		)
-		self.Avionics.add(
-			'NAV_DMESPEED:index',
-			(b'NAV DMESPEED:index', b'Knots'),
-			_dec='DME speed'
-		)
-		self.Avionics.add(
-			'ADF_ACTIVE_FREQUENCY:index',
-			(b'ADF ACTIVE FREQUENCY:index', b'Frequency ADF BCD32'),
-			_dec='ADF frequency. Index of 1 or 2.'
-		)
-		self.Avionics.add(
-			'ADF_STANDBY_FREQUENCY:index',
-			(b'ADF STANDBY FREQUENCY:index', b'Hz'),
-			_dec='ADF standby frequency'
-		)
-		self.Avionics.add(
-			'ADF_RADIAL:index',
-			(b'ADF RADIAL:index', b'Degrees'),
-			_dec='Current direction from NDB station'
-		)
-		self.Avionics.add(
-			'ADF_SIGNAL:index',
-			(b'ADF SIGNAL:index', b'Number'),
-			_dec='Signal strength'
-		)
-		self.Avionics.add(
-			'TRANSPONDER_CODE:index',
-			(b'TRANSPONDER CODE:index', b'BCO16'),
-			_dec='4-digit code'
-		)
-		self.Avionics.add(
-			'INNER_MARKER',
-			(b'INNER MARKER', b'Bool'),
-			_dec='Inner marker state'
-		)
-		self.Avionics.add(
-			'MIDDLE_MARKER',
-			(b'MIDDLE MARKER', b'Bool'),
-			_dec='Middle marker state'
-		)
-		self.Avionics.add(
-			'OUTER_MARKER',
-			(b'OUTER MARKER', b'Bool'),
-			_dec='Outer marker state'
-		)
-		self.Avionics.add(
-			'NAV_RAW_GLIDE_SLOPE:index',
-			(b'NAV RAW GLIDE SLOPE:index', b'Degrees'),
-			_dec='Glide slope angle'
-		)
-		self.Avionics.add(
-			'ADF_CARD',
-			(b'ADF CARD', b'Degrees'),
-			_dec='ADF compass rose setting'
-		)
-		self.Avionics.add(
-			'HSI_CDI_NEEDLE',
-			(b'HSI CDI NEEDLE', b'Number'),
-			_dec='Needle deflection (+/- 127)'
-		)
-		self.Avionics.add(
-			'HSI_GSI_NEEDLE',
-			(b'HSI GSI NEEDLE', b'Number'),
-			_dec='Needle deflection (+/- 119)'
-		)
-		self.Avionics.add(
-			'HSI_CDI_NEEDLE_VALID',
-			(b'HSI CDI NEEDLE VALID', b'Bool'),
-			_dec='Signal valid'
-		)
-		self.Avionics.add(
-			'HSI_GSI_NEEDLE_VALID',
-			(b'HSI GSI NEEDLE VALID', b'Bool'),
-			_dec='Signal valid'
-		)
-		self.Avionics.add(
-			'HSI_BEARING_VALID',
-			(b'HSI BEARING VALID', b'Bool'),
-			_dec='This will return true if the HSI BEARING variable contains valid data.'
-		)
-		self.Avionics.add(
-			'HSI_BEARING',
-			(b'HSI BEARING', b'Degrees'),
-			_dec='''
-				If the GPS DRIVES NAV1 variable is true and
-				the HSI BEARING VALID variable is true,
-				this variable contains the HSI needle bearing.
-				If the GPS DRIVES NAV1 variable is false and
-				the HSI BEARING VALID variable is true,
-				this variable contains the ADF1 frequency.'''
-		)
-		self.Avionics.add(
-			'HSI_HAS_LOCALIZER',
-			(b'HSI HAS LOCALIZER', b'Bool'),
-			_dec='Station is a localizer'
-		)
-		self.Avionics.add(
-			'HSI_SPEED',
-			(b'HSI SPEED', b'Knots'),
-			_dec='DME/GPS speed'
-		)
-		self.Avionics.add(
-			'HSI_DISTANCE',
-			(b'HSI DISTANCE', b'Nautical miles'),
-			_dec='DME/GPS distance'
-		)
-		self.Avionics.add(
-			'GPS_POSITION_LAT',
-			(b'GPS POSITION LAT', b'Degrees'),
-			_dec='Current GPS latitude'
-		)
-		self.Avionics.add(
-			'GPS_POSITION_LON',
-			(b'GPS POSITION LON', b'Degrees'),
-			_dec='Current GPS longitude'
-		)
-		self.Avionics.add(
-			'GPS_POSITION_ALT',
-			(b'GPS POSITION ALT', b'Meters'),
-			_dec='Current GPS altitude'
-		)
-		self.Avionics.add(
-			'GPS_MAGVAR',
-			(b'GPS MAGVAR', b'Radians'),
-			_dec='Current GPS magnetic variation'
-		)
-		self.Avionics.add(
-			'GPS_IS_ACTIVE_FLIGHT_PLAN',
-			(b'GPS IS ACTIVE FLIGHT PLAN', b'Bool'),
-			_dec='Flight plan mode active'
-		)
-		self.Avionics.add(
-			'GPS_IS_ACTIVE_WAY_POINT',
-			(b'GPS IS ACTIVE WAY POINT', b'Bool'),
-			_dec='Waypoint mode active'
-		)
-		self.Avionics.add(
-			'GPS_IS_ARRIVED',
-			(b'GPS IS ARRIVED', b'Bool'),
-			_dec='Is flight plan destination reached'
-		)
-		self.Avionics.add(
-			'GPS_IS_DIRECTTO_FLIGHTPLAN',
-			(b'GPS IS DIRECTTO FLIGHTPLAN', b'Bool'),
-			_dec='Is Direct To Waypoint mode active'
-		)
-		self.Avionics.add(
-			'GPS_GROUND_SPEED',
-			(b'GPS GROUND SPEED', b'Meters per second'),
-			_dec='Current ground speed'
-		)
-		self.Avionics.add(
-			'GPS_GROUND_TRUE_HEADING',
-			(b'GPS GROUND TRUE HEADING', b'Radians'),
-			_dec='Current true heading'
-		)
-		self.Avionics.add(
-			'GPS_GROUND_MAGNETIC_TRACK',
-			(b'GPS GROUND MAGNETIC TRACK', b'Radians'),
-			_dec='Current magnetic ground track'
-		)
-		self.Avionics.add(
-			'GPS_GROUND_TRUE_TRACK',
-			(b'GPS GROUND TRUE TRACK', b'Radians'),
-			_dec='Current true ground track'
-		)
-		self.Avionics.add(
-			'GPS_WP_DISTANCE',
-			(b'GPS WP DISTANCE', b'Meters'),
-			_dec='Distance to waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_BEARING',
-			(b'GPS WP BEARING', b'Radians'),
-			_dec='Magnetic bearing to waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_TRUE_BEARING',
-			(b'GPS WP TRUE BEARING', b'Radians'),
-			_dec='True bearing to waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_CROSS_TRK',
-			(b'GPS WP CROSS TRK', b'Meters'),
-			_dec='Cross track distance'
-		)
-		self.Avionics.add(
-			'GPS_WP_DESIRED_TRACK',
-			(b'GPS WP DESIRED TRACK', b'Radians'),
-			_dec='Desired track to waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_TRUE_REQ_HDG',
-			(b'GPS WP TRUE REQ HDG', b'Radians'),
-			_dec='Required true heading to waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_VERTICAL_SPEED',
-			(b'GPS WP VERTICAL SPEED', b'Meters per second'),
-			_dec='Vertical speed to waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_TRACK_ANGLE_ERROR',
-			(b'GPS WP TRACK ANGLE ERROR', b'Radians'),
-			_dec='Tracking angle error to waypoint'
-		)
-		self.Avionics.add(
-			'GPS_ETE',
-			(b'GPS ETE', b'Seconds'),
-			_dec='Estimated time enroute to destination'
-		)
-		self.Avionics.add(
-			'GPS_ETA',
-			(b'GPS ETA', b'Seconds'),
-			_dec='Estimated time of arrival at destination'
-		)
-		self.Avionics.add(
-			'GPS_WP_NEXT_LAT',
-			(b'GPS WP NEXT LAT', b'Degrees'),
-			_dec='Latitude of next waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_NEXT_LON',
-			(b'GPS WP NEXT LON', b'Degrees'),
-			_dec='Longitude of next waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_NEXT_ALT',
-			(b'GPS WP NEXT ALT', b'Meters'),
-			_dec='Altitude of next waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_PREV_VALID',
-			(b'GPS WP PREV VALID', b'Bool'),
-			_dec='Is previous waypoint valid (i.e. current waypoint is not the first waypoint)'
-		)
-		self.Avionics.add(
-			'GPS_WP_PREV_LAT',
-			(b'GPS WP PREV LAT', b'Degrees'),
-			_dec='Latitude of previous waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_PREV_LON',
-			(b'GPS WP PREV LON', b'Degrees'),
-			_dec='Longitude of previous waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_PREV_ALT',
-			(b'GPS WP PREV ALT', b'Meters'),
-			_dec='Altitude of previous waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_ETE',
-			(b'GPS WP ETE', b'Seconds'),
-			_dec='Estimated time enroute to waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_ETA',
-			(b'GPS WP ETA', b'Seconds'),
-			_dec='Estimated time of arrival at waypoint'
-		)
-		self.Avionics.add(
-			'GPS_COURSE_TO_STEER',
-			(b'GPS COURSE TO STEER', b'Radians'),
-			_dec='Suggested heading to steer (for autopilot)'
-		)
-		self.Avionics.add(
-			'GPS_FLIGHT_PLAN_WP_INDEX',
-			(b'GPS FLIGHT PLAN WP INDEX', b'Number'),
-			_dec='Index of waypoint'
-		)
-		self.Avionics.add(
-			'GPS_FLIGHT_PLAN_WP_COUNT',
-			(b'GPS FLIGHT PLAN WP COUNT', b'Number'),
-			_dec='Number of waypoints'
-		)
-		self.Avionics.add(
-			'GPS_IS_ACTIVE_WP_LOCKED',
-			(b'GPS IS ACTIVE WP LOCKED', b'Bool'),
-			_dec='Is switching to next waypoint locked'
-		)
-		self.Avionics.add(
-			'GPS_IS_APPROACH_LOADED',
-			(b'GPS IS APPROACH LOADED', b'Bool'),
-			_dec='Is approach loaded'
-		)
-		self.Avionics.add(
-			'GPS_IS_APPROACH_ACTIVE',
-			(b'GPS IS APPROACH ACTIVE', b'Bool'),
-			_dec='Is approach mode active'
-		)
-		self.Avionics.add(
-			'GPS_APPROACH_IS_WP_RUNWAY',
-			(b'GPS APPROACH IS WP RUNWAY', b'Bool'),
-			_dec='Waypoint is the runway'
-		)
-		self.Avionics.add(
-			'GPS_APPROACH_APPROACH_INDEX',
-			(b'GPS APPROACH APPROACH INDEX', b'Number'),
-			_dec='Index of approach for given airport'
-		)
-		self.Avionics.add(
-			'GPS_APPROACH_TRANSITION_INDEX',
-			(b'GPS APPROACH TRANSITION INDEX', b'Number'),
-			_dec='Index of approach transition'
-		)
-		self.Avionics.add(
-			'GPS_APPROACH_IS_FINAL',
-			(b'GPS APPROACH IS FINAL', b'Bool'),
-			_dec='Is approach transition final approach segment'
-		)
-		self.Avionics.add(
-			'GPS_APPROACH_IS_MISSED',
-			(b'GPS APPROACH IS MISSED', b'Bool'),
-			_dec='Is approach segment missed approach segment'
-		)
-		self.Avionics.add(
-			'GPS_APPROACH_TIMEZONE_DEVIATION',
-			(b'GPS APPROACH TIMEZONE DEVIATION', b'Seconds'),
-			_dec='Deviation of local time from GMT'
-		)
-		self.Avionics.add(
-			'GPS_APPROACH_WP_INDEX',
-			(b'GPS APPROACH WP INDEX', b'Number'),
-			_dec='Index of current waypoint'
-		)
-		self.Avionics.add(
-			'GPS_APPROACH_WP_COUNT',
-			(b'GPS APPROACH WP COUNT', b'Number'),
-			_dec='Number of waypoints'
-		)
-		self.Avionics.add(
-			'GPS_DRIVES_NAV1',
-			(b'GPS DRIVES NAV1', b'Bool'),
-			_dec='GPS is driving Nav 1 indicator'
-		)
-		self.Avionics.add(
-			'COM_RECEIVE_ALL',
-			(b'COM RECEIVE ALL', b'Bool'),
-			_dec='Toggles all COM radios to receive on'
-		)
-		self.Avionics.add(
-			'COM_AVAILABLE',
-			(b'COM AVAILABLE', b'Bool'),
-			_dec='True if either COM1 or COM2 is available'
-		)
-		self.Avionics.add(
-			'COM_TEST:index',
-			(b'COM TEST:index', b'Bool'),
-			_dec='Enter an index of 1 or 2. True if the COM system is working.'
-		)
-		self.Avionics.add(
-			'TRANSPONDER_AVAILABLE',
-			(b'TRANSPONDER AVAILABLE', b'Bool'),
-			_dec='True if a transponder is available'
-		)
-		self.Avionics.add(
-			'ADF_AVAILABLE',
-			(b'ADF AVAILABLE', b'Bool'),
-			_dec='True if ADF is available'
-		)
-		self.Avionics.add(
-			'ADF_FREQUENCY:index',
-			(b'ADF FREQUENCY:index', b'Frequency BCD16'),
-			_dec='Legacy, use ADF ACTIVE FREQUENCY'
-		)
-		self.Avionics.add(
-			'ADF_EXT_FREQUENCY:index',
-			(b'ADF EXT FREQUENCY:index', b'Frequency BCD16'),
-			_dec='Legacy, use ADF ACTIVE FREQUENCY'
-		)
-		self.Avionics.add(
-			'ADF_IDENT',
-			(b'ADF IDENT', b'String'),
-			_dec='ICAO code'
-		)
-		self.Avionics.add(
-			'ADF_NAME',
-			(b'ADF NAME', b'String'),
-			_dec='Descriptive name'
-		)
-		self.Avionics.add(
-			'NAV_IDENT',
-			(b'NAV IDENT', b'String'),
-			_dec='ICAO code'
-		)
-		self.Avionics.add(
-			'NAV_NAME',
-			(b'NAV NAME', b'String'),
-			_dec='Descriptive name'
-		)
-		self.Avionics.add(
-			'NAV_GLIDE_SLOPE',
-			(b'NAV GLIDE SLOPE', b'Number'),
-			_dec='The glide slope gradient.'
-		)
-		self.Avionics.add(
-			'NAV_RELATIVE_BEARING_TO_STATION:index',
-			(b'NAV RELATIVE BEARING TO STATION:index', b'Degrees'),
-			_dec='Relative bearing to station'
-		)
-		self.Avionics.add(
-			'SELECTED_DME',
-			(b'SELECTED DME', b'Number'),
-			_dec='Selected DME'
-		)
-		self.Avionics.add(
-			'GPS_WP_NEXT_ID',
-			(b'GPS WP NEXT ID', b'String'),
-			_dec='ID of next GPS waypoint'
-		)
-		self.Avionics.add(
-			'GPS_WP_PREV_ID',
-			(b'GPS WP PREV ID', b'String'),
-			_dec='ID of previous GPS waypoint'
-		)
-		self.Avionics.add(
-			'GPS_TARGET_DISTANCE',
-			(b'GPS TARGET DISTANCE', b'Meters'),
-			_dec='Distance to target'
-		)
-		self.Avionics.add(
-			'GPS_TARGET_ALTITUDE',
-			(b'GPS TARGET ALTITUDE', b'Meters'),
-			_dec='Altitude of GPS target'
-		)
-		self.Avionics.add(
-			'ADF_LATLONALT:index',
-			(b'ADF LATLONALT:index', b'SIMCONNECT_DATA_LATLONALTstructure'),
-			_dec='''
-			Returns the latitude, longitude and altitude of the station
-			the radio equipment is currently tuned to, or zeros if the
-			radio is not tuned to any ADF station.
-			Index of 1 or 2 for ADF 1 and ADF 2.'''
-		)
-		self.Avionics.add(
-			'NAV_VOR_LATLONALT:index',
-			(b'NAV VOR LATLONALT:index', b'SIMCONNECT_DATA_LATLONALTstructure'),
-			_dec='Returns the VOR station latitude, longitude and altitude.'
-		)
-		self.Avionics.add(
-			'NAV_GS_LATLONALT:index',
-			(b'NAV GS LATLONALT:index', b'SIMCONNECT_DATA_LATLONALTstructure'),
-			_dec='Returns the glide slope.'
-		)
-		self.Avionics.add(
-			'NAV_DME_LATLONALT:index',
-			(b'NAV DME LATLONALT:index', b'SIMCONNECT_DATA_LATLONALTstructure'),
-			_dec='Returns the DME station.'
-		)
-		self.Avionics.add(
-			'INNER_MARKER_LATLONALT',
-			(b'INNER MARKER LATLONALT', b'SIMCONNECT_DATA_LATLONALTstructure'),
-			_dec='''
-				Returns the latitude, longitude and altitude of the inner marker 
-				of an approach to a runway, if the aircraft is within the required 
-				proximity, otherwise it will return zeros.'''
-		)
-		self.Avionics.add(
-			'MIDDLE_MARKER_LATLONALT',
-			(b'MIDDLE MARKER LATLONALT', b'SIMCONNECT_DATA_LATLONALTstructure'),
-			_dec='Returns the latitude, longitude and altitude of the middle marker.'
-		)
-		self.Avionics.add(
-			'OUTER_MARKER_LATLONALT',
-			(b'OUTER MARKER LATLONALT', b'SIMCONNECT_DATA_LATLONALTstructure'),
-			_dec='Returns the latitude, longitude and altitude of the outer marker.'
-		)
+	class __AircraftAvionicsData(RequestHelper):
+		list = [
+			("AVIONICS_MASTER_SWITCH", "Avionics switch state", b'AVIONICS MASTER SWITCH', b'Bool', 'N'),
+			("NAV_SOUND:index", "Nav audio flag. Index of 1 or 2.", b'NAV SOUND:index', b'Bool', 'N'),
+			("DME_SOUND", "DME audio flag", b'DME SOUND', b'Bool', 'N'),
+			("ADF_SOUND:index", "ADF audio flag. Index of 0 or 1.", b'ADF SOUND:index', b'Bool', 'N'),
+			("MARKER_SOUND", "Marker audio flag", b'MARKER SOUND', b'Bool', 'N'),
+			("COM_TRANSMIT:index", "Audio panel com transmit state. Index of 1 or 2.", b'COM TRANSMIT:index', b'Bool', 'N'),
+			("COM_RECIEVE_ALL", "Flag if all Coms receiving", b'COM RECIEVE ALL', b'Bool', 'N'),
+			("COM_ACTIVE_FREQUENCY:index", "Com frequency. Index is 1 or 2.", b'COM ACTIVE FREQUENCY:index', b'Frequency BCD16', 'N'),
+			("COM_STANDBY_FREQUENCY:index", "Com standby frequency. Index is 1 or 2.", b'COM STANDBY FREQUENCY:index', b'Frequency BCD16', 'N'),
+			# ['COM STATUS:index', 'Radio status flag :']
+			# ['-1 =Invalid']
+			# ['0 = OK']
+			# ['1 = Does not exist']
+			# ['2 = No electricity']
+			# ['3 = Failed']
+			# ['Enum', 'N', '-']
+			("NAV_AVAILABLE:index", "Flag if Nav equipped on aircraft", b'NAV AVAILABLE:index', b'Bool', 'N'),
+			("NAV_ACTIVE_FREQUENCY:index", "Nav active frequency. Index is 1 or 2.", b'NAV ACTIVE FREQUENCY:index', b'MHz', 'N'),
+			("NAV_STANDBY_FREQUENCY:index", "Nav standby frequency. Index is 1 or 2.", b'NAV STANDBY FREQUENCY:index', b'MHz', 'N'),
+			("NAV_SIGNAL:index", "Nav signal strength", b'NAV SIGNAL:index', b'Number', 'N'),
+			("NAV_HAS_NAV:index", "Flag if Nav has signal", b'NAV HAS NAV:index', b'Bool', 'N'),
+			("NAV_HAS_LOCALIZER:index", "Flag if tuned station is a localizer", b'NAV HAS LOCALIZER:index', b'Bool', 'N'),
+			("NAV_HAS_DME:index", "Flag if tuned station has a DME", b'NAV HAS DME:index', b'Bool', 'N'),
+			("NAV_HAS_GLIDE_SLOPE:index", "Flag if tuned station has a glideslope", b'NAV HAS GLIDE SLOPE:index', b'Bool', 'N'),
+			# ['NAV BACK COURSE FLAGS:index', 'Returns the following bit flags:']
+			# ['BIT0: 1=back course available']
+			# ['BIT1: 1=localizer tuned in']
+			# ['BIT2: 1=on course']
+			# ['BIT7: 1=station active', 'Flags', 'N', '-']
+			("NAV_MAGVAR:index", "Magnetic variation of tuned nav station", b'NAV MAGVAR:index', b'Degrees', 'N'),
+			("NAV_RADIAL:index", "Radial that aircraft is on", b'NAV RADIAL:index', b'Degrees', 'N'),
+			("NAV_RADIAL_ERROR:index", "Difference between current radial and OBS tuned radial", b'NAV RADIAL ERROR:index', b'Degrees', 'N'),
+			("NAV_LOCALIZER:index", "Localizer course heading", b'NAV LOCALIZER:index', b'Degrees', 'N'),
+			("NAV_GLIDE_SLOPE_ERROR:index", "Difference between current position and glideslope angle. Note that this provides 32 bit floating point precision, rather than the 8 bit integer precision of NAV GSI.", b'NAV GLIDE SLOPE ERROR:index', b'Degrees', 'N'),
+			("NAV_CDI:index", "CDI needle deflection (+/- 127)", b'NAV CDI:index', b'Number', 'N'),
+			("NAV_GSI:index", "Glideslope needle deflection (+/- 119). Note that this provides only 8 bit precision, whereas NAV GLIDE SLOPE ERROR provides 32 bit floating point precision.", b'NAV GSI:index', b'Number', 'N'),
+			# ['NAV TOFROM:index', 'Nav TO/FROM flag:']
+			# ['0 = Off']
+			# ['1 = TO']
+			# ['2 = FROM']
+			# ['Enum', 'N', '-']
+			("NAV_GS_FLAG:index", "Glideslope flag", b'NAV GS FLAG:index', b'Bool', 'N'),
+			("NAV_OBS:index", "OBS setting. Index of 1 or 2.", b'NAV OBS:index', b'Degrees', 'N'),
+			("NAV_DME:index", "DME distance", b'NAV DME:index', b'Nautical miles', 'N'),
+			("NAV_DMESPEED:index", "DME speed", b'NAV DMESPEED:index', b'Knots', 'N'),
+			("ADF_ACTIVE_FREQUENCY:index", "ADF frequency. Index of 1 or 2.", b'ADF ACTIVE FREQUENCY:index', b'Frequency ADF BCD32', 'N'),
+			("ADF_STANDBY_FREQUENCY:index", "ADF standby frequency", b'ADF STANDBY FREQUENCY:index', b'Hz', 'N'),
+			("ADF_RADIAL:index", "Current direction from NDB station", b'ADF RADIAL:index', b'Degrees', 'N'),
+			("ADF_SIGNAL:index", "Signal strength", b'ADF SIGNAL:index', b'Number', 'N'),
+			("TRANSPONDER_CODE:index", "4-digit code", b'TRANSPONDER CODE:index', b'BCO16', 'N'),
+			# ['MARKER BEACON STATE', 'Marker beacon state:']
+			# ['0 = None']
+			# ['1 = Outer']
+			# ['2 = Middle']
+			# ['3 = Inner', 'Enum', 'Y', '-']
+			("INNER_MARKER", "Inner marker state", b'INNER MARKER', b'Bool', 'Y'),
+			("MIDDLE_MARKER", "Middle marker state", b'MIDDLE MARKER', b'Bool', 'Y'),
+			("OUTER_MARKER", "Outer marker state", b'OUTER MARKER', b'Bool', 'Y'),
+			("NAV_RAW_GLIDE_SLOPE:index", "Glide slope angle", b'NAV RAW GLIDE SLOPE:index', b'Degrees', 'N'),
+			("ADF_CARD", "ADF compass rose setting", b'ADF CARD', b'Degrees', 'N'),
+			("HSI_CDI_NEEDLE", "Needle deflection (+/- 127)", b'HSI CDI NEEDLE', b'Number', 'N'),
+			("HSI_GSI_NEEDLE", "Needle deflection (+/- 119)", b'HSI GSI NEEDLE', b'Number', 'N'),
+			("HSI_CDI_NEEDLE_VALID", "Signal valid", b'HSI CDI NEEDLE VALID', b'Bool', 'N'),
+			("HSI_GSI_NEEDLE_VALID", "Signal valid", b'HSI GSI NEEDLE VALID', b'Bool', 'N'),
+			# ['HSI TF FLAGS', 'Nav TO/FROM flag:']
+			# ['0 = Off']
+			# ['1 = TO']
+			# ['2 = FROM', 'Enum', 'N', '-']
+			("HSI_BEARING_VALID", "This will return true if the HSI BEARING variable contains valid data.", b'HSI BEARING VALID', b'Bool', 'N'),
+			("HSI_BEARING", "If the GPS DRIVES NAV1 variable is true and the HSI BEARING VALID variable is true, this variable contains the HSI needle bearing. If the GPS DRIVES NAV1 variable is false and the HSI BEARING VALID variable is true, this variable contains the ADF1 frequency.", b'HSI BEARING', b'Degrees', 'N'),
+			("HSI_HAS_LOCALIZER", "Station is a localizer", b'HSI HAS LOCALIZER', b'Bool', 'N'),
+			("HSI_SPEED", "DME/GPS speed", b'HSI SPEED', b'Knots', 'N'),
+			("HSI_DISTANCE", "DME/GPS distance", b'HSI DISTANCE', b'Nautical miles', 'N'),
+			("GPS_POSITION_LAT", "Current GPS latitude", b'GPS POSITION LAT', b'Degrees', 'N'),
+			("GPS_POSITION_LON", "Current GPS longitude", b'GPS POSITION LON', b'Degrees', 'N'),
+			("GPS_POSITION_ALT", "Current GPS altitude", b'GPS POSITION ALT', b'Meters', 'N'),
+			("GPS_MAGVAR", "Current GPS magnetic variation", b'GPS MAGVAR', b'Radians', 'N'),
+			("GPS_IS_ACTIVE_FLIGHT_PLAN", "Flight plan mode active", b'GPS IS ACTIVE FLIGHT PLAN', b'Bool', 'N'),
+			("GPS_IS_ACTIVE_WAY_POINT", "Waypoint mode active", b'GPS IS ACTIVE WAY POINT', b'Bool', 'N'),
+			("GPS_IS_ARRIVED", "Is flight plan destination reached", b'GPS IS ARRIVED', b'Bool', 'N'),
+			("GPS_IS_DIRECTTO_FLIGHTPLAN", "Is Direct To Waypoint mode active", b'GPS IS DIRECTTO FLIGHTPLAN', b'Bool', 'N'),
+			("GPS_GROUND_SPEED", "Current ground speed", b'GPS GROUND SPEED', b'Meters per second', 'N'),
+			("GPS_GROUND_TRUE_HEADING", "Current true heading", b'GPS GROUND TRUE HEADING', b'Radians', 'N'),
+			("GPS_GROUND_MAGNETIC_TRACK", "Current magnetic ground track", b'GPS GROUND MAGNETIC TRACK', b'Radians', 'N'),
+			("GPS_GROUND_TRUE_TRACK", "Current true ground track", b'GPS GROUND TRUE TRACK', b'Radians', 'N'),
+			("GPS_WP_DISTANCE", "Distance to waypoint", b'GPS WP DISTANCE', b'Meters', 'N'),
+			("GPS_WP_BEARING", "Magnetic bearing to waypoint", b'GPS WP BEARING', b'Radians', 'N'),
+			("GPS_WP_TRUE_BEARING", "True bearing to waypoint", b'GPS WP TRUE BEARING', b'Radians', 'N'),
+			("GPS_WP_CROSS_TRK", "Cross track distance", b'GPS WP CROSS TRK', b'Meters', 'N'),
+			("GPS_WP_DESIRED_TRACK", "Desired track to waypoint", b'GPS WP DESIRED TRACK', b'Radians', 'N'),
+			("GPS_WP_TRUE_REQ_HDG", "Required true heading to waypoint", b'GPS WP TRUE REQ HDG', b'Radians', 'N'),
+			("GPS_WP_VERTICAL_SPEED", "Vertical speed to waypoint", b'GPS WP VERTICAL SPEED', b'Meters per second', 'N'),
+			("GPS_WP_TRACK_ANGLE_ERROR", "Tracking angle error to waypoint", b'GPS WP TRACK ANGLE ERROR', b'Radians', 'N'),
+			("GPS_ETE", "Estimated time enroute to destination", b'GPS ETE', b'Seconds', 'N'),
+			("GPS_ETA", "Estimated time of arrival at destination", b'GPS ETA', b'Seconds', 'N'),
+			("GPS_WP_NEXT_LAT", "Latitude of next waypoint", b'GPS WP NEXT LAT', b'Degrees', 'N'),
+			("GPS_WP_NEXT_LON", "Longitude of next waypoint", b'GPS WP NEXT LON', b'Degrees', 'N'),
+			("GPS_WP_NEXT_ALT", "Altitude of next waypoint", b'GPS WP NEXT ALT', b'Meters', 'N'),
+			("GPS_WP_PREV_VALID", "Is previous waypoint valid (i.e. current waypoint is not the first waypoint)", b'GPS WP PREV VALID', b'Bool', 'N'),
+			("GPS_WP_PREV_LAT", "Latitude of previous waypoint", b'GPS WP PREV LAT', b'Degrees', 'N'),
+			("GPS_WP_PREV_LON", "Longitude of previous waypoint", b'GPS WP PREV LON', b'Degrees', 'N'),
+			("GPS_WP_PREV_ALT", "Altitude of previous waypoint", b'GPS WP PREV ALT', b'Meters', 'N'),
+			("GPS_WP_ETE", "Estimated time enroute to waypoint", b'GPS WP ETE', b'Seconds', 'N'),
+			("GPS_WP_ETA", "Estimated time of arrival at waypoint", b'GPS WP ETA', b'Seconds', 'N'),
+			("GPS_COURSE_TO_STEER", "Suggested heading to steer (for autopilot)", b'GPS COURSE TO STEER', b'Radians', 'N'),
+			("GPS_FLIGHT_PLAN_WP_INDEX", "Index of waypoint", b'GPS FLIGHT PLAN WP INDEX', b'Number', 'N'),
+			("GPS_FLIGHT_PLAN_WP_COUNT", "Number of waypoints", b'GPS FLIGHT PLAN WP COUNT', b'Number', 'N'),
+			("GPS_IS_ACTIVE_WP_LOCKED", "Is switching to next waypoint locked", b'GPS IS ACTIVE WP LOCKED', b'Bool', 'N'),
+			("GPS_IS_APPROACH_LOADED", "Is approach loaded", b'GPS IS APPROACH LOADED', b'Bool', 'N'),
+			("GPS_IS_APPROACH_ACTIVE", "Is approach mode active", b'GPS IS APPROACH ACTIVE', b'Bool', 'N'),
+			# ['GPS APPROACH MODE', 'Sub mode within approach mode :']
+			# ['0 = None']
+			# ['1 = Transition']
+			# ['2 = Final']
+			# ['3 = Missed']
+			# ['Enum', 'N', '-']
+			# ['GPS APPROACH WP TYPE', 'Waypoint type within approach mode :']
+			# ['0 = None']
+			# ['1 = Fix']
+			# ['2 = Procedure turn left']
+			# ['3 = Procedure turn right']
+			# ['4 = Dme arc left']
+			# ['5 = Dme arc right']
+			# ['6 = Holding left']
+			# ['7 = Holding right']
+			# ['8 = Distance']
+			# ['9 = Altitude']
+			# ['10 = Manual sequence']
+			# ['11 = Vector to final']
+			# ['Enum', 'N', '-']
+			("GPS_APPROACH_IS_WP_RUNWAY", "Waypoint is the runway", b'GPS APPROACH IS WP RUNWAY', b'Bool', 'N'),
+			# ['GPS APPROACH SEGMENT TYPE', 'Segment type within approach :']
+			# ['0 = Line']
+			# ['1 = Arc clockwise']
+			# ['2 = Arc counter-clockwise']
+			# ['Enum', 'N', '-']
+			("GPS_APPROACH_APPROACH_INDEX", "Index of approach for given airport", b'GPS APPROACH APPROACH INDEX', b'Number', 'N'),
+			# ['GPS APPROACH APPROACH TYPE', 'Approach type :']
+			# ['0 = None']
+			# ['1 = GPS']
+			# ['2 = VOR']
+			# ['3 = NDB']
+			# ['4 = ILS']
+			# ['5 = Localizer']
+			# ['6 = SDF']
+			# ['7 = LDA']
+			# ['8 = VOR/DME']
+			# ['9 = NDB/DME']
+			# ['10 = RNAV']
+			# ['11 = Backcourse']
+			# ['Enum', 'N', '-']
+			("GPS_APPROACH_TRANSITION_INDEX", "Index of approach transition", b'GPS APPROACH TRANSITION INDEX', b'Number', 'N'),
+			("GPS_APPROACH_IS_FINAL", "Is approach transition final approach segment", b'GPS APPROACH IS FINAL', b'Bool', 'N'),
+			("GPS_APPROACH_IS_MISSED", "Is approach segment missed approach segment", b'GPS APPROACH IS MISSED', b'Bool', 'N'),
+			("GPS_APPROACH_TIMEZONE_DEVIATION", "Deviation of local time from GMT", b'GPS APPROACH TIMEZONE DEVIATION', b'Seconds', 'N'),
+			("GPS_APPROACH_WP_INDEX", "Index of current waypoint", b'GPS APPROACH WP INDEX', b'Number', 'N'),
+			("GPS_APPROACH_WP_COUNT", "Number of waypoints", b'GPS APPROACH WP COUNT', b'Number', 'N'),
+			("GPS_DRIVES_NAV1", "GPS is driving Nav 1 indicator", b'GPS DRIVES NAV1', b'Bool', 'N'),
+			("COM_RECEIVE_ALL", "Toggles all COM radios to receive on", b'COM RECEIVE ALL', b'Bool', 'N'),
+			("COM_AVAILABLE", "True if either COM1 or COM2 is available", b'COM AVAILABLE', b'Bool', 'N'),
+			("COM_TEST:index", "Enter an index of 1 or 2. True if the COM system is working.", b'COM TEST:index', b'Bool', 'N'),
+			("TRANSPONDER_AVAILABLE", "True if a transponder is available", b'TRANSPONDER AVAILABLE', b'Bool', 'N'),
+			("ADF_AVAILABLE", "True if ADF is available", b'ADF AVAILABLE', b'Bool', 'N'),
+			("ADF_FREQUENCY:index", "Legacy, use ADF ACTIVE FREQUENCY", b'ADF FREQUENCY:index', b'Frequency BCD16', 'N'),
+			("ADF_EXT_FREQUENCY:index", "Legacy, use ADF ACTIVE FREQUENCY", b'ADF EXT FREQUENCY:index', b'Frequency BCD16', 'N'),
+			("ADF_IDENT", "ICAO code", b'ADF IDENT', b'String', 'N'),
+			("ADF_NAME", "Descriptive name", b'ADF NAME', b'String', 'N'),
+			("NAV_IDENT", "ICAO code", b'NAV IDENT', b'String', 'N'),
+			("NAV_NAME", "Descriptive name", b'NAV NAME', b'String', 'N'),
+			# ['NAV CODES:index', 'Returns bit flags with the following meaning:']
+			# ['BIT7: 0= VOR  1= Localizer']
+			# ['BIT6: 1= glideslope available']
+			# ['BIT5: 1= no localizer backcourse']
+			# ['BIT4: 1= DME transmitter at glide slope transmitter']
+			# ['BIT3: 1= no nav signal available']
+			# ['BIT2: 1= voice available']
+			# ['BIT1: 1 = TACAN available']
+			# ['BIT0: 1= DME available', 'Flags', 'N', '-']
+			("NAV_GLIDE_SLOPE", "The glide slope gradient.", b'NAV GLIDE SLOPE', b'Number', 'N'),
+			("NAV_RELATIVE_BEARING_TO_STATION:index", "Relative bearing to station", b'NAV RELATIVE BEARING TO STATION:index', b'Degrees', 'N'),
+			("SELECTED_DME", "Selected DME", b'SELECTED DME', b'Number', 'N'),
+			("GPS_WP_NEXT_ID", "ID of next GPS waypoint", b'GPS WP NEXT ID', b'String', 'N'),
+			("GPS_WP_PREV_ID", "ID of previous GPS waypoint", b'GPS WP PREV ID', b'String', 'N'),
+			("GPS_TARGET_DISTANCE", "Distance to target", b'GPS TARGET DISTANCE', b'Meters', 'N'),
+			("GPS_TARGET_ALTITUDE", "Altitude of GPS target", b'GPS TARGET ALTITUDE', b'Meters', 'N'),
+			("ADF_LATLONALT:index", "Returns the latitude, longitude and altitude of the station the radio equipment is currently tuned to, or zeros if the radio is not tuned to any ADF station. Index of 1 or 2 for ADF 1 and ADF 2.", b'ADF LATLONALT:index', b'SIMCONNECT_DATA_LATLONALTstructure', 'N'),
+			("NAV_VOR_LATLONALT:index", "Returns the VOR station latitude, longitude and altitude.", b'NAV VOR LATLONALT:index', b'SIMCONNECT_DATA_LATLONALTstructure', 'N'),
+			("NAV_GS_LATLONALT:index", "Returns the glide slope.", b'NAV GS LATLONALT:index', b'SIMCONNECT_DATA_LATLONALTstructure', 'N'),
+			("NAV_DME_LATLONALT:index", "Returns the DME station.", b'NAV DME LATLONALT:index', b'SIMCONNECT_DATA_LATLONALTstructure', 'N'),
+			("INNER_MARKER_LATLONALT", "Returns the latitude, longitude and altitude of the inner marker of an approach to a runway, if the aircraft is within the required proximity, otherwise it will return zeros.", b'INNER MARKER LATLONALT', b'SIMCONNECT_DATA_LATLONALTstructure', 'N'),
+			("MIDDLE_MARKER_LATLONALT", "Returns the latitude, longitude and altitude of the middle marker.", b'MIDDLE MARKER LATLONALT', b'SIMCONNECT_DATA_LATLONALTstructure', 'N'),
+			("OUTER_MARKER_LATLONALT", "Returns the latitude, longitude and altitude of the outer marker.", b'OUTER MARKER LATLONALT', b'SIMCONNECT_DATA_LATLONALTstructure', 'N'),
+		]
 
+	class __AircraftControlsData(RequestHelper):
+		list = [
+			("YOKE_Y_POSITION", "Percent control deflection fore/aft (for animation)", b'YOKE Y POSITION', b'Position (-16K to 0) -16K = Yoke fully pushed in', 'Y'),
+			("YOKE_X_POSITION", "Percent control deflection left/right (for animation)", b'YOKE X POSITION', b'Position (-16K to 0) -16K =', 'Y'),
+			("RUDDER_PEDAL_POSITION", "Percent rudder pedal deflection (for animation)", b'RUDDER PEDAL POSITION', b'Position (-16K to 0) -16K = left pedal pushed full in', 'Y'),
+			("RUDDER_POSITION", "Percent rudder input deflection", b'RUDDER POSITION', b'Position (-16K to 0) -16K = full left', 'Y'),
+			("ELEVATOR_POSITION", "Percent elevator input deflection", b'ELEVATOR POSITION', b'Position (-16K to 0) -16K = full down', 'Y'),
+			("AILERON_POSITION", "Percent aileron input left/right", b'AILERON POSITION', b'Position (-16K to 0) -16K = full left', 'Y'),
+			("ELEVATOR_TRIM_POSITION", "Elevator trim deflection", b'ELEVATOR TRIM POSITION', b'Radians', 'Y'),
+			("ELEVATOR_TRIM_INDICATOR", "Percent elevator trim (for indication)", b'ELEVATOR TRIM INDICATOR', b'Position (-16K to 0) -16K = full down', 'N'),
+			("ELEVATOR_TRIM_PCT", "Percent elevator trim", b'ELEVATOR TRIM PCT', b'Percent Over 100', 'N'),
+			("BRAKE_LEFT_POSITION", "Percent left brake", b'BRAKE LEFT POSITION', b'Position (0 to 32K) 0 = off, 32K full', 'Y'),
+			("BRAKE_RIGHT_POSITION", "Percent right brake", b'BRAKE RIGHT POSITION', b'Position (0 to 32K) 0 = off, 32K full', 'Y'),
+			("BRAKE_INDICATOR", "Brake on indication", b'BRAKE INDICATOR', b'Position (0 to 16K) 0 = off, 16K full', 'N'),
+			("BRAKE_PARKING_POSITION", "Parking brake on", b'BRAKE PARKING POSITION', b'Position (0 to 32K) 0 = off, 32K full', 'Y'),
+			("BRAKE_PARKING_INDICATOR", "Parking brake indicator", b'BRAKE PARKING INDICATOR', b'Bool', 'N'),
+			("SPOILERS_ARMED", "Auto-spoilers armed", b'SPOILERS ARMED', b'Bool', 'N'),
+			("SPOILERS_HANDLE_POSITION", "Spoiler handle position", b'SPOILERS HANDLE POSITION', b'Percent Over 100 or Position (16K = down, 0 = up)', 'Y'),
+			("SPOILERS_LEFT_POSITION", "Percent left spoiler deflected", b'SPOILERS LEFT POSITION', b'Percent Over 100 or Position (0 = retracted, 16K fully extended)', 'N'),
+			("SPOILERS_RIGHT_POSITION", "Percent right spoiler deflected", b'SPOILERS RIGHT POSITION', b'Percent Over 100 or Position (0 = retracted, 16K fully extended)', 'N'),
+			("FLAPS_HANDLE_PERCENT", "Percent flap handle extended", b'FLAPS HANDLE PERCENT', b'Percent Over 100', 'N'),
+			("FLAPS_HANDLE_INDEX", "Index of current flap position", b'FLAPS HANDLE INDEX', b'Number', 'Y'),
+			("FLAPS_NUM_HANDLE_POSITIONS", "Number of flap positions", b'FLAPS NUM HANDLE POSITIONS', b'Number', 'N'),
+			("TRAILING_EDGE_FLAPS_LEFT_PERCENT", "Percent left trailing edge flap extended", b'TRAILING EDGE FLAPS LEFT PERCENT', b'Percent Over 100', 'Y'),
+			("TRAILING_EDGE_FLAPS_RIGHT_PERCENT", "Percent right trailing edge flap extended", b'TRAILING EDGE FLAPS RIGHT PERCENT', b'Percent Over 100', 'Y'),
+			("TRAILING_EDGE_FLAPS_LEFT_ANGLE", "Angle left trailing edge flap extended. Use TRAILING EDGE FLAPS LEFT PERCENT to set a value.", b'TRAILING EDGE FLAPS LEFT ANGLE', b'Radians', 'N'),
+			("TRAILING_EDGE_FLAPS_RIGHT_ANGLE", "Angle right trailing edge flap extended. Use TRAILING EDGE FLAPS RIGHT PERCENT to set a value.", b'TRAILING EDGE FLAPS RIGHT ANGLE', b'Radians', 'N'),
+			("LEADING_EDGE_FLAPS_LEFT_PERCENT", "Percent left leading edge flap extended", b'LEADING EDGE FLAPS LEFT PERCENT', b'Percent Over 100', 'Y'),
+			("LEADING_EDGE_FLAPS_RIGHT_PERCENT", "Percent right leading edge flap extended", b'LEADING EDGE FLAPS RIGHT PERCENT', b'Percent Over 100', 'Y'),
+			("LEADING_EDGE_FLAPS_LEFT_ANGLE", "Angle left leading edge flap extended. Use LEADING EDGE FLAPS LEFT PERCENT to set a value.", b'LEADING EDGE FLAPS LEFT ANGLE', b'Radians', 'N'),
+			("LEADING_EDGE_FLAPS_RIGHT_ANGLE", "Angle right leading edge flap extended. Use LEADING EDGE FLAPS RIGHT PERCENT to set a value.", b'LEADING EDGE FLAPS RIGHT ANGLE', b'Radians', 'N'),
+			("AILERON_LEFT_DEFLECTION", "Angle deflection", b'AILERON LEFT DEFLECTION', b'Radians', 'N'),
+			("AILERON_LEFT_DEFLECTION_PCT", "Percent deflection", b'AILERON LEFT DEFLECTION PCT', b'Percent Over 100', 'N'),
+			("AILERON_RIGHT_DEFLECTION", "Angle deflection", b'AILERON RIGHT DEFLECTION', b'Radians', 'N'),
+			("AILERON_RIGHT_DEFLECTION_PCT", "Percent deflection", b'AILERON RIGHT DEFLECTION PCT', b'Percent Over 100', 'N'),
+			("AILERON_AVERAGE_DEFLECTION", "Angle deflection", b'AILERON AVERAGE DEFLECTION', b'Radians', 'N'),
+			("AILERON_TRIM", "Angle deflection", b'AILERON TRIM', b'Radians', 'N'),
+			("AILERON_TRIM_PCT", "Percent deflection", b'AILERON TRIM PCT', b'Percent Over 100', 'Y'),
+			("RUDDER_DEFLECTION", "Angle deflection", b'RUDDER DEFLECTION', b'Radians', 'N'),
+			("RUDDER_DEFLECTION_PCT", "Percent deflection", b'RUDDER DEFLECTION PCT', b'Percent Over 100', 'N'),
+			("RUDDER_TRIM", "Angle deflection", b'RUDDER TRIM', b'Radians', 'N'),
+			("RUDDER_TRIM_PCT", "Percent deflection", b'RUDDER TRIM PCT', b'Percent Over 100', 'Y'),
+			("FLAPS_AVAILABLE", "True if flaps available", b'FLAPS AVAILABLE', b'Bool', 'N'),
+			("FLAP_DAMAGE_BY_SPEED", "True if flagps are damaged by excessive speed", b'FLAP DAMAGE BY SPEED', b'Bool', 'N'),
+			("FLAP_SPEED_EXCEEDED", "True if safe speed limit for flaps exceeded", b'FLAP SPEED EXCEEDED', b'Bool', 'N'),
+			("ELEVATOR_DEFLECTION", "Angle deflection", b'ELEVATOR DEFLECTION', b'Radians', 'N'),
+			("ELEVATOR_DEFLECTION_PCT", "Percent deflection", b'ELEVATOR DEFLECTION PCT', b'Percent Over 100', 'N'),
+			("ALTERNATE_STATIC_SOURCE_OPEN", "Alternate static air source", b'ALTERNATE STATIC SOURCE OPEN', b'Bool', 'N'),
+			("AILERON_TRIM_PCT", "The trim position of the ailerons. Zero is fully retracted.", b'AILERON TRIM PCT', b'Float. Percent over 100', 'Y'),
+			("RUDDER_TRIM_PCT", "The trim position of the rudder. Zero is no trim.", b'RUDDER TRIM PCT', b'Float. Percent over 100', 'Y'),
+			("FOLDING_WING_HANDLE_POSITION", "True if the folding wing handle is engaged.", b'FOLDING WING HANDLE POSITION', b'Bool', 'N'),
+			("FUEL_DUMP_SWITCH", "If true the aircraft is dumping fuel at the rate set in the configuration file.", b'FUEL DUMP SWITCH', b'Bool', 'N'),
+		]
 
-		self.Controls = sm.new_request_holder()
-		self.Controls.add(
-			'YOKE_Y_POSITION',
-			(b'YOKE Y POSITION', b'Position (-16K to 0) -16K = Yoke fully pushed in'),
-			_dec='Percent control deflection fore/aft (for animation)'
-		)
-		self.Controls.add(
-			'YOKE_X_POSITION',
-			(b'YOKE X POSITION', b'Position (-16K to 0) -16K ='),
-			_dec='Percent control deflection left/right (for animation)'
-		)
-		self.Controls.add(
-			'RUDDER_PEDAL_POSITION',
-			(b'RUDDER PEDAL POSITION', b'Position (-16K to 0) -16K = left pedal pushed full in'),
-			_dec='Percent rudder pedal deflection (for animation)'
-		)
-		self.Controls.add(
-			'RUDDER_POSITION',
-			(b'RUDDER POSITION', b'Position (-16K to 0) -16K = full left'),
-			_dec='Percent rudder input deflection'
-		)
-		self.Controls.add(
-			'ELEVATOR_POSITION',
-			(b'ELEVATOR POSITION', b'Position (-16K to 0) -16K = full down'),
-			_dec='Percent elevator input deflection'
-		)
-		self.Controls.add(
-			'AILERON_POSITION',
-			(b'AILERON POSITION', b'Position (-16K to 0) -16K = full left'),
-			_dec='Percent aileron input left/right'
-		)
-		self.Controls.add(
-			'ELEVATOR_TRIM_POSITION',
-			(b'ELEVATOR TRIM POSITION', b'Radians'),
-			_dec='Elevator trim deflection'
-		)
-		self.Controls.add(
-			'ELEVATOR_TRIM_INDICATOR',
-			(b'ELEVATOR TRIM INDICATOR', b'Position (-16K to 0) -16K = full down'),
-			_dec='Percent elevator trim (for indication)'
-		)
-		self.Controls.add(
-			'ELEVATOR_TRIM_PCT',
-			(b'ELEVATOR TRIM PCT', b'Percent Over 100'),
-			_dec='Percent elevator trim'
-		)
-		self.Controls.add(
-			'BRAKE_LEFT_POSITION',
-			(b'BRAKE LEFT POSITION', b'Position (0 to 32K) 0 = off, 32K full'),
-			_dec='Percent left brake'
-		)
-		self.Controls.add(
-			'BRAKE_RIGHT_POSITION',
-			(b'BRAKE RIGHT POSITION', b'Position (0 to 32K) 0 = off, 32K full'),
-			_dec='Percent right brake'
-		)
-		self.Controls.add(
-			'BRAKE_INDICATOR',
-			(b'BRAKE INDICATOR', b'Position (0 to 16K) 0 = off, 16K full'),
-			_dec='Brake on indication'
-		)
-		self.Controls.add(
-			'BRAKE_PARKING_POSITION',
-			(b'BRAKE PARKING POSITION', b'Position (0 to 32K) 0 = off, 32K full'),
-			_dec='Parking brake on'
-		)
-		self.Controls.add(
-			'BRAKE_PARKING_INDICATOR',
-			(b'BRAKE PARKING INDICATOR', b'Bool'),
-			_dec='Parking brake indicator'
-		)
-		self.Controls.add(
-			'SPOILERS_ARMED',
-			(b'SPOILERS ARMED', b'Bool'),
-			_dec='Auto-spoilers armed'
-		)
-		self.Controls.add(
-			'SPOILERS_HANDLE_POSITION',
-			(b'SPOILERS HANDLE POSITION', b'Percent Over 100 or Position (16K = down, 0 = up)'),
-			_dec='Spoiler handle position'
-		)
-		self.Controls.add(
-			'SPOILERS_LEFT_POSITION',
-			(b'SPOILERS LEFT POSITION', b'Percent Over 100 or Position (0 = retracted, 16K fully extended)'),
-			_dec='Percent left spoiler deflected'
-		)
-		self.Controls.add(
-			'SPOILERS_RIGHT_POSITION',
-			(b'SPOILERS RIGHT POSITION', b'Percent Over 100 or Position (0 = retracted, 16K fully extended)'),
-			_dec='Percent right spoiler deflected'
-		)
-		self.Controls.add(
-			'FLAPS_HANDLE_PERCENT',
-			(b'FLAPS HANDLE PERCENT', b'Percent Over 100'),
-			_dec='Percent flap handle extended'
-		)
-		self.Controls.add(
-			'FLAPS_HANDLE_INDEX',
-			(b'FLAPS HANDLE INDEX', b'Number'),
-			_dec='Index of current flap position'
-		)
-		self.Controls.add(
-			'FLAPS_NUM_HANDLE_POSITIONS',
-			(b'FLAPS NUM HANDLE POSITIONS', b'Number'),
-			_dec='Number of flap positions'
-		)
-		self.Controls.add(
-			'TRAILING_EDGE_FLAPS_LEFT_PERCENT',
-			(b'TRAILING EDGE FLAPS LEFT PERCENT', b'Percent Over 100'),
-			_dec='Percent left trailing edge flap extended'
-		)
-		self.Controls.add(
-			'TRAILING_EDGE_FLAPS_RIGHT_PERCENT',
-			(b'TRAILING EDGE FLAPS RIGHT PERCENT', b'Percent Over 100'),
-			_dec='Percent right trailing edge flap extended'
-		)
-		self.Controls.add(
-			'TRAILING_EDGE_FLAPS_LEFT_ANGLE',
-			(b'TRAILING EDGE FLAPS LEFT ANGLE', b'Radians'),
-			_dec='Angle left trailing edge flap extended. Use TRAILING EDGE FLAPS LEFT PERCENT to set a value.'
-		)
-		self.Controls.add(
-			'TRAILING_EDGE_FLAPS_RIGHT_ANGLE',
-			(b'TRAILING EDGE FLAPS RIGHT ANGLE', b'Radians'),
-			_dec='Angle right trailing edge flap extended. Use TRAILING EDGE FLAPS RIGHT PERCENT to set a value.'
-		)
-		self.Controls.add(
-			'LEADING_EDGE_FLAPS_LEFT_PERCENT',
-			(b'LEADING EDGE FLAPS LEFT PERCENT', b'Percent Over 100'),
-			_dec='Percent left leading edge flap extended'
-		)
-		self.Controls.add(
-			'LEADING_EDGE_FLAPS_RIGHT_PERCENT',
-			(b'LEADING EDGE FLAPS RIGHT PERCENT', b'Percent Over 100'),
-			_dec='Percent right leading edge flap extended'
-		)
-		self.Controls.add(
-			'LEADING_EDGE_FLAPS_LEFT_ANGLE',
-			(b'LEADING EDGE FLAPS LEFT ANGLE', b'Radians'),
-			_dec='Angle left leading edge flap extended. Use LEADING EDGE FLAPS LEFT PERCENT to set a value.'
-		)
-		self.Controls.add(
-			'LEADING_EDGE_FLAPS_RIGHT_ANGLE',
-			(b'LEADING EDGE FLAPS RIGHT ANGLE', b'Radians'),
-			_dec='Angle right leading edge flap extended. Use LEADING EDGE FLAPS RIGHT PERCENT to set a value.'
-		)
-		self.Controls.add(
-			'AILERON_LEFT_DEFLECTION',
-			(b'AILERON LEFT DEFLECTION', b'Radians'),
-			_dec='Angle deflection'
-		)
-		self.Controls.add(
-			'AILERON_LEFT_DEFLECTION_PCT',
-			(b'AILERON LEFT DEFLECTION PCT', b'Percent Over 100'),
-			_dec='Percent deflection'
-		)
-		self.Controls.add(
-			'AILERON_RIGHT_DEFLECTION',
-			(b'AILERON RIGHT DEFLECTION', b'Radians'),
-			_dec='Angle deflection'
-		)
-		self.Controls.add(
-			'AILERON_RIGHT_DEFLECTION_PCT',
-			(b'AILERON RIGHT DEFLECTION PCT', b'Percent Over 100'),
-			_dec='Percent deflection'
-		)
-		self.Controls.add(
-			'AILERON_AVERAGE_DEFLECTION',
-			(b'AILERON AVERAGE DEFLECTION', b'Radians'),
-			_dec='Angle deflection'
-		)
-		self.Controls.add(
-			'AILERON_TRIM',
-			(b'AILERON TRIM', b'Radians'),
-			_dec='Angle deflection'
-		)
-		self.Controls.add(
-			'AILERON_TRIM_PCT',
-			(b'AILERON TRIM PCT', b'Percent Over 100'),
-			_dec='Percent deflection'
-		)
-		self.Controls.add(
-			'RUDDER_DEFLECTION',
-			(b'RUDDER DEFLECTION', b'Radians'),
-			_dec='Angle deflection'
-		)
-		self.Controls.add(
-			'RUDDER_DEFLECTION_PCT',
-			(b'RUDDER DEFLECTION PCT', b'Percent Over 100'),
-			_dec='Percent deflection'
-		)
-		self.Controls.add(
-			'RUDDER_TRIM',
-			(b'RUDDER TRIM', b'Radians'),
-			_dec='Angle deflection'
-		)
-		self.Controls.add(
-			'RUDDER_TRIM_PCT',
-			(b'RUDDER TRIM PCT', b'Percent Over 100'),
-			_dec='Percent deflection'
-		)
-		self.Controls.add(
-			'FLAPS_AVAILABLE',
-			(b'FLAPS AVAILABLE', b'Bool'),
-			_dec='True if flaps available'
-		)
-		self.Controls.add(
-			'FLAP_DAMAGE_BY_SPEED',
-			(b'FLAP DAMAGE BY SPEED', b'Bool'),
-			_dec='True if flagps are damaged by excessive speed'
-		)
-		self.Controls.add(
-			'FLAP_SPEED_EXCEEDED',
-			(b'FLAP SPEED EXCEEDED', b'Bool'),
-			_dec='True if safe speed limit for flaps exceeded'
-		)
-		self.Controls.add(
-			'ELEVATOR_DEFLECTION',
-			(b'ELEVATOR DEFLECTION', b'Radians'),
-			_dec='Angle deflection'
-		)
-		self.Controls.add(
-			'ELEVATOR_DEFLECTION_PCT',
-			(b'ELEVATOR DEFLECTION PCT', b'Percent Over 100'),
-			_dec='Percent deflection'
-		)
-		self.Controls.add(
-			'ALTERNATE_STATIC_SOURCE_OPEN',
-			(b'ALTERNATE STATIC SOURCE OPEN', b'Bool'),
-			_dec='Alternate static air source'
-		)
-		self.Controls.add(
-			'AILERON_TRIM_PCT',
-			(b'AILERON TRIM PCT', b'Float. Percent over 100'),
-			_dec='The trim position of the ailerons. Zero is fully retracted.'
-		)
-		self.Controls.add(
-			'RUDDER_TRIM_PCT',
-			(b'RUDDER TRIM PCT', b'Float. Percent over 100'),
-			_dec='The trim position of the rudder. Zero is no trim.'
-		)
-		self.Controls.add(
-			'FOLDING_WING_HANDLE_POSITION',
-			(b'FOLDING WING HANDLE POSITION', b'Bool'),
-			_dec='True if the folding wing handle is engaged.'
-		)
-		self.Controls.add(
-			'FUEL_DUMP_SWITCH',
-			(b'FUEL DUMP SWITCH', b'Bool'),
-			_dec='If true the aircraft is dumping fuel at the rate set in the configuration file.'
-		)
+	class __AircraftAutopilotData(RequestHelper):
+		list = [
+			("AUTOPILOT_AVAILABLE", "Available flag", b'AUTOPILOT AVAILABLE', b'Bool', 'N'),
+			("AUTOPILOT_MASTER", "On/off flag", b'AUTOPILOT MASTER', b'Bool', 'N'),
+			("AUTOPILOT_NAV_SELECTED", "Index of Nav radio selected", b'AUTOPILOT NAV SELECTED', b'Number', 'N'),
+			("AUTOPILOT_WING_LEVELER", "Wing leveler active", b'AUTOPILOT WING LEVELER', b'Bool', 'N'),
+			("AUTOPILOT_NAV1_LOCK", "Lateral nav mode active", b'AUTOPILOT NAV1 LOCK', b'Bool', 'N'),
+			("AUTOPILOT_HEADING_LOCK", "Heading mode active", b'AUTOPILOT HEADING LOCK', b'Bool', 'N'),
+			("AUTOPILOT_HEADING_LOCK_DIR", "Selected heading", b'AUTOPILOT HEADING LOCK DIR', b'Degrees', 'N'),
+			("AUTOPILOT_ALTITUDE_LOCK", "Altitude hole active", b'AUTOPILOT ALTITUDE LOCK', b'Bool', 'N'),
+			("AUTOPILOT_ALTITUDE_LOCK_VAR", "Selected altitude", b'AUTOPILOT ALTITUDE LOCK VAR', b'Feet', 'N'),
+			("AUTOPILOT_ATTITUDE_HOLD", "Attitude hold active", b'AUTOPILOT ATTITUDE HOLD', b'Bool', 'N'),
+			("AUTOPILOT_GLIDESLOPE_HOLD", "GS hold active", b'AUTOPILOT GLIDESLOPE HOLD', b'Bool', 'N'),
+			("AUTOPILOT_PITCH_HOLD_REF", "Current reference pitch", b'AUTOPILOT PITCH HOLD REF', b'Radians', 'N'),
+			("AUTOPILOT_APPROACH_HOLD", "Approach mode active", b'AUTOPILOT APPROACH HOLD', b'Bool', 'N'),
+			("AUTOPILOT_BACKCOURSE_HOLD", "Back course mode active", b'AUTOPILOT BACKCOURSE HOLD', b'Bool', 'N'),
+			("AUTOPILOT_VERTICAL_HOLD_VAR", "Selected vertical speed", b'AUTOPILOT VERTICAL HOLD VAR', b'Feet/minute', 'N'),
+			("AUTOPILOT_PITCH_HOLD", "Set to True if the autopilot pitch hold has is engaged.", b'AUTOPILOT PITCH HOLD', b'Bool', 'N'),
+			("AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE", "Flight director active", b'AUTOPILOT FLIGHT DIRECTOR ACTIVE', b'Bool', 'N'),
+			("AUTOPILOT_FLIGHT_DIRECTOR_PITCH", "Reference pitch angle", b'AUTOPILOT FLIGHT DIRECTOR PITCH', b'Radians', 'N'),
+			("AUTOPILOT_FLIGHT_DIRECTOR_BANK", "Reference bank angle", b'AUTOPILOT FLIGHT DIRECTOR BANK', b'Radians', 'N'),
+			("AUTOPILOT_AIRSPEED_HOLD", "Airspeed hold active", b'AUTOPILOT AIRSPEED HOLD', b'Bool', 'N'),
+			("AUTOPILOT_AIRSPEED_HOLD_VAR", "Selected airspeed", b'AUTOPILOT AIRSPEED HOLD VAR', b'Knots', 'N'),
+			("AUTOPILOT_MACH_HOLD", "Mach hold active", b'AUTOPILOT MACH HOLD', b'Bool', 'N'),
+			("AUTOPILOT_MACH_HOLD_VAR", "Selected mach", b'AUTOPILOT MACH HOLD VAR', b'Number', 'N'),
+			("AUTOPILOT_YAW_DAMPER", "Yaw damper active", b'AUTOPILOT YAW DAMPER', b'Bool', 'N'),
+			("AUTOPILOT_RPM_HOLD_VAR", "Selected rpm", b'AUTOPILOT RPM HOLD VAR', b'Number', 'N'),
+			("AUTOPILOT_THROTTLE_ARM", "Autothrottle armed", b'AUTOPILOT THROTTLE ARM', b'Bool', 'N'),
+			("AUTOPILOT_TAKEOFF_POWER_ACTIVE", "Takeoff / Go Around power mode active", b'AUTOPILOT TAKEOFF POWER ACTIVE', b'Bool', 'N'),
+			("AUTOTHROTTLE_ACTIVE", "Auto-throttle active", b'AUTOTHROTTLE ACTIVE', b'Bool', 'N'),
+			("AUTOPILOT_NAV1_LOCK", "True if autopilot nav1 lock applied", b'AUTOPILOT NAV1 LOCK', b'Bool', 'N'),
+			("AUTOPILOT_VERTICAL_HOLD", "True if autopilot vertical hold applied", b'AUTOPILOT VERTICAL HOLD', b'Bool', 'N'),
+			("AUTOPILOT_RPM_HOLD", "True if autopilot rpm hold applied", b'AUTOPILOT RPM HOLD', b'Bool', 'N'),
+			("AUTOPILOT_MAX_BANK", "True if autopilot max bank applied", b'AUTOPILOT MAX BANK', b'Radians', 'N'),
+			("FLY_BY_WIRE_ELAC_SWITCH", "True if the fly by wire Elevators and Ailerons computer is on.", b'FLY BY WIRE ELAC SWITCH', b'Bool', 'N'),
+			("FLY_BY_WIRE_FAC_SWITCH", "True if the fly by wire Flight Augmentation computer is on.", b'FLY BY WIRE FAC SWITCH', b'Bool', 'N'),
+			("FLY_BY_WIRE_SEC_SWITCH", "True if the fly by wire Spoilers and Elevators computer is on.", b'FLY BY WIRE SEC SWITCH', b'Bool', 'N'),
+			("FLY_BY_WIRE_ELAC_FAILED", "True if the Elevators and Ailerons computer has failed.", b'FLY BY WIRE ELAC FAILED', b'Bool', 'N'),
+			("FLY_BY_WIRE_FAC_FAILED", "True if the Flight Augmentation computer has failed.", b'FLY BY WIRE FAC FAILED', b'Bool', 'N'),
+			("FLY_BY_WIRE_SEC_FAILED", "True if the Spoilers and Elevators computer has failed.", b'FLY BY WIRE SEC FAILED', b'Bool', 'N'),
+		]
 
-		self.Autopilot = sm.new_request_holder()
-		self.Autopilot.add(
-			'AUTOPILOT_AVAILABLE',
-			(b'AUTOPILOT AVAILABLE', b'Bool'),
-			_dec='Available flag'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_MASTER',
-			(b'AUTOPILOT MASTER', b'Bool'),
-			_dec='On/off flag'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_NAV_SELECTED',
-			(b'AUTOPILOT NAV SELECTED', b'Number'),
-			_dec='Index of Nav radio selected'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_WING_LEVELER',
-			(b'AUTOPILOT WING LEVELER', b'Bool'),
-			_dec='Wing leveler active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_NAV1_LOCK',
-			(b'AUTOPILOT NAV1 LOCK', b'Bool'),
-			_dec='Lateral nav mode active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_HEADING_LOCK',
-			(b'AUTOPILOT HEADING LOCK', b'Bool'),
-			_dec='Heading mode active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_HEADING_LOCK_DIR',
-			(b'AUTOPILOT HEADING LOCK DIR', b'Degrees'),
-			_dec='Selected heading'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_ALTITUDE_LOCK',
-			(b'AUTOPILOT ALTITUDE LOCK', b'Bool'),
-			_dec='Altitude hole active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_ALTITUDE_LOCK_VAR',
-			(b'AUTOPILOT ALTITUDE LOCK VAR', b'Feet'),
-			_dec='Selected altitude'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_ATTITUDE_HOLD',
-			(b'AUTOPILOT ATTITUDE HOLD', b'Bool'),
-			_dec='Attitude hold active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_GLIDESLOPE_HOLD',
-			(b'AUTOPILOT GLIDESLOPE HOLD', b'Bool'),
-			_dec='GS hold active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_PITCH_HOLD_REF',
-			(b'AUTOPILOT PITCH HOLD REF', b'Radians'),
-			_dec='Current reference pitch'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_APPROACH_HOLD',
-			(b'AUTOPILOT APPROACH HOLD', b'Bool'),
-			_dec='Approach mode active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_BACKCOURSE_HOLD',
-			(b'AUTOPILOT BACKCOURSE HOLD', b'Bool'),
-			_dec='Back course mode active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_VERTICAL_HOLD_VAR',
-			(b'AUTOPILOT VERTICAL HOLD VAR', b'Feet/minute'),
-			_dec='Selected vertical speed'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_PITCH_HOLD',
-			(b'AUTOPILOT PITCH HOLD', b'Bool'),
-			_dec='Set to True if the autopilot pitch hold has is engaged.'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE',
-			(b'AUTOPILOT FLIGHT DIRECTOR ACTIVE', b'Bool'),
-			_dec='Flight director active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_FLIGHT_DIRECTOR_PITCH',
-			(b'AUTOPILOT FLIGHT DIRECTOR PITCH', b'Radians'),
-			_dec='Reference pitch angle'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_FLIGHT_DIRECTOR_BANK',
-			(b'AUTOPILOT FLIGHT DIRECTOR BANK', b'Radians'),
-			_dec='Reference bank angle'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_AIRSPEED_HOLD',
-			(b'AUTOPILOT AIRSPEED HOLD', b'Bool'),
-			_dec='Airspeed hold active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_AIRSPEED_HOLD_VAR',
-			(b'AUTOPILOT AIRSPEED HOLD VAR', b'Knots'),
-			_dec='Selected airspeed'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_MACH_HOLD',
-			(b'AUTOPILOT MACH HOLD', b'Bool'),
-			_dec='Mach hold active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_MACH_HOLD_VAR',
-			(b'AUTOPILOT MACH HOLD VAR', b'Number'),
-			_dec='Selected mach'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_YAW_DAMPER',
-			(b'AUTOPILOT YAW DAMPER', b'Bool'),
-			_dec='Yaw damper active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_RPM_HOLD_VAR',
-			(b'AUTOPILOT RPM HOLD VAR', b'Number'),
-			_dec='Selected rpm'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_THROTTLE_ARM',
-			(b'AUTOPILOT THROTTLE ARM', b'Bool'),
-			_dec='Autothrottle armed'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_TAKEOFF_POWER_ACTIVE',
-			(b'AUTOPILOT TAKEOFF POWER ACTIVE', b'Bool'),
-			_dec='Takeoff / Go Around power mode active'
-		)
-		self.Autopilot.add(
-			'AUTOTHROTTLE_ACTIVE',
-			(b'AUTOTHROTTLE ACTIVE', b'Bool'),
-			_dec='Auto-throttle active'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_NAV1_LOCK',
-			(b'AUTOPILOT NAV1 LOCK', b'Bool'),
-			_dec='True if autopilot nav1 lock applied'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_VERTICAL_HOLD',
-			(b'AUTOPILOT VERTICAL HOLD', b'Bool'),
-			_dec='True if autopilot vertical hold applied'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_RPM_HOLD',
-			(b'AUTOPILOT RPM HOLD', b'Bool'),
-			_dec='True if autopilot rpm hold applied'
-		)
-		self.Autopilot.add(
-			'AUTOPILOT_MAX_BANK',
-			(b'AUTOPILOT MAX BANK', b'Radians'),
-			_dec='True if autopilot max bank applied'
-		)
-		self.Autopilot.add(
-			'FLY_BY_WIRE_ELAC_SWITCH',
-			(b'FLY BY WIRE ELAC SWITCH', b'Bool'),
-			_dec='True if the fly by wire Elevators and Ailerons computer is on.'
-		)
-		self.Autopilot.add(
-			'FLY_BY_WIRE_FAC_SWITCH',
-			(b'FLY BY WIRE FAC SWITCH', b'Bool'),
-			_dec='True if the fly by wire Flight Augmentation computer is on.'
-		)
-		self.Autopilot.add(
-			'FLY_BY_WIRE_SEC_SWITCH',
-			(b'FLY BY WIRE SEC SWITCH', b'Bool'),
-			_dec='True if the fly by wire Spoilers and Elevators computer is on.'
-		)
-		self.Autopilot.add(
-			'FLY_BY_WIRE_ELAC_FAILED',
-			(b'FLY BY WIRE ELAC FAILED', b'Bool'),
-			_dec='True if the Elevators and Ailerons computer has failed.'
-		)
-		self.Autopilot.add(
-			'FLY_BY_WIRE_FAC_FAILED',
-			(b'FLY BY WIRE FAC FAILED', b'Bool'),
-			_dec='True if the Flight Augmentation computer has failed.'
-		)
-		self.Autopilot.add(
-			'FLY_BY_WIRE_SEC_FAILED',
-			(b'FLY BY WIRE SEC FAILED', b'Bool'),
-			_dec='True if the Spoilers and Elevators computer has failed.'
-		)
+	class __AircraftLandingGearData(RequestHelper):
+		list = [
+			("IS_GEAR_RETRACTABLE", "True if gear can be retracted", b'IS GEAR RETRACTABLE', b'Bool', 'N'),
+			("IS_GEAR_SKIS", "True if landing gear is skis", b'IS GEAR SKIS', b'Bool', 'N'),
+			("IS_GEAR_FLOATS", "True if landing gear is floats", b'IS GEAR FLOATS', b'Bool', 'N'),
+			("IS_GEAR_SKIDS", "True if landing gear is skids", b'IS GEAR SKIDS', b'Bool', 'N'),
+			("IS_GEAR_WHEELS", "True if landing gear is wheels", b'IS GEAR WHEELS', b'Bool', 'N'),
+			("GEAR_HANDLE_POSITION", "True if gear handle is applied", b'GEAR HANDLE POSITION', b'Bool', 'Y'),
+			("GEAR_HYDRAULIC_PRESSURE", "Gear hydraulic pressure", b'GEAR HYDRAULIC PRESSURE', b'Pound force per square foot (psf)', 'N'),
+			("TAILWHEEL_LOCK_ON", "True if tailwheel lock applied", b'TAILWHEEL LOCK ON', b'Bool', 'N'),
+			("GEAR_CENTER_POSITION", "Percent center gear extended", b'GEAR CENTER POSITION', b'Percent Over 100', 'Y'),
+			("GEAR_LEFT_POSITION", "Percent left gear extended", b'GEAR LEFT POSITION', b'Percent Over 100', 'Y'),
+			("GEAR_RIGHT_POSITION", "Percent right gear extended", b'GEAR RIGHT POSITION', b'Percent Over 100', 'Y'),
+			("GEAR_TAIL_POSITION", "Percent tail gear extended", b'GEAR TAIL POSITION', b'Percent Over 100', 'N'),
+			("GEAR_AUX_POSITION", "Percent auxiliary gear extended", b'GEAR AUX POSITION', b'Percent Over 100', 'N'),
+			# ['GEAR POSITION:index', 'Position of landing gear:']
+			# ['0 = unknown']
+			# ['1 = up']
+			# ['2 = down', 'Enum', 'Y', '-']
+			("GEAR_ANIMATION_POSITION:index", "Percent gear animation extended", b'GEAR ANIMATION POSITION:index', b'Number', 'N'),
+			("GEAR_TOTAL_PCT_EXTENDED", "Percent total gear extended", b'GEAR TOTAL PCT EXTENDED', b'Percentage', 'N'),
+			("AUTO_BRAKE_SWITCH_CB", "Auto brake switch position", b'AUTO BRAKE SWITCH CB', b'Number', 'N'),
+			("WATER_RUDDER_HANDLE_POSITION", "Position of the water rudder handle (0 handle retracted, 100 rudder handle applied)", b'WATER RUDDER HANDLE POSITION', b'Percent Over 100', 'Y'),
+			("WATER_LEFT_RUDDER_EXTENDED", "Percent extended", b'WATER LEFT RUDDER EXTENDED', b'Percentage', 'N'),
+			("WATER_RIGHT_RUDDER_EXTENDED", "Percent extended", b'WATER RIGHT RUDDER EXTENDED', b'Percentage', 'N'),
+			("GEAR_CENTER_STEER_ANGLE", "Center wheel angle, negative to the left, positive to the right.", b'GEAR CENTER STEER ANGLE', b'Percent Over 100', 'N'),
+			("GEAR_LEFT_STEER_ANGLE", "Left wheel angle, negative to the left, positive to the right.", b'GEAR LEFT STEER ANGLE', b'Percent Over 100', 'N'),
+			("GEAR_RIGHT_STEER_ANGLE", "Right wheel angle, negative to the left, positive to the right.", b'GEAR RIGHT STEER ANGLE', b'Percent Over 100', 'N'),
+			("GEAR_AUX_STEER_ANGLE", "Aux wheel angle, negative to the left, positive to the right. The aux wheel is the fourth set of gear, sometimes used on helicopters.", b'GEAR AUX STEER ANGLE', b'Percent Over 100', 'N'),
+			# ['GEAR STEER ANGLE:index', 'Alternative method of getting the steer angle. Index is']
+			# ['0 = center']
+			# ['1 = left']
+			# ['2 = right']
+			# ['3 = aux', 'Percent Over 100', 'N', '-']
+			("WATER_LEFT_RUDDER_STEER_ANGLE", "Water left rudder angle, negative to the left, positive to the right.", b'WATER LEFT RUDDER STEER ANGLE', b'Percent Over 100', 'N'),
+			("WATER_RIGHT_RUDDER_STEER_ANGLE", "Water right rudder angle, negative to the left, positive to the right.", b'WATER RIGHT RUDDER STEER ANGLE', b'Percent Over 100', 'N'),
+			("GEAR_CENTER_STEER_ANGLE_PCT", "Center steer angle as a percentage", b'GEAR CENTER STEER ANGLE PCT', b'Percent Over 100', 'N'),
+			("GEAR_LEFT_STEER_ANGLE_PCT", "Left steer angle as a percentage", b'GEAR LEFT STEER ANGLE PCT', b'Percent Over 100', 'N'),
+			("GEAR_RIGHT_STEER_ANGLE_PCT", "Right steer angle as a percentage", b'GEAR RIGHT STEER ANGLE PCT', b'Percent Over 100', 'N'),
+			("GEAR_AUX_STEER_ANGLE_PCT", "Aux steer angle as a percentage", b'GEAR AUX STEER ANGLE PCT', b'Percent Over 100', 'N'),
+			# ['GEAR STEER ANGLE PCT:index', 'Alternative method of getting steer angle as a percentage. Index is']
+			# ['0 = center']
+			# ['1 = left']
+			# ['2 = right']
+			# ['3 = aux', 'Percent Over 100', 'N', '-']
+			("WATER_LEFT_RUDDER_STEER_ANGLE_PCT", "Water left rudder angle as a percentage", b'WATER LEFT RUDDER STEER ANGLE PCT', b'Percent Over 100', 'N'),
+			("WATER_RIGHT_RUDDER_STEER_ANGLE_PCT", "Water right rudder as a percentage", b'WATER RIGHT RUDDER STEER ANGLE PCT', b'Percent Over 100', 'N'),
+			# ['WHEEL RPM:index', 'Wheel rpm. Index is']
+			# ['0 = center']
+			# ['1 = left']
+			# ['2 = right']
+			# ['3 = aux', 'Rpm', 'N', '-']
+			("CENTER_WHEEL_RPM", "Center landing gear rpm", b'CENTER WHEEL RPM', b'Rpm', 'N'),
+			("LEFT_WHEEL_RPM", "Left landing gear rpm", b'LEFT WHEEL RPM', b'Rpm', 'N'),
+			("RIGHT_WHEEL_RPM", "Right landing gear rpm", b'RIGHT WHEEL RPM', b'Rpm', 'N'),
+			("AUX_WHEEL_RPM", "Rpm of fourth set of gear wheels.", b'AUX WHEEL RPM', b'Rpm', 'N'),
+			# ['WHEEL ROTATION ANGLE:index', 'Wheel rotation angle. Index is']
+			# ['0 = center']
+			# ['1 = left']
+			# ['2 = right']
+			# ['3 = aux', 'Radians', 'N', '-']
+			("CENTER_WHEEL_ROTATION_ANGLE", "Center wheel rotation angle", b'CENTER WHEEL ROTATION ANGLE', b'Radians', 'N'),
+			("LEFT_WHEEL_ROTATION_ANGLE", "Left wheel rotation angle", b'LEFT WHEEL ROTATION ANGLE', b'Radians', 'N'),
+			("RIGHT_WHEEL_ROTATION_ANGLE", "Right wheel rotation angle", b'RIGHT WHEEL ROTATION ANGLE', b'Radians', 'N'),
+			("AUX_WHEEL_ROTATION_ANGLE", "Aux wheel rotation angle", b'AUX WHEEL ROTATION ANGLE', b'Radians', 'N'),
+			("GEAR_EMERGENCY_HANDLE_POSITION", "True if gear emergency handle applied", b'GEAR EMERGENCY HANDLE POSITION', b'Bool', 'N'),
+			# ['GEAR WARNING', 'One of:']
+			# ['0: unknown']
+			# ['1: normal']
+			# ['2: amphib', 'Enum', 'N', '-']
+			("ANTISKID_BRAKES_ACTIVE", "True if antiskid brakes active", b'ANTISKID BRAKES ACTIVE', b'Bool', 'N'),
+			("RETRACT_FLOAT_SWITCH", "True if retract float switch on", b'RETRACT FLOAT SWITCH', b'Bool', 'N'),
+			("RETRACT_LEFT_FLOAT_EXTENDED", "If aircraft has retractable floats.", b'RETRACT LEFT FLOAT EXTENDED', b'Percent (0 is fully retracted, 100 is fully extended)', 'N'),
+			("RETRACT_RIGHT_FLOAT_EXTENDED", "If aircraft has retractable floats.", b'RETRACT RIGHT FLOAT EXTENDED', b'Percent (0 is fully retracted, 100 is fully extended)', 'N'),
+			("STEER_INPUT_CONTROL", "Position of steering tiller", b'STEER INPUT CONTROL', b'Percent over 100', 'N'),
+			("GEAR_DAMAGE_BY_SPEED", "True if gear has been damaged by excessive speed", b'GEAR DAMAGE BY SPEED', b'Bool', 'N'),
+			("GEAR_SPEED_EXCEEDED", "True if safe speed limit for gear exceeded", b'GEAR SPEED EXCEEDED', b'Bool', 'N'),
+			("NOSEWHEEL_LOCK_ON", "True if the nosewheel lock is engaged.", b'NOSEWHEEL LOCK ON', b'Bool', 'N'),
+		]
 
+	class __AircraftEnvironmentData(RequestHelper):
+		list = [
+			("AMBIENT_DENSITY", "Ambient density", b'AMBIENT DENSITY', b'Slugs per cubic feet', 'N'),
+			("AMBIENT_TEMPERATURE", "Ambient temperature", b'AMBIENT TEMPERATURE', b'Celsius', 'N'),
+			("AMBIENT_PRESSURE", "Ambient pressure", b'AMBIENT PRESSURE', b'Inches of mercury, inHg', 'N'),
+			("AMBIENT_WIND_VELOCITY", "Wind velocity", b'AMBIENT WIND VELOCITY', b'Knots', 'N'),
+			("AMBIENT_WIND_DIRECTION", "Wind direction", b'AMBIENT WIND DIRECTION', b'Degrees', 'N'),
+			("AMBIENT_WIND_X", "Wind component in East/West direction.", b'AMBIENT WIND X', b'Meters per second', 'N'),
+			("AMBIENT_WIND_Y", "Wind component in vertical direction.", b'AMBIENT WIND Y', b'Meters per second', 'N'),
+			("AMBIENT_WIND_Z", "Wind component in North/South direction.", b'AMBIENT WIND Z', b'Meters per second', 'N'),
+			("STRUCT_AMBIENT_WIND", "X (latitude), Y (vertical) and Z (longitude) components of the wind.", b'STRUCT AMBIENT WIND', b'Feet_per_second', 'N'),
+			# ['AMBIENT PRECIP STATE', 'Precip state (bit field)']
+			# ['2 = None']
+			# ['4 = Rain']
+			# ['8 = Snow']
+			# ['Mask', 'N', '-']
+			("AIRCRAFT_WIND_X", "Wind component in aircraft lateral axis", b'AIRCRAFT WIND X', b'Knots', 'N'),
+			("AIRCRAFT_WIND_Y", "Wind component in aircraft vertical axis", b'AIRCRAFT WIND Y', b'Knots', 'N'),
+			("AIRCRAFT_WIND_Z", "Wind component in aircraft longitudinal axis", b'AIRCRAFT WIND Z', b'Knots', 'N'),
+			("BAROMETER_PRESSURE", "Barometric pressure", b'BAROMETER PRESSURE', b'Millibars', 'N'),
+			("SEA_LEVEL_PRESSURE", "Barometric pressure at sea level", b'SEA LEVEL PRESSURE', b'Millibars', 'N'),
+			("TOTAL_AIR_TEMPERATURE", "Total air temperature is the air temperature at the front of the aircraft where the ram pressure from the speed of the aircraft is taken into account.", b'TOTAL AIR TEMPERATURE', b'Celsius', 'N'),
+			("WINDSHIELD_RAIN_EFFECT_AVAILABLE", "Is visual effect available on this aircraft", b'WINDSHIELD RAIN EFFECT AVAILABLE', b'Bool', 'N'),
+			("AMBIENT_IN_CLOUD", "True if the aircraft is in a cloud.", b'AMBIENT IN CLOUD', b'Bool', 'N'),
+			("AMBIENT_VISIBILITY", "Ambient visibility", b'AMBIENT VISIBILITY', b'Meters', 'N'),
+			("STANDARD_ATM_TEMPERATURE", "Outside temperature on the standard ATM scale", b'STANDARD ATM TEMPERATURE', b'Rankine', 'N'),
+		]
 
-		self.Landing_Gear = sm.new_request_holder()
-		self.Landing_Gear.add(
-			'IS_GEAR_RETRACTABLE',
-			(b'IS GEAR RETRACTABLE', b'Bool'),
-			_dec='True if gear can be retracted'
-		)
-		self.Landing_Gear.add(
-			'IS_GEAR_SKIS',
-			(b'IS GEAR SKIS', b'Bool'),
-			_dec='True if landing gear is skis'
-		)
-		self.Landing_Gear.add(
-			'IS_GEAR_FLOATS',
-			(b'IS GEAR FLOATS', b'Bool'),
-			_dec='True if landing gear is floats'
-		)
-		self.Landing_Gear.add(
-			'IS_GEAR_SKIDS',
-			(b'IS GEAR SKIDS', b'Bool'),
-			_dec='True if landing gear is skids'
-		)
-		self.Landing_Gear.add(
-			'IS_GEAR_WHEELS',
-			(b'IS GEAR WHEELS', b'Bool'),
-			_dec='True if landing gear is wheels'
-		)
-		self.Landing_Gear.add(
-			'GEAR_HANDLE_POSITION',
-			(b'GEAR HANDLE POSITION', b'Bool'),
-			_dec='True if gear handle is applied'
-		)
-		self.Landing_Gear.add(
-			'GEAR_HYDRAULIC_PRESSURE',
-			(b'GEAR HYDRAULIC PRESSURE', b'Pound force per square foot (psf)'),
-			_dec='Gear hydraulic pressure'
-		)
-		self.Landing_Gear.add(
-			'TAILWHEEL_LOCK_ON',
-			(b'TAILWHEEL LOCK ON', b'Bool'),
-			_dec='True if tailwheel lock applied'
-		)
-		self.Landing_Gear.add(
-			'GEAR_CENTER_POSITION',
-			(b'GEAR CENTER POSITION', b'Percent Over 100'),
-			_dec='Percent center gear extended'
-		)
-		self.Landing_Gear.add(
-			'GEAR_LEFT_POSITION',
-			(b'GEAR LEFT POSITION', b'Percent Over 100'),
-			_dec='Percent left gear extended'
-		)
-		self.Landing_Gear.add(
-			'GEAR_RIGHT_POSITION',
-			(b'GEAR RIGHT POSITION', b'Percent Over 100'),
-			_dec='Percent right gear extended'
-		)
-		self.Landing_Gear.add(
-			'GEAR_TAIL_POSITION',
-			(b'GEAR TAIL POSITION', b'Percent Over 100'),
-			_dec='Percent tail gear extended'
-		)
-		self.Landing_Gear.add(
-			'GEAR_AUX_POSITION',
-			(b'GEAR AUX POSITION', b'Percent Over 100'),
-			_dec='Percent auxiliary gear extended'
-		)
-		self.Landing_Gear.add(
-			'GEAR_ANIMATION_POSITION:index',
-			(b'GEAR ANIMATION POSITION:index', b'Number'),
-			_dec='Percent gear animation extended'
-		)
-		self.Landing_Gear.add(
-			'GEAR_TOTAL_PCT_EXTENDED',
-			(b'GEAR TOTAL PCT EXTENDED', b'Percentage'),
-			_dec='Percent total gear extended'
-		)
-		self.Landing_Gear.add(
-			'AUTO_BRAKE_SWITCH_CB',
-			(b'AUTO BRAKE SWITCH CB', b'Number'),
-			_dec='Auto brake switch position'
-		)
-		self.Landing_Gear.add(
-			'WATER_RUDDER_HANDLE_POSITION',
-			(b'WATER RUDDER HANDLE POSITION', b'Percent Over 100'),
-			_dec='Position of the water rudder handle (0 handle retracted, 100 rudder handle applied)'
-		)
-		self.Landing_Gear.add(
-			'WATER_LEFT_RUDDER_EXTENDED',
-			(b'WATER LEFT RUDDER EXTENDED', b'Percentage'),
-			_dec='Percent extended'
-		)
-		self.Landing_Gear.add(
-			'WATER_RIGHT_RUDDER_EXTENDED',
-			(b'WATER RIGHT RUDDER EXTENDED', b'Percentage'),
-			_dec='Percent extended'
-		)
-		self.Landing_Gear.add(
-			'GEAR_CENTER_STEER_ANGLE',
-			(b'GEAR CENTER STEER ANGLE', b'Percent Over 100'),
-			_dec='Center wheel angle, negative to the left, positive to the right.'
-		)
-		self.Landing_Gear.add(
-			'GEAR_LEFT_STEER_ANGLE',
-			(b'GEAR LEFT STEER ANGLE', b'Percent Over 100'),
-			_dec='Left wheel angle, negative to the left, positive to the right.'
-		)
-		self.Landing_Gear.add(
-			'GEAR_RIGHT_STEER_ANGLE',
-			(b'GEAR RIGHT STEER ANGLE', b'Percent Over 100'),
-			_dec='Right wheel angle, negative to the left, positive to the right.'
-		)
-		self.Landing_Gear.add(
-			'GEAR_AUX_STEER_ANGLE',
-			(b'GEAR AUX STEER ANGLE', b'Percent Over 100'),
-			_dec='''
-			Aux wheel angle, negative to the left,
-			positive to the right.
-			The aux wheel is the fourth set of gear,
-			sometimes used on helicopters.'''
-		)
-		self.Landing_Gear.add(
-			'WATER_LEFT_RUDDER_STEER_ANGLE',
-			(b'WATER LEFT RUDDER STEER ANGLE', b'Percent Over 100'),
-			_dec='Water left rudder angle, negative to the left, positive to the right.'
-		)
-		self.Landing_Gear.add(
-			'WATER_RIGHT_RUDDER_STEER_ANGLE',
-			(b'WATER RIGHT RUDDER STEER ANGLE', b'Percent Over 100'),
-			_dec='Water right rudder angle, negative to the left, positive to the right.'
-		)
-		self.Landing_Gear.add(
-			'GEAR_CENTER_STEER_ANGLE_PCT',
-			(b'GEAR CENTER STEER ANGLE PCT', b'Percent Over 100'),
-			_dec='Center steer angle as a percentage'
-		)
-		self.Landing_Gear.add(
-			'GEAR_LEFT_STEER_ANGLE_PCT',
-			(b'GEAR LEFT STEER ANGLE PCT', b'Percent Over 100'),
-			_dec='Left steer angle as a percentage'
-		)
-		self.Landing_Gear.add(
-			'GEAR_RIGHT_STEER_ANGLE_PCT',
-			(b'GEAR RIGHT STEER ANGLE PCT', b'Percent Over 100'),
-			_dec='Right steer angle as a percentage'
-		)
-		self.Landing_Gear.add(
-			'GEAR_AUX_STEER_ANGLE_PCT',
-			(b'GEAR AUX STEER ANGLE PCT', b'Percent Over 100'),
-			_dec='Aux steer angle as a percentage'
-		)
-		self.Landing_Gear.add(
-			'WATER_LEFT_RUDDER_STEER_ANGLE_PCT',
-			(b'WATER LEFT RUDDER STEER ANGLE PCT', b'Percent Over 100'),
-			_dec='Water left rudder angle as a percentage'
-		)
-		self.Landing_Gear.add(
-			'WATER_RIGHT_RUDDER_STEER_ANGLE_PCT',
-			(b'WATER RIGHT RUDDER STEER ANGLE PCT', b'Percent Over 100'),
-			_dec='Water right rudder as a percentage'
-		)
-		self.Landing_Gear.add(
-			'CENTER_WHEEL_RPM',
-			(b'CENTER WHEEL RPM', b'Rpm'),
-			_dec='Center landing gear rpm'
-		)
-		self.Landing_Gear.add(
-			'LEFT_WHEEL_RPM',
-			(b'LEFT WHEEL RPM', b'Rpm'),
-			_dec='Left landing gear rpm'
-		)
-		self.Landing_Gear.add(
-			'RIGHT_WHEEL_RPM',
-			(b'RIGHT WHEEL RPM', b'Rpm'),
-			_dec='Right landing gear rpm'
-		)
-		self.Landing_Gear.add(
-			'AUX_WHEEL_RPM',
-			(b'AUX WHEEL RPM', b'Rpm'),
-			_dec='Rpm of fourth set of gear wheels.'
-		)
-		self.Landing_Gear.add(
-			'CENTER_WHEEL_ROTATION_ANGLE',
-			(b'CENTER WHEEL ROTATION ANGLE', b'Radians'),
-			_dec='Center wheel rotation angle'
-		)
-		self.Landing_Gear.add(
-			'LEFT_WHEEL_ROTATION_ANGLE',
-			(b'LEFT WHEEL ROTATION ANGLE', b'Radians'),
-			_dec='Left wheel rotation angle'
-		)
-		self.Landing_Gear.add(
-			'RIGHT_WHEEL_ROTATION_ANGLE',
-			(b'RIGHT WHEEL ROTATION ANGLE', b'Radians'),
-			_dec='Right wheel rotation angle'
-		)
-		self.Landing_Gear.add(
-			'AUX_WHEEL_ROTATION_ANGLE',
-			(b'AUX WHEEL ROTATION ANGLE', b'Radians'),
-			_dec='Aux wheel rotation angle'
-		)
-		self.Landing_Gear.add(
-			'GEAR_EMERGENCY_HANDLE_POSITION',
-			(b'GEAR EMERGENCY HANDLE POSITION', b'Bool'),
-			_dec='True if gear emergency handle applied'
-		)
-		self.Landing_Gear.add(
-			'ANTISKID_BRAKES_ACTIVE',
-			(b'ANTISKID BRAKES ACTIVE', b'Bool'),
-			_dec='True if antiskid brakes active'
-		)
-		self.Landing_Gear.add(
-			'RETRACT_FLOAT_SWITCH',
-			(b'RETRACT FLOAT SWITCH', b'Bool'),
-			_dec='True if retract float switch on'
-		)
-		self.Landing_Gear.add(
-			'RETRACT_LEFT_FLOAT_EXTENDED',
-			(b'RETRACT LEFT FLOAT EXTENDED', b'Percent (0 is fully retracted, 100 is fully extended)'),
-			_dec='If aircraft has retractable floats.'
-		)
-		self.Landing_Gear.add(
-			'RETRACT_RIGHT_FLOAT_EXTENDED',
-			(b'RETRACT RIGHT FLOAT EXTENDED', b'Percent (0 is fully retracted, 100 is fully extended)'),
-			_dec='If aircraft has retractable floats.'
-		)
-		self.Landing_Gear.add(
-			'STEER_INPUT_CONTROL',
-			(b'STEER INPUT CONTROL', b'Percent over 100'),
-			_dec='Position of steering tiller'
-		)
-		self.Landing_Gear.add(
-			'GEAR_DAMAGE_BY_SPEED',
-			(b'GEAR DAMAGE BY SPEED', b'Bool'),
-			_dec='True if gear has been damaged by excessive speed'
-		)
-		self.Landing_Gear.add(
-			'GEAR_SPEED_EXCEEDED',
-			(b'GEAR SPEED EXCEEDED', b'Bool'),
-			_dec='True if safe speed limit for gear exceeded'
-		)
-		self.Landing_Gear.add(
-			'NOSEWHEEL_LOCK_ON',
-			(b'NOSEWHEEL LOCK ON', b'Bool'),
-			_dec='True if the nosewheel lock is engaged.'
-		)
+	class __HelicopterSpecificData(RequestHelper):
+		list = [
+			("ROTOR_BRAKE_HANDLE_POS", "Percent actuated", b'ROTOR BRAKE HANDLE POS', b'Percent Over 100', 'N'),
+			("ROTOR_BRAKE_ACTIVE", "Active", b'ROTOR BRAKE ACTIVE', b'Bool', 'N'),
+			("ROTOR_CLUTCH_SWITCH_POS", "Switch position", b'ROTOR CLUTCH SWITCH POS', b'Bool', 'N'),
+			("ROTOR_CLUTCH_ACTIVE", "Active", b'ROTOR CLUTCH ACTIVE', b'Bool', 'N'),
+			("ROTOR_TEMPERATURE", "Main rotor transmission temperature", b'ROTOR TEMPERATURE', b'Rankine', 'N'),
+			("ROTOR_CHIP_DETECTED", "Chip detection", b'ROTOR CHIP DETECTED', b'Bool', 'N'),
+			("ROTOR_GOV_SWITCH_POS", "Switch position", b'ROTOR GOV SWITCH POS', b'Bool', 'N'),
+			("ROTOR_GOV_ACTIVE", "Active", b'ROTOR GOV ACTIVE', b'Bool', 'N'),
+			("ROTOR_LATERAL_TRIM_PCT", "Trim percent", b'ROTOR LATERAL TRIM PCT', b'Percent Over 100', 'N'),
+			("ROTOR_RPM_PCT", "Percent max rated rpm", b'ROTOR RPM PCT', b'Percent Over 100', 'N'),
+			("ENG_TURBINE_TEMPERATURE", "Turbine temperature. Applies only to Bell helicopter.", b'ENG TURBINE TEMPERATURE', b'Celsius scalar 16K (degrees * 16384)', 'N'),
+			("ENG_TORQUE_PERCENT:index", "Torque. Returns main rotor torque for Bell helicopter, or the indexed rotor torque of other helicopters.", b'ENG TORQUE PERCENT:index', b'Percent scalar 16K (Ft/lbs * 16384)', 'N'),
+			("ENG_FUEL_PRESSURE", "Fuel pressure. Applies only to Bell helicopter.", b'ENG FUEL PRESSURE', b'PSI scalar 16K (Psi * 16384)', 'N'),
+			("ENG_ELECTRICAL_LOAD", "Electrical load. Applies only to Bell helicopter.", b'ENG ELECTRICAL LOAD', b'Percent scalar 16K (Max load * 16384)', 'N'),
+			("ENG_TRANSMISSION_PRESSURE", "Transmission pressure. Applies only to Bell helicopter.", b'ENG TRANSMISSION PRESSURE', b'PSI scalar 16K (Psi * 16384)', 'N'),
+			("ENG_TRANSMISSION_TEMPERATURE", "Transmission temperature. Applies only to Bell helicopter.", b'ENG TRANSMISSION TEMPERATURE', b'Celsius scalar 16K (Degrees * 16384)', 'N'),
+			("ENG_ROTOR_RPM:index", "Rotor rpm. Returns main rotor rpm for Bell helicopter, or the indexed rotor rpm of other helicopters.", b'ENG ROTOR RPM:index', b'Percent scalar 16K (Max rpm * 16384)', 'N'),
+			("COLLECTIVE_POSITION", "The position of the helicopter's collective. 0 is fully up, 100 fully depressed.", b'COLLECTIVE POSITION', b'Percent_over_100', 'N'),
+		]
 
-		self.Environment = sm.new_request_holder()
-		self.Environment.add(
-			'AMBIENT_DENSITY',
-			(b'AMBIENT DENSITY', b'Slugs per cubic feet'),
-			_dec='Ambient density'
-		)
-		self.Environment.add(
-			'AMBIENT_TEMPERATURE',
-			(b'AMBIENT TEMPERATURE', b'Celsius'),
-			_dec='Ambient temperature'
-		)
-		self.Environment.add(
-			'AMBIENT_PRESSURE',
-			(b'AMBIENT PRESSURE', b'Inches of mercury, inHg'),
-			_dec='Ambient pressure'
-		)
-		self.Environment.add(
-			'AMBIENT_WIND_VELOCITY',
-			(b'AMBIENT WIND VELOCITY', b'Knots'),
-			_dec='Wind velocity'
-		)
-		self.Environment.add(
-			'AMBIENT_WIND_DIRECTION',
-			(b'AMBIENT WIND DIRECTION', b'Degrees'),
-			_dec='Wind direction'
-		)
-		self.Environment.add(
-			'AMBIENT_WIND_X',
-			(b'AMBIENT WIND X', b'Meters per second'),
-			_dec='Wind component in East/West direction.'
-		)
-		self.Environment.add(
-			'AMBIENT_WIND_Y',
-			(b'AMBIENT WIND Y', b'Meters per second'),
-			_dec='Wind component in vertical direction.'
-		)
-		self.Environment.add(
-			'AMBIENT_WIND_Z',
-			(b'AMBIENT WIND Z', b'Meters per second'),
-			_dec='Wind component in North/South direction.'
-		)
-		self.Environment.add(
-			'STRUCT_AMBIENT_WIND',
-			(b'STRUCT AMBIENT WIND', b'Feet_per_second'),
-			_dec='X (latitude), Y (vertical) and Z (longitude) components of the wind.'
-		)
-		self.Environment.add(
-			'AIRCRAFT_WIND_X',
-			(b'AIRCRAFT WIND X', b'Knots'),
-			_dec='Wind component in aircraft lateral axis'
-		)
-		self.Environment.add(
-			'AIRCRAFT_WIND_Y',
-			(b'AIRCRAFT WIND Y', b'Knots'),
-			_dec='Wind component in aircraft vertical axis'
-		)
-		self.Environment.add(
-			'AIRCRAFT_WIND_Z',
-			(b'AIRCRAFT WIND Z', b'Knots'),
-			_dec='Wind component in aircraft longitudinal axis'
-		)
-		self.Environment.add(
-			'BAROMETER_PRESSURE',
-			(b'BAROMETER PRESSURE', b'Millibars'),
-			_dec='Barometric pressure'
-		)
-		self.Environment.add(
-			'SEA_LEVEL_PRESSURE',
-			(b'SEA LEVEL PRESSURE', b'Millibars'),
-			_dec='Barometric pressure at sea level'
-		)
-		self.Environment.add(
-			'TOTAL_AIR_TEMPERATURE',
-			(b'TOTAL AIR TEMPERATURE', b'Celsius'),
-			_dec='Total air temperature is the air temperature at the front of the aircraft where the ram pressure from the speed of the aircraft is taken into account.'
-		)
-		self.Environment.add(
-			'WINDSHIELD_RAIN_EFFECT_AVAILABLE',
-			(b'WINDSHIELD RAIN EFFECT AVAILABLE', b'Bool'),
-			_dec='Is visual effect available on this aircraft'
-		)
-		self.Environment.add(
-			'AMBIENT_IN_CLOUD',
-			(b'AMBIENT IN CLOUD', b'Bool'),
-			_dec='True if the aircraft is in a cloud.'
-		)
-		self.Environment.add(
-			'AMBIENT_VISIBILITY',
-			(b'AMBIENT VISIBILITY', b'Meters'),
-			_dec='Ambient visibility'
-		)
-		self.Environment.add(
-			'STANDARD_ATM_TEMPERATURE',
-			(b'STANDARD ATM TEMPERATURE', b'Rankine'),
-			_dec='Outside temperature on the standard ATM scale'
-		)
+	class __SlingsandHoists(RequestHelper):
+		list = [
+			("NUM_SLING_CABLES", "The number of sling cables (not hoists) that are configured for the aircraft. Refer to the document Notes on Aircraft Systems.", b'NUM SLING CABLES', b'Number', 'N'),
+			("PAYLOAD_STATION_OBJECT:index", "Places the named object at the payload station identified by the index (starting from 1). The string is the Container name (refer to the title property of Simulation Object Configuration Files).", b'PAYLOAD STATION OBJECT:index', b'String', 'Y- set only'),
+			("PAYLOAD_STATION_NUM_SIMOBJECTS:index", "The number of objects at the payload station (indexed from 1).", b'PAYLOAD STATION NUM SIMOBJECTS:index', b'Number', 'N'),
+			("SLING_OBJECT_ATTACHED:index", "If units are set as boolean, returns True if a sling object is attached. If units are set as a string, returns the container title of the object. There can be multiple sling positions, indexed from 1. The sling positions are set in the Aircraft Configuration File.", b'SLING OBJECT ATTACHED:index', b'Bool/String', 'N'),
+			("SLING_CABLE_BROKEN:index", "True if the cable is broken.", b'SLING CABLE BROKEN:index', b'Bool', 'N'),
+			("SLING_CABLE_EXTENDED_LENGTH:index", "The length of the cable extending from the aircraft.", b'SLING CABLE EXTENDED LENGTH:index', b'Feet', 'Y'),
+			("SLING_ACTIVE_PAYLOAD_STATION:index", "The payload station (identified by the parameter) where objects will be placed from the sling (identified by the index).", b'SLING ACTIVE PAYLOAD STATION:index', b'Number', 'Y'),
+			("SLING_HOIST_PERCENT_DEPLOYED:index", "The percentage of the full length of the sling cable deployed.", b'SLING HOIST PERCENT DEPLOYED:index', b'Percent_over_100', 'N'),
+			# ['SLING HOOK IN PICKUP MODE:index']
+			# ['A Boolean for whether or not the hook is in pickup mode, so capable of picking up another object. ', 'Bool', 'N', '-']
+			("IS_ATTACHED_TO_SLING", "Set to true if this object is attached to a sling.", b'IS ATTACHED TO SLING', b'Bool', 'N'),
+		]
 
-		self.Miscellaneous_Systems = sm.new_request_holder()
-		self.Miscellaneous_Systems.add(
-			'SMOKE_ENABLE',
-			(b'SMOKE ENABLE', b'Bool'),
-			_dec='Set to True to activate the smoke system, if one is available (for example, on the Extra).'
-		)
-		self.Miscellaneous_Systems.add(
-			'SMOKESYSTEM_AVAILABLE',
-			(b'SMOKESYSTEM AVAILABLE', b'Bool'),
-			_dec='Smoke system available'
-		)
-		self.Miscellaneous_Systems.add(
-			'PITOT_HEAT',
-			(b'PITOT HEAT', b'Bool'),
-			_dec='Pitot heat active'
-		)
-		self.Miscellaneous_Systems.add(
-			'FOLDING_WING_LEFT_PERCENT',
-			(b'FOLDING WING LEFT PERCENT', b'Percent Over 100'),
-			_dec='Left folding wing position, 100 is fully folded'
-		)
-		self.Miscellaneous_Systems.add(
-			'FOLDING_WING_RIGHT_PERCENT',
-			(b'FOLDING WING RIGHT PERCENT', b'Percent Over 100'),
-			_dec='Right folding wing position, 100 is fully folded'
-		)
-		self.Miscellaneous_Systems.add(
-			'CANOPY_OPEN',
-			(b'CANOPY OPEN', b'Percent Over 100'),
-			_dec='Percent primary door/exit open'
-		)
-		self.Miscellaneous_Systems.add(
-			'TAILHOOK_POSITION',
-			(b'TAILHOOK POSITION', b'Percent Over 100'),
-			_dec='Percent tail hook extended'
-		)
-		self.Miscellaneous_Systems.add(
-			'EXIT_OPEN:index',
-			(b'EXIT OPEN:index', b'Percent Over 100'),
-			_dec='Percent door/exit open'
-		)
-		self.Miscellaneous_Systems.add(
-			'STALL_HORN_AVAILABLE',
-			(b'STALL HORN AVAILABLE', b'Bool'),
-			_dec='True if stall alarm available'
-		)
-		self.Miscellaneous_Systems.add(
-			'ENGINE_MIXURE_AVAILABLE',
-			(b'ENGINE MIXURE AVAILABLE', b'Bool'),
-			_dec='True if engine mixture is available for prop engines. Obsolete value as mixture is always available. Spelling error in variable name.'
-		)
-		self.Miscellaneous_Systems.add(
-			'CARB_HEAT_AVAILABLE',
-			(b'CARB HEAT AVAILABLE', b'Bool'),
-			_dec='True if carb heat available'
-		)
-		self.Miscellaneous_Systems.add(
-			'SPOILER_AVAILABLE',
-			(b'SPOILER AVAILABLE', b'Bool'),
-			_dec='True if spoiler system available'
-		)
-		self.Miscellaneous_Systems.add(
-			'IS_TAIL_DRAGGER',
-			(b'IS TAIL DRAGGER', b'Bool'),
-			_dec='True if the aircraft is a taildragger'
-		)
-		self.Miscellaneous_Systems.add(
-			'STROBES_AVAILABLE',
-			(b'STROBES AVAILABLE', b'Bool'),
-			_dec='True if strobe lights are available'
-		)
-		self.Miscellaneous_Systems.add(
-			'TOE_BRAKES_AVAILABLE',
-			(b'TOE BRAKES AVAILABLE', b'Bool'),
-			_dec='True if toe brakes are available'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_MASTER_BATTERY',
-			(b'ELECTRICAL MASTER BATTERY', b'Bool'),
-			_dec='Battery switch position'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_TOTAL_LOAD_AMPS',
-			(b'ELECTRICAL TOTAL LOAD AMPS', b'Amperes'),
-			_dec='Total load amps'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_BATTERY_LOAD',
-			(b'ELECTRICAL BATTERY LOAD', b'Amperes'),
-			_dec='Battery load'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_BATTERY_VOLTAGE',
-			(b'ELECTRICAL BATTERY VOLTAGE', b'Volts'),
-			_dec='Battery voltage'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_MAIN_BUS_VOLTAGE',
-			(b'ELECTRICAL MAIN BUS VOLTAGE', b'Volts'),
-			_dec='Main bus voltage'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_MAIN_BUS_AMPS',
-			(b'ELECTRICAL MAIN BUS AMPS', b'Amperes'),
-			_dec='Main bus current'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_AVIONICS_BUS_VOLTAGE',
-			(b'ELECTRICAL AVIONICS BUS VOLTAGE', b'Volts'),
-			_dec='Avionics bus voltage'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_AVIONICS_BUS_AMPS',
-			(b'ELECTRICAL AVIONICS BUS AMPS', b'Amperes'),
-			_dec='Avionics bus current'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_HOT_BATTERY_BUS_VOLTAGE',
-			(b'ELECTRICAL HOT BATTERY BUS VOLTAGE', b'Volts'),
-			_dec='Voltage available when battery switch is turned off'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_HOT_BATTERY_BUS_AMPS',
-			(b'ELECTRICAL HOT BATTERY BUS AMPS', b'Amperes'),
-			_dec='Current available when battery switch is turned off'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_BATTERY_BUS_VOLTAGE',
-			(b'ELECTRICAL BATTERY BUS VOLTAGE', b'Volts'),
-			_dec='Battery bus voltage'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_BATTERY_BUS_AMPS',
-			(b'ELECTRICAL BATTERY BUS AMPS', b'Amperes'),
-			_dec='Battery bus current'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_GENALT_BUS_VOLTAGE:index',
-			(b'ELECTRICAL GENALT BUS VOLTAGE:index', b'Volts'),
-			_dec='Genalt bus voltage (takes engine index)'
-		)
-		self.Miscellaneous_Systems.add(
-			'ELECTRICAL_GENALT_BUS_AMPS:index',
-			(b'ELECTRICAL GENALT BUS AMPS:index', b'Amperes'),
-			_dec='Genalt bus current (takes engine index)'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_GENERAL_PANEL_ON',
-			(b'CIRCUIT GENERAL PANEL ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_FLAP_MOTOR_ON',
-			(b'CIRCUIT FLAP MOTOR ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_GEAR_MOTOR_ON',
-			(b'CIRCUIT GEAR MOTOR ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_AUTOPILOT_ON',
-			(b'CIRCUIT AUTOPILOT ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_AVIONICS_ON',
-			(b'CIRCUIT AVIONICS ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_PITOT_HEAT_ON',
-			(b'CIRCUIT PITOT HEAT ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_PROP_SYNC_ON',
-			(b'CIRCUIT PROP SYNC ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_AUTO_FEATHER_ON',
-			(b'CIRCUIT AUTO FEATHER ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_AUTO_BRAKES_ON',
-			(b'CIRCUIT AUTO BRAKES ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_STANDY_VACUUM_ON',
-			(b'CIRCUIT STANDY VACUUM ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_MARKER_BEACON_ON',
-			(b'CIRCUIT MARKER BEACON ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_GEAR_WARNING_ON',
-			(b'CIRCUIT GEAR WARNING ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'CIRCUIT_HYDRAULIC_PUMP_ON',
-			(b'CIRCUIT HYDRAULIC PUMP ON', b'Bool'),
-			_dec='Is electrical power available to this circuit'
-		)
-		self.Miscellaneous_Systems.add(
-			'HYDRAULIC_PRESSURE:index',
-			(b'HYDRAULIC PRESSURE:index', b'Pound force per square foot'),
-			_dec='Hydraulic system pressure. Indexes start at 1.'
-		)
-		self.Miscellaneous_Systems.add(
-			'HYDRAULIC_RESERVOIR_PERCENT:index',
-			(b'HYDRAULIC RESERVOIR PERCENT:index', b'Percent Over 100'),
-			_dec='Hydraulic pressure changes will follow changes to this variable. Indexes start at 1.'
-		)
-		self.Miscellaneous_Systems.add(
-			'HYDRAULIC_SYSTEM_INTEGRITY',
-			(b'HYDRAULIC SYSTEM INTEGRITY', b'Percent Over 100'),
-			_dec='Percent system functional'
-		)
-		self.Miscellaneous_Systems.add(
-			'STRUCTURAL_DEICE_SWITCH',
-			(b'STRUCTURAL DEICE SWITCH', b'Bool'),
-			_dec='True if the aircraft structure deice switch is on'
-		)
-		self.Miscellaneous_Systems.add(
-			'APPLY_HEAT_TO_SYSTEMS',
-			(b'APPLY HEAT TO SYSTEMS', b'Bool'),
-			_dec='Used when too close to a fire.'
-		)
-		self.Miscellaneous_Systems.add(
-			'DROPPABLE_OBJECTS_TYPE:index',
-			(b'DROPPABLE OBJECTS TYPE:index', b'String'),
-			_dec='The type of droppable object at the station number identified by the index.'
-		)
-		self.Miscellaneous_Systems.add(
-			'DROPPABLE_OBJECTS_COUNT:index',
-			(b'DROPPABLE OBJECTS COUNT:index', b'Number'),
-			_dec='The number of droppable objects at the station number identified by the index.'
-		)
+	class __AircraftMiscellaneousSystemsData(RequestHelper):
+		list = [
+			("SMOKE_ENABLE", "Set to True to activate the smoke system, if one is available (for example, on the Extra).", b'SMOKE ENABLE', b'Bool', 'Y'),
+			("SMOKESYSTEM_AVAILABLE", "Smoke system available", b'SMOKESYSTEM AVAILABLE', b'Bool', 'N'),
+			("PITOT_HEAT", "Pitot heat active", b'PITOT HEAT', b'Bool', 'N'),
+			("FOLDING_WING_LEFT_PERCENT", "Left folding wing position, 100 is fully folded", b'FOLDING WING LEFT PERCENT', b'Percent Over 100', 'Y'),
+			("FOLDING_WING_RIGHT_PERCENT", "Right folding wing position, 100 is fully folded", b'FOLDING WING RIGHT PERCENT', b'Percent Over 100', 'Y'),
+			("CANOPY_OPEN", "Percent primary door/exit open", b'CANOPY OPEN', b'Percent Over 100', 'Y'),
+			("TAILHOOK_POSITION", "Percent tail hook extended", b'TAILHOOK POSITION', b'Percent Over 100', 'Y'),
+			("EXIT_OPEN:index", "Percent door/exit open", b'EXIT OPEN:index', b'Percent Over 100', 'Y'),
+			("STALL_HORN_AVAILABLE", "True if stall alarm available", b'STALL HORN AVAILABLE', b'Bool', 'N'),
+			("ENGINE_MIXURE_AVAILABLE", "True if engine mixture is available for prop engines. Obsolete value as mixture is always available. Spelling error in variable name.", b'ENGINE MIXURE AVAILABLE', b'Bool', 'N'),
+			("CARB_HEAT_AVAILABLE", "True if carb heat available", b'CARB HEAT AVAILABLE', b'Bool', 'N'),
+			("SPOILER_AVAILABLE", "True if spoiler system available", b'SPOILER AVAILABLE', b'Bool', 'N'),
+			("IS_TAIL_DRAGGER", "True if the aircraft is a taildragger", b'IS TAIL DRAGGER', b'Bool', 'N'),
+			("STROBES_AVAILABLE", "True if strobe lights are available", b'STROBES AVAILABLE', b'Bool', 'N'),
+			("TOE_BRAKES_AVAILABLE", "True if toe brakes are available", b'TOE BRAKES AVAILABLE', b'Bool', 'N'),
+			# ['PUSHBACK STATE', 'Type of pushback :']
+			# ['0 = Straight']
+			# ['1 = Left']
+			# ['2 = Right', 'Enum', 'Y', '-']
+			("ELECTRICAL_MASTER_BATTERY", "Battery switch position", b'ELECTRICAL MASTER BATTERY', b'Bool', 'Y'),
+			("ELECTRICAL_TOTAL_LOAD_AMPS", "Total load amps", b'ELECTRICAL TOTAL LOAD AMPS', b'Amperes', 'Y'),
+			("ELECTRICAL_BATTERY_LOAD", "Battery load", b'ELECTRICAL BATTERY LOAD', b'Amperes', 'Y'),
+			("ELECTRICAL_BATTERY_VOLTAGE", "Battery voltage", b'ELECTRICAL BATTERY VOLTAGE', b'Volts', 'Y'),
+			("ELECTRICAL_MAIN_BUS_VOLTAGE", "Main bus voltage", b'ELECTRICAL MAIN BUS VOLTAGE', b'Volts', 'Y'),
+			("ELECTRICAL_MAIN_BUS_AMPS", "Main bus current", b'ELECTRICAL MAIN BUS AMPS', b'Amperes', 'Y'),
+			("ELECTRICAL_AVIONICS_BUS_VOLTAGE", "Avionics bus voltage", b'ELECTRICAL AVIONICS BUS VOLTAGE', b'Volts', 'Y'),
+			("ELECTRICAL_AVIONICS_BUS_AMPS", "Avionics bus current", b'ELECTRICAL AVIONICS BUS AMPS', b'Amperes', 'Y'),
+			("ELECTRICAL_HOT_BATTERY_BUS_VOLTAGE", "Voltage available when battery switch is turned off", b'ELECTRICAL HOT BATTERY BUS VOLTAGE', b'Volts', 'Y'),
+			("ELECTRICAL_HOT_BATTERY_BUS_AMPS", "Current available when battery switch is turned off", b'ELECTRICAL HOT BATTERY BUS AMPS', b'Amperes', 'Y'),
+			("ELECTRICAL_BATTERY_BUS_VOLTAGE", "Battery bus voltage", b'ELECTRICAL BATTERY BUS VOLTAGE', b'Volts', 'Y'),
+			("ELECTRICAL_BATTERY_BUS_AMPS", "Battery bus current", b'ELECTRICAL BATTERY BUS AMPS', b'Amperes', 'Y'),
+			("ELECTRICAL_GENALT_BUS_VOLTAGE:index", "Genalt bus voltage (takes engine index)", b'ELECTRICAL GENALT BUS VOLTAGE:index', b'Volts', 'Y'),
+			("ELECTRICAL_GENALT_BUS_AMPS:index", "Genalt bus current (takes engine index)", b'ELECTRICAL GENALT BUS AMPS:index', b'Amperes', 'Y'),
+			("CIRCUIT_GENERAL_PANEL_ON", "Is electrical power available to this circuit", b'CIRCUIT GENERAL PANEL ON', b'Bool', 'N'),
+			("CIRCUIT_FLAP_MOTOR_ON", "Is electrical power available to this circuit", b'CIRCUIT FLAP MOTOR ON', b'Bool', 'N'),
+			("CIRCUIT_GEAR_MOTOR_ON", "Is electrical power available to this circuit", b'CIRCUIT GEAR MOTOR ON', b'Bool', 'N'),
+			("CIRCUIT_AUTOPILOT_ON", "Is electrical power available to this circuit", b'CIRCUIT AUTOPILOT ON', b'Bool', 'N'),
+			("CIRCUIT_AVIONICS_ON", "Is electrical power available to this circuit", b'CIRCUIT AVIONICS ON', b'Bool', 'N'),
+			("CIRCUIT_PITOT_HEAT_ON", "Is electrical power available to this circuit", b'CIRCUIT PITOT HEAT ON', b'Bool', 'N'),
+			("CIRCUIT_PROP_SYNC_ON", "Is electrical power available to this circuit", b'CIRCUIT PROP SYNC ON', b'Bool', 'N'),
+			("CIRCUIT_AUTO_FEATHER_ON", "Is electrical power available to this circuit", b'CIRCUIT AUTO FEATHER ON', b'Bool', 'N'),
+			("CIRCUIT_AUTO_BRAKES_ON", "Is electrical power available to this circuit", b'CIRCUIT AUTO BRAKES ON', b'Bool', 'N'),
+			("CIRCUIT_STANDY_VACUUM_ON", "Is electrical power available to this circuit", b'CIRCUIT STANDY VACUUM ON', b'Bool', 'N'),
+			("CIRCUIT_MARKER_BEACON_ON", "Is electrical power available to this circuit", b'CIRCUIT MARKER BEACON ON', b'Bool', 'N'),
+			("CIRCUIT_GEAR_WARNING_ON", "Is electrical power available to this circuit", b'CIRCUIT GEAR WARNING ON', b'Bool', 'N'),
+			("CIRCUIT_HYDRAULIC_PUMP_ON", "Is electrical power available to this circuit", b'CIRCUIT HYDRAULIC PUMP ON', b'Bool', 'N'),
+			("HYDRAULIC_PRESSURE:index", "Hydraulic system pressure. Indexes start at 1.", b'HYDRAULIC PRESSURE:index', b'Pound force per square foot', 'N'),
+			("HYDRAULIC_RESERVOIR_PERCENT:index", "Hydraulic pressure changes will follow changes to this variable. Indexes start at 1.", b'HYDRAULIC RESERVOIR PERCENT:index', b'Percent Over 100', 'Y'),
+			("HYDRAULIC_SYSTEM_INTEGRITY", "Percent system functional", b'HYDRAULIC SYSTEM INTEGRITY', b'Percent Over 100', 'N'),
+			("STRUCTURAL_DEICE_SWITCH", "True if the aircraft structure deice switch is on", b'STRUCTURAL DEICE SWITCH', b'Bool', 'N'),
+			("APPLY_HEAT_TO_SYSTEMS", "Used when too close to a fire.", b'APPLY HEAT TO SYSTEMS', b'Bool', 'Y'),
+			("DROPPABLE_OBJECTS_TYPE:index", "The type of droppable object at the station number identified by the index.", b'DROPPABLE OBJECTS TYPE:index', b'String', 'Y'),
+			("DROPPABLE_OBJECTS_COUNT:index", "The number of droppable objects at the station number identified by the index.", b'DROPPABLE OBJECTS COUNT:index', b'Number', 'N'),
+		]
 
-		self.Miscellaneous = sm.new_request_holder()
-		self.Miscellaneous.add(
-			'TOTAL_WEIGHT',
-			(b'TOTAL WEIGHT', b'Pounds'),
-			_dec='Total weight of the aircraft'
-		)
-		self.Miscellaneous.add(
-			'MAX_GROSS_WEIGHT',
-			(b'MAX GROSS WEIGHT', b'Pounds'),
-			_dec='Maximum gross weight of the aircaft'
-		)
-		self.Miscellaneous.add(
-			'EMPTY_WEIGHT',
-			(b'EMPTY WEIGHT', b'Pounds'),
-			_dec='Empty weight of the aircraft'
-		)
-		self.Miscellaneous.add(
-			'IS_USER_SIM',
-			(b'IS USER SIM', b'Bool'),
-			_dec='Is this the user loaded aircraft'
-		)
-		self.Miscellaneous.add(
-			'SIM_DISABLED',
-			(b'SIM DISABLED', b'Bool'),
-			_dec='Is sim disabled'
-		)
-		self.Miscellaneous.add(
-			'G_FORCE',
-			(b'G FORCE', b'GForce'),
-			_dec='Current g force'
-		)
-		self.Miscellaneous.add(
-			'ATC_HEAVY',
-			(b'ATC HEAVY', b'Bool'),
-			_dec='Is this aircraft recognized by ATC as heavy'
-		)
-		self.Miscellaneous.add(
-			'AUTO_COORDINATION',
-			(b'AUTO COORDINATION', b'Bool'),
-			_dec='Is auto-coordination active'
-		)
-		self.Miscellaneous.add(
-			'REALISM',
-			(b'REALISM', b'Number'),
-			_dec='General realism percent'
-		)
-		self.Miscellaneous.add(
-			'TRUE_AIRSPEED_SELECTED',
-			(b'TRUE AIRSPEED SELECTED', b'Bool'),
-			_dec='True if True Airspeed has been selected'
-		)
-		self.Miscellaneous.add(
-			'DESIGN_SPEED_VS0',
-			(b'DESIGN SPEED VS0', b'Feet per second'),
-			_dec='Design speed at VS0'
-		)
-		self.Miscellaneous.add(
-			'DESIGN_SPEED_VS1',
-			(b'DESIGN SPEED VS1', b'Feet per second'),
-			_dec='Design speed at VS1'
-		)
-		self.Miscellaneous.add(
-			'DESIGN_SPEED_VC',
-			(b'DESIGN SPEED VC', b'Feet per second'),
-			_dec='Design speed at VC'
-		)
-		self.Miscellaneous.add(
-			'MIN_DRAG_VELOCITY',
-			(b'MIN DRAG VELOCITY', b'Feet per second'),
-			_dec='Minimum drag velocity'
-		)
-		self.Miscellaneous.add(
-			'ESTIMATED_CRUISE_SPEED',
-			(b'ESTIMATED CRUISE SPEED', b'Feet per second'),
-			_dec='Estimated cruise speed'
-		)
-		self.Miscellaneous.add(
-			'CG_PERCENT',
-			(b'CG PERCENT', b'Percent over 100'),
-			_dec='Longitudinal CG position as a percent of reference chord'
-		)
-		self.Miscellaneous.add(
-			'CG_PERCENT_LATERAL',
-			(b'CG PERCENT LATERAL', b'Percent over 100'),
-			_dec='Lateral CG position as a percent of reference chord'
-		)
-		self.Miscellaneous.add(
-			'IS_SLEW_ACTIVE',
-			(b'IS SLEW ACTIVE', b'Bool'),
-			_dec='True if slew is active'
-		)
-		self.Miscellaneous.add(
-			'IS_SLEW_ALLOWED',
-			(b'IS SLEW ALLOWED', b'Bool'),
-			_dec='True if slew is enabled'
-		)
-		self.Miscellaneous.add(
-			'ATC_SUGGESTED_MIN_RWY_TAKEOFF',
-			(b'ATC SUGGESTED MIN RWY TAKEOFF', b'Feet'),
-			_dec='Suggested minimum runway length for takeoff. Used by ATC '
-		)
-		self.Miscellaneous.add(
-			'ATC_SUGGESTED_MIN_RWY_LANDING',
-			(b'ATC SUGGESTED MIN RWY LANDING', b'Feet'),
-			_dec='Suggested minimum runway length for landing. Used by ATC '
-		)
-		self.Miscellaneous.add(
-			'PAYLOAD_STATION_WEIGHT:index',
-			(b'PAYLOAD STATION WEIGHT:index', b'Pounds'),
-			_dec='Individual payload station weight'
-		)
-		self.Miscellaneous.add(
-			'PAYLOAD_STATION_COUNT',
-			(b'PAYLOAD STATION COUNT', b'Number'),
-			_dec='Number of payload stations'
-		)
-		self.Miscellaneous.add(
-			'USER_INPUT_ENABLED',
-			(b'USER INPUT ENABLED', b'Bool'),
-			_dec='Is input allowed from the user'
-		)
-		self.Miscellaneous.add(
-			'TYPICAL_DESCENT_RATE',
-			(b'TYPICAL DESCENT RATE', b'Feet per minute'),
-			_dec='Normal descent rate'
-		)
-		self.Miscellaneous.add(
-			'VISUAL_MODEL_RADIUS',
-			(b'VISUAL MODEL RADIUS', b'Meters'),
-			_dec='Model radius'
-		)
-		self.Miscellaneous.add(
-			'SIGMA_SQRT',
-			(b'SIGMA SQRT', b'Number'),
-			_dec='Sigma sqrt'
-		)
-		self.Miscellaneous.add(
-			'DYNAMIC_PRESSURE',
-			(b'DYNAMIC PRESSURE', b'Pounds per square foot'),
-			_dec='Dynamic pressure'
-		)
-		self.Miscellaneous.add(
-			'TOTAL_VELOCITY',
-			(b'TOTAL VELOCITY', b'Feet per second'),
-			_dec='Velocity regardless of direction. For example, if a helicopter is ascending vertically at 100 fps, getting this variable will return 100.'
-		)
-		self.Miscellaneous.add(
-			'AIRSPEED_SELECT_INDICATED_OR_TRUE',
-			(b'AIRSPEED SELECT INDICATED OR TRUE', b'Knots'),
-			_dec='The airspeed, whether true or indicated airspeed has been selected.'
-		)
-		self.Miscellaneous.add(
-			'VARIOMETER_RATE',
-			(b'VARIOMETER RATE', b'Feet per second'),
-			_dec='Variometer rate'
-		)
-		self.Miscellaneous.add(
-			'VARIOMETER_SWITCH',
-			(b'VARIOMETER SWITCH', b'Bool'),
-			_dec='True if the variometer switch is on'
-		)
-		self.Miscellaneous.add(
-			'PRESSURE_ALTITUDE',
-			(b'PRESSURE ALTITUDE', b'Meters'),
-			_dec='Altitude reading'
-		)
-		self.Miscellaneous.add(
-			'MAGNETIC_COMPASS',
-			(b'MAGNETIC COMPASS', b'Degrees'),
-			_dec='Compass reading'
-		)
-		self.Miscellaneous.add(
-			'TURN_INDICATOR_RATE',
-			(b'TURN INDICATOR RATE', b'Radians per second'),
-			_dec='Turn indicator reading'
-		)
-		self.Miscellaneous.add(
-			'TURN_INDICATOR_SWITCH',
-			(b'TURN INDICATOR SWITCH', b'Bool'),
-			_dec='True if turn indicator switch is on'
-		)
-		self.Miscellaneous.add(
-			'YOKE_Y_INDICATOR',
-			(b'YOKE Y INDICATOR', b'Position'),
-			_dec='Yoke position in vertical direction'
-		)
-		self.Miscellaneous.add(
-			'YOKE_X_INDICATOR',
-			(b'YOKE X INDICATOR', b'Position'),
-			_dec='Yoke position in horizontal direction'
-		)
-		self.Miscellaneous.add(
-			'RUDDER_PEDAL_INDICATOR',
-			(b'RUDDER PEDAL INDICATOR', b'Position'),
-			_dec='Rudder pedal position'
-		)
-		self.Miscellaneous.add(
-			'BRAKE_DEPENDENT_HYDRAULIC_PRESSURE',
-			(b'BRAKE DEPENDENT HYDRAULIC PRESSURE', b'Pounds per square foot'),
-			_dec='Brake dependent hydraulic pressure reading'
-		)
-		self.Miscellaneous.add(
-			'PANEL_ANTI_ICE_SWITCH',
-			(b'PANEL ANTI ICE SWITCH', b'Bool'),
-			_dec='True if panel anti-ice switch is on'
-		)
-		self.Miscellaneous.add(
-			'WING_AREA',
-			(b'WING AREA', b'Square feet'),
-			_dec='Total wing area'
-		)
-		self.Miscellaneous.add(
-			'WING_SPAN',
-			(b'WING SPAN', b'Feet'),
-			_dec='Total wing span'
-		)
-		self.Miscellaneous.add(
-			'BETA_DOT',
-			(b'BETA DOT', b'Radians per second'),
-			_dec='Beta dot'
-		)
-		self.Miscellaneous.add(
-			'LINEAR_CL_ALPHA',
-			(b'LINEAR CL ALPHA', b'Per radian'),
-			_dec='Linear CL alpha'
-		)
-		self.Miscellaneous.add(
-			'STALL_ALPHA',
-			(b'STALL ALPHA', b'Radians'),
-			_dec='Stall alpha'
-		)
-		self.Miscellaneous.add(
-			'ZERO_LIFT_ALPHA',
-			(b'ZERO LIFT ALPHA', b'Radians'),
-			_dec='Zero lift alpha'
-		)
-		self.Miscellaneous.add(
-			'CG_AFT_LIMIT',
-			(b'CG AFT LIMIT', b'Percent over 100'),
-			_dec='Aft limit of CG'
-		)
-		self.Miscellaneous.add(
-			'CG_FWD_LIMIT',
-			(b'CG FWD LIMIT', b'Percent over 100'),
-			_dec='Forward limit of CG'
-		)
-		self.Miscellaneous.add(
-			'CG_MAX_MACH',
-			(b'CG MAX MACH', b'Machs'),
-			_dec='Max mach CG'
-		)
-		self.Miscellaneous.add(
-			'CG_MIN_MACH',
-			(b'CG MIN MACH', b'Machs'),
-			_dec='Min mach CG'
-		)
-		self.Miscellaneous.add(
-			'PAYLOAD_STATION_NAME',
-			(b'PAYLOAD STATION NAME', b'String'),
-			_dec='Descriptive name for payload station'
-		)
-		self.Miscellaneous.add(
-			'ELEVON_DEFLECTION',
-			(b'ELEVON DEFLECTION', b'Radians'),
-			_dec='Elevon deflection'
-		)
-		self.Miscellaneous.add(
-			'EXIT_POSX',
-			(b'EXIT POSX', b'Feet'),
-			_dec='Position of exit relative to datum reference point'
-		)
-		self.Miscellaneous.add(
-			'EXIT_POSY',
-			(b'EXIT POSY', b'Feet'),
-			_dec='Position of exit relative to datum reference point'
-		)
-		self.Miscellaneous.add(
-			'EXIT_POSZ',
-			(b'EXIT POSZ', b'Feet'),
-			_dec='Position of exit relative to datum reference point'
-		)
-		self.Miscellaneous.add(
-			'DECISION_HEIGHT',
-			(b'DECISION HEIGHT', b'Feet'),
-			_dec='Design decision height'
-		)
-		self.Miscellaneous.add(
-			'DECISION_ALTITUDE_MSL',
-			(b'DECISION ALTITUDE MSL', b'Feet'),
-			_dec='Design decision altitude above mean sea level'
-		)
-		self.Miscellaneous.add(
-			'EMPTY_WEIGHT_PITCH_MOI',
-			(b'EMPTY WEIGHT PITCH MOI', b'Slugs per feet squared'),
-			_dec='Empty weight pitch moment of inertia'
-		)
-		self.Miscellaneous.add(
-			'EMPTY_WEIGHT_ROLL_MOI',
-			(b'EMPTY WEIGHT ROLL MOI', b'Slugs per feet squared'),
-			_dec='Empty weight roll moment of inertia'
-		)
-		self.Miscellaneous.add(
-			'EMPTY_WEIGHT_YAW_MOI',
-			(b'EMPTY WEIGHT YAW MOI', b'Slugs per feet squared'),
-			_dec='Empty weight yaw moment of inertia'
-		)
-		self.Miscellaneous.add(
-			'EMPTY_WEIGHT_CROSS_COUPLED_MOI',
-			(b'EMPTY WEIGHT CROSS COUPLED MOI', b'Slugs per feet squared'),
-			_dec='Empty weigth cross coupled moment of inertia'
-		)
-		self.Miscellaneous.add(
-			'TOTAL_WEIGHT_PITCH_MOI',
-			(b'TOTAL WEIGHT PITCH MOI', b'Slugs per feet squared'),
-			_dec='Total weight pitch moment of inertia'
-		)
-		self.Miscellaneous.add(
-			'TOTAL_WEIGHT_ROLL_MOI',
-			(b'TOTAL WEIGHT ROLL MOI', b'Slugs per feet squared'),
-			_dec='Total weight roll moment of inertia'
-		)
-		self.Miscellaneous.add(
-			'TOTAL_WEIGHT_YAW_MOI',
-			(b'TOTAL WEIGHT YAW MOI', b'Slugs per feet squared'),
-			_dec='Total weight yaw moment of inertia'
-		)
-		self.Miscellaneous.add(
-			'TOTAL_WEIGHT_CROSS_COUPLED_MOI',
-			(b'TOTAL WEIGHT CROSS COUPLED MOI', b'Slugs per feet squared'),
-			_dec='Total weight cross coupled moment of inertia'
-		)
-		self.Miscellaneous.add(
-			'WATER_BALLAST_VALVE',
-			(b'WATER BALLAST VALVE', b'Bool'),
-			_dec='True if water ballast valve is available'
-		)
-		self.Miscellaneous.add(
-			'MAX_RATED_ENGINE_RPM',
-			(b'MAX RATED ENGINE RPM', b'Rpm'),
-			_dec='Maximum rated rpm'
-		)
-		self.Miscellaneous.add(
-			'FULL_THROTTLE_THRUST_TO_WEIGHT_RATIO',
-			(b'FULL THROTTLE THRUST TO WEIGHT RATIO', b'Number'),
-			_dec='Full throttle thrust to weight ratio'
-		)
-		self.Miscellaneous.add(
-			'PROP_AUTO_CRUISE_ACTIVE',
-			(b'PROP AUTO CRUISE ACTIVE', b'Bool'),
-			_dec='True if prop auto cruise active'
-		)
-		self.Miscellaneous.add(
-			'PROP_ROTATION_ANGLE',
-			(b'PROP ROTATION ANGLE', b'Radians'),
-			_dec='Prop rotation angle'
-		)
-		self.Miscellaneous.add(
-			'PROP_BETA_MAX',
-			(b'PROP BETA MAX', b'Radians'),
-			_dec='Prop beta max'
-		)
-		self.Miscellaneous.add(
-			'PROP_BETA_MIN',
-			(b'PROP BETA MIN', b'Radians'),
-			_dec='Prop beta min'
-		)
-		self.Miscellaneous.add(
-			'PROP_BETA_MIN_REVERSE',
-			(b'PROP BETA MIN REVERSE', b'Radians'),
-			_dec='Prop beta min reverse'
-		)
-		self.Miscellaneous.add(
-			'ELECTRICAL_OLD_CHARGING_AMPS',
-			(b'ELECTRICAL OLD CHARGING AMPS', b'Amps'),
-			_dec='Legacy, use ELECTRICAL BATTERY LOAD'
-		)
-		self.Miscellaneous.add(
-			'HYDRAULIC_SWITCH',
-			(b'HYDRAULIC SWITCH', b'Bool'),
-			_dec='True if hydraulic switch is on'
-		)
-		self.Miscellaneous.add(
-			'CONCORDE_VISOR_POSITION_PERCENT',
-			(b'CONCORDE VISOR POSITION PERCENT', b'Percent over 100'),
-			_dec='0 = up, 1.0 = extended/down'
-		)
-		self.Miscellaneous.add(
-			'CONCORDE_NOSE_ANGLE',
-			(b'CONCORDE NOSE ANGLE', b'Radians'),
-			_dec='0 = up'
-		)
-		self.Miscellaneous.add(
-			'REALISM_CRASH_WITH_OTHERS',
-			(b'REALISM CRASH WITH OTHERS', b'Bool'),
-			_dec='True indicates crashing with other aircraft is possible.'
-		)
-		self.Miscellaneous.add(
-			'REALISM_CRASH_DETECTION',
-			(b'REALISM CRASH DETECTION', b'Bool'),
-			_dec='True indicates crash detection is turned on.'
-		)
-		self.Miscellaneous.add(
-			'MANUAL_INSTRUMENT_LIGHTS',
-			(b'MANUAL INSTRUMENT LIGHTS', b'Bool'),
-			_dec='True if instrument lights are set manually'
-		)
-		self.Miscellaneous.add(
-			'PITOT_ICE_PCT',
-			(b'PITOT ICE PCT', b'Percent over 100'),
-			_dec='Amount of pitot ice. 100 is fully iced.'
-		)
-		self.Miscellaneous.add(
-			'SEMIBODY_LOADFACTOR_Y',
-			(b'SEMIBODY LOADFACTOR Y', b'Number'),
-			_dec='Semibody loadfactor x and z are not supported.'
-		)
-		self.Miscellaneous.add(
-			'SEMIBODY_LOADFACTOR_YDOT',
-			(b'SEMIBODY LOADFACTOR YDOT', b'Per second'),
-			_dec='Semibody loadfactory ydot'
-		)
-		self.Miscellaneous.add(
-			'RAD_INS_SWITCH',
-			(b'RAD INS SWITCH', b'Bool'),
-			_dec='True if Rad INS switch on'
-		)
-		self.Miscellaneous.add(
-			'SIMULATED_RADIUS',
-			(b'SIMULATED RADIUS', b'Feet'),
-			_dec='Simulated radius'
-		)
-		self.Miscellaneous.add(
-			'STRUCTURAL_ICE_PCT',
-			(b'STRUCTURAL ICE PCT', b'Percent over 100'),
-			_dec='Amount of ice on aircraft structure. 100 is fully iced.'
-		)
-		self.Miscellaneous.add(
-			'ARTIFICIAL_GROUND_ELEVATION',
-			(b'ARTIFICIAL GROUND ELEVATION', b'Feet'),
-			_dec='In case scenery is not loaded for AI planes, this variable can be used to set a default surface elevation.'
-		)
-		self.Miscellaneous.add(
-			'SURFACE_INFO_VALID',
-			(b'SURFACE INFO VALID', b'Bool'),
-			_dec='True indicates SURFACE CONDITION is meaningful.'
-		)
-		self.Miscellaneous.add(
-			'PUSHBACK_ANGLE',
-			(b'PUSHBACK ANGLE', b'Radians'),
-			_dec='Pushback angle (the heading of the tug)'
-		)
-		self.Miscellaneous.add(
-			'PUSHBACK_CONTACTX',
-			(b'PUSHBACK CONTACTX', b'Feet'),
-			_dec='The towpoint position, relative to the aircrafts datum reference point.'
-		)
-		self.Miscellaneous.add(
-			'PUSHBACK_CONTACTY',
-			(b'PUSHBACK CONTACTY', b'Feet'),
-			_dec='Pushback contact position in vertical direction'
-		)
-		self.Miscellaneous.add(
-			'PUSHBACK_CONTACTZ',
-			(b'PUSHBACK CONTACTZ', b'Feet'),
-			_dec='Pushback contact position in fore/aft direction'
-		)
-		self.Miscellaneous.add(
-			'PUSHBACK_WAIT',
-			(b'PUSHBACK WAIT', b'Bool'),
-			_dec='True if waiting for pushback.'
-		)
-		self.Miscellaneous.add(
-			'YAW_STRING_ANGLE',
-			(b'YAW STRING ANGLE', b'Radians'),
-			_dec='The yaw string angle. Yaw strings are attached to gliders as visible indicators of the yaw angle. An animation of this is not implemented in ESP.'
-		)
-		self.Miscellaneous.add(
-			'YAW_STRING_PCT_EXTENDED',
-			(b'YAW STRING PCT EXTENDED', b'Percent over 100'),
-			_dec='Yaw string angle as a percentage'
-		)
-		self.Miscellaneous.add(
-			'INDUCTOR_COMPASS_PERCENT_DEVIATION',
-			(b'INDUCTOR COMPASS PERCENT DEVIATION', b'Percent over 100'),
-			_dec='Inductor compass deviation reading'
-		)
-		self.Miscellaneous.add(
-			'INDUCTOR_COMPASS_HEADING_REF',
-			(b'INDUCTOR COMPASS HEADING REF', b'Radians'),
-			_dec='Inductor compass heading'
-		)
-		self.Miscellaneous.add(
-			'ANEMOMETER_PCT_RPM',
-			(b'ANEMOMETER PCT RPM', b'Percent over 100'),
-			_dec='Anemometer rpm as a percentage'
-		)
-		self.Miscellaneous.add(
-			'ROTOR_ROTATION_ANGLE',
-			(b'ROTOR ROTATION ANGLE', b'Radians'),
-			_dec='Main rotor rotation angle (helicopters only)'
-		)
-		self.Miscellaneous.add(
-			'DISK_PITCH_ANGLE',
-			(b'DISK PITCH ANGLE', b'Radians'),
-			_dec='Main rotor pitch angle (helicopters only)'
-		)
-		self.Miscellaneous.add(
-			'DISK_BANK_ANGLE',
-			(b'DISK BANK ANGLE', b'Radians'),
-			_dec='Main rotor bank angle (helicopters only)'
-		)
-		self.Miscellaneous.add(
-			'DISK_PITCH_PCT',
-			(b'DISK PITCH PCT', b'Percent over 100'),
-			_dec='Main rotor pitch percent (helicopters only)'
-		)
-		self.Miscellaneous.add(
-			'DISK_BANK_PCT',
-			(b'DISK BANK PCT', b'Percent over 100'),
-			_dec='Main rotor bank percent (helicopters only)'
-		)
-		self.Miscellaneous.add(
-			'DISK_CONING_PCT',
-			(b'DISK CONING PCT', b'Percent over 100'),
-			_dec='Main rotor coning percent (helicopters only)'
-		)
-		self.Miscellaneous.add(
-			'NAV_VOR_LLAF64',
-			(b'NAV VOR LLAF64', b'LLA structure'),
-			_dec='Nav VOR latitude, longitude, altitude'
-		)
-		self.Miscellaneous.add(
-			'NAV_GS_LLAF64',
-			(b'NAV GS LLAF64', b'LLA structure'),
-			_dec='Nav GS latitude, longitude, altitude'
-		)
-		self.Miscellaneous.add(
-			'STATIC_CG_TO_GROUND',
-			(b'STATIC CG TO GROUND', b'Feet'),
-			_dec='Static CG to ground'
-		)
-		self.Miscellaneous.add(
-			'STATIC_PITCH',
-			(b'STATIC PITCH', b'Radians'),
-			_dec='Static pitch'
-		)
-		self.Miscellaneous.add(
-			'TOW_RELEASE_HANDLE',
-			(b'TOW RELEASE HANDLE', b'Percent over 100'),
-			_dec='Position of tow release handle. 100 is fully deployed.'
-		)
-		self.Miscellaneous.add(
-			'TOW_CONNECTION',
-			(b'TOW CONNECTION', b'Bool'),
-			_dec='True if a towline is connected to both tow plane and glider.'
-		)
-		self.Miscellaneous.add(
-			'APU_PCT_RPM',
-			(b'APU PCT RPM', b'Percent over 100'),
-			_dec='Auxiliary power unit rpm, as a percentage'
-		)
-		self.Miscellaneous.add(
-			'APU_PCT_STARTER',
-			(b'APU PCT STARTER', b'Percent over 100'),
-			_dec='Auxiliary power unit starter, as a percentage'
-		)
-		self.Miscellaneous.add(
-			'APU_VOLTS',
-			(b'APU VOLTS', b'Volts'),
-			_dec='Auxiliary power unit voltage'
-		)
-		self.Miscellaneous.add(
-			'APU_GENERATOR_SWITCH',
-			(b'APU GENERATOR SWITCH', b'Bool'),
-			_dec='True if APU generator switch on'
-		)
-		self.Miscellaneous.add(
-			'APU_GENERATOR_ACTIVE',
-			(b'APU GENERATOR ACTIVE', b'Bool'),
-			_dec='True if APU generator active'
-		)
-		self.Miscellaneous.add(
-			'APU_ON_FIRE_DETECTED',
-			(b'APU ON FIRE DETECTED', b'Bool'),
-			_dec='True if APU on fire'
-		)
-		self.Miscellaneous.add(
-			'PRESSURIZATION_CABIN_ALTITUDE',
-			(b'PRESSURIZATION CABIN ALTITUDE', b'Feet'),
-			_dec='The current altitude of the cabin pressurization..'
-		)
-		self.Miscellaneous.add(
-			'PRESSURIZATION_CABIN_ALTITUDE_GOAL',
-			(b'PRESSURIZATION CABIN ALTITUDE GOAL', b'Feet'),
-			_dec='The set altitude of the cabin pressurization.'
-		)
-		self.Miscellaneous.add(
-			'PRESSURIZATION_CABIN_ALTITUDE_RATE',
-			(b'PRESSURIZATION CABIN ALTITUDE RATE', b'Feet per second'),
-			_dec='The rate at which cabin pressurization changes.'
-		)
-		self.Miscellaneous.add(
-			'PRESSURIZATION_PRESSURE_DIFFERENTIAL',
-			(b'PRESSURIZATION PRESSURE DIFFERENTIAL', b'Pounds per square foot'),
-			_dec='The difference in pressure between the set altitude pressurization and the current pressurization.'
-		)
-		self.Miscellaneous.add(
-			'PRESSURIZATION_DUMP_SWITCH',
-			(b'PRESSURIZATION DUMP SWITCH', b'Bool'),
-			_dec='True if the cabin pressurization dump switch is on.'
-		)
-		self.Miscellaneous.add(
-			'FIRE_BOTTLE_SWITCH',
-			(b'FIRE BOTTLE SWITCH', b'Bool'),
-			_dec='True if the fire bottle switch is on.'
-		)
-		self.Miscellaneous.add(
-			'FIRE_BOTTLE_DISCHARGED',
-			(b'FIRE BOTTLE DISCHARGED', b'Bool'),
-			_dec='True if the fire bottle is discharged.'
-		)
-		self.Miscellaneous.add(
-			'CABIN_NO_SMOKING_ALERT_SWITCH',
-			(b'CABIN NO SMOKING ALERT SWITCH', b'Bool'),
-			_dec='True if the No Smoking switch is on.'
-		)
-		self.Miscellaneous.add(
-			'CABIN_SEATBELTS_ALERT_SWITCH',
-			(b'CABIN SEATBELTS ALERT SWITCH', b'Bool'),
-			_dec='True if the Seatbelts switch is on.'
-		)
-		self.Miscellaneous.add(
-			'GPWS_WARNING',
-			(b'GPWS WARNING', b'Bool'),
-			_dec='True if Ground Proximity Warning System installed.'
-		)
-		self.Miscellaneous.add(
-			'GPWS_SYSTEM_ACTIVE',
-			(b'GPWS SYSTEM ACTIVE', b'Bool'),
-			_dec='True if the Ground Proximity Warning System is active'
-		)
-		self.Miscellaneous.add(
-			'IS_LATITUDE_LONGITUDE_FREEZE_ON',
-			(b'IS LATITUDE LONGITUDE FREEZE ON', b'Bool'),
-			_dec='True if the lat/lon of the aircraft '
-		)
-		self.Miscellaneous.add(
-			'IS_ALTITUDE_FREEZE_ON',
-			(b'IS ALTITUDE FREEZE ON', b'Bool'),
-			_dec='True if the altitude of the aircraft is frozen.'
-		)
-		self.Miscellaneous.add(
-			'IS_ATTITUDE_FREEZE_ON',
-			(b'IS ATTITUDE FREEZE ON', b'Bool'),
-			_dec='True if the attitude (pitch, bank and heading) of the aircraft is frozen.'
-		)
+	class __AircraftMiscellaneousData(RequestHelper):
+		list = [
+			("TOTAL_WEIGHT", "Total weight of the aircraft", b'TOTAL WEIGHT', b'Pounds', 'N'),
+			("MAX_GROSS_WEIGHT", "Maximum gross weight of the aircaft", b'MAX GROSS WEIGHT', b'Pounds', 'N'),
+			("EMPTY_WEIGHT", "Empty weight of the aircraft", b'EMPTY WEIGHT', b'Pounds', 'N'),
+			("IS_USER_SIM", "Is this the user loaded aircraft", b'IS USER SIM', b'Bool', 'N'),
+			("SIM_DISABLED", "Is sim disabled", b'SIM DISABLED', b'Bool', 'Y'),
+			("G_FORCE", "Current g force", b'G FORCE', b'GForce', 'Y'),
+			("ATC_HEAVY", "Is this aircraft recognized by ATC as heavy", b'ATC HEAVY', b'Bool', 'Y'),
+			("AUTO_COORDINATION", "Is auto-coordination active", b'AUTO COORDINATION', b'Bool', 'Y'),
+			("REALISM", "General realism percent", b'REALISM', b'Number', 'Y'),
+			("TRUE_AIRSPEED_SELECTED", "True if True Airspeed has been selected", b'TRUE AIRSPEED SELECTED', b'Bool', 'Y'),
+			("DESIGN_SPEED_VS0", "Design speed at VS0", b'DESIGN SPEED VS0', b'Feet per second', 'N'),
+			("DESIGN_SPEED_VS1", "Design speed at VS1", b'DESIGN SPEED VS1', b'Feet per second', 'N'),
+			("DESIGN_SPEED_VC", "Design speed at VC", b'DESIGN SPEED VC', b'Feet per second', 'N'),
+			("MIN_DRAG_VELOCITY", "Minimum drag velocity", b'MIN DRAG VELOCITY', b'Feet per second', 'N'),
+			("ESTIMATED_CRUISE_SPEED", "Estimated cruise speed", b'ESTIMATED CRUISE SPEED', b'Feet per second', 'N'),
+			("CG_PERCENT", "Longitudinal CG position as a percent of reference chord", b'CG PERCENT', b'Percent over 100', 'N'),
+			("CG_PERCENT_LATERAL", "Lateral CG position as a percent of reference chord", b'CG PERCENT LATERAL', b'Percent over 100', 'N'),
+			("IS_SLEW_ACTIVE", "True if slew is active", b'IS SLEW ACTIVE', b'Bool', 'Y'),
+			("IS_SLEW_ALLOWED", "True if slew is enabled", b'IS SLEW ALLOWED', b'Bool', 'Y'),
+			("ATC_SUGGESTED_MIN_RWY_TAKEOFF", "Suggested minimum runway length for takeoff. Used by ATC ", b'ATC SUGGESTED MIN RWY TAKEOFF', b'Feet', 'N'),
+			("ATC_SUGGESTED_MIN_RWY_LANDING", "Suggested minimum runway length for landing. Used by ATC ", b'ATC SUGGESTED MIN RWY LANDING', b'Feet', 'N'),
+			("PAYLOAD_STATION_WEIGHT:index", "Individual payload station weight", b'PAYLOAD STATION WEIGHT:index', b'Pounds', 'Y'),
+			("PAYLOAD_STATION_COUNT", "Number of payload stations", b'PAYLOAD STATION COUNT', b'Number', 'N'),
+			("USER_INPUT_ENABLED", "Is input allowed from the user", b'USER INPUT ENABLED', b'Bool', 'Y'),
+			("TYPICAL_DESCENT_RATE", "Normal descent rate", b'TYPICAL DESCENT RATE', b'Feet per minute', 'N'),
+			("VISUAL_MODEL_RADIUS", "Model radius", b'VISUAL MODEL RADIUS', b'Meters', 'N'),
+			# ['CATEGORY', 'One of the following:']
+			# ['"Airplane",']
+			# ['"Helicopter",']
+			# ['"Boat",']
+			# ['"GroundVehicle",']
+			# ['"ControlTower",']
+			# ['"SimpleObject",']
+			# ['"Viewer"', 'String', 'N', '-']
+			("SIGMA_SQRT", "Sigma sqrt", b'SIGMA SQRT', b'Number', 'N'),
+			("DYNAMIC_PRESSURE", "Dynamic pressure", b'DYNAMIC PRESSURE', b'Pounds per square foot', 'N'),
+			("TOTAL_VELOCITY", "Velocity regardless of direction. For example, if a helicopter is ascending vertically at 100 fps, getting this variable will return 100.", b'TOTAL VELOCITY', b'Feet per second', 'N'),
+			("AIRSPEED_SELECT_INDICATED_OR_TRUE", "The airspeed, whether true or indicated airspeed has been selected.", b'AIRSPEED SELECT INDICATED OR TRUE', b'Knots', 'N'),
+			("VARIOMETER_RATE", "Variometer rate", b'VARIOMETER RATE', b'Feet per second', 'N'),
+			("VARIOMETER_SWITCH", "True if the variometer switch is on", b'VARIOMETER SWITCH', b'Bool', 'N'),
+			("PRESSURE_ALTITUDE", "Altitude reading", b'PRESSURE ALTITUDE', b'Meters', 'N'),
+			("MAGNETIC_COMPASS", "Compass reading", b'MAGNETIC COMPASS', b'Degrees', 'N'),
+			("TURN_INDICATOR_RATE", "Turn indicator reading", b'TURN INDICATOR RATE', b'Radians per second', 'N'),
+			("TURN_INDICATOR_SWITCH", "True if turn indicator switch is on", b'TURN INDICATOR SWITCH', b'Bool', 'N'),
+			("YOKE_Y_INDICATOR", "Yoke position in vertical direction", b'YOKE Y INDICATOR', b'Position', 'N'),
+			("YOKE_X_INDICATOR", "Yoke position in horizontal direction", b'YOKE X INDICATOR', b'Position', 'N'),
+			("RUDDER_PEDAL_INDICATOR", "Rudder pedal position", b'RUDDER PEDAL INDICATOR', b'Position', 'N'),
+			("BRAKE_DEPENDENT_HYDRAULIC_PRESSURE", "Brake dependent hydraulic pressure reading", b'BRAKE DEPENDENT HYDRAULIC PRESSURE', b'Pounds per square foot', 'N'),
+			("PANEL_ANTI_ICE_SWITCH", "True if panel anti-ice switch is on", b'PANEL ANTI ICE SWITCH', b'Bool', 'N'),
+			("WING_AREA", "Total wing area", b'WING AREA', b'Square feet', 'N'),
+			("WING_SPAN", "Total wing span", b'WING SPAN', b'Feet', 'N'),
+			("BETA_DOT", "Beta dot", b'BETA DOT', b'Radians per second', 'N'),
+			("LINEAR_CL_ALPHA", "Linear CL alpha", b'LINEAR CL ALPHA', b'Per radian', 'N'),
+			("STALL_ALPHA", "Stall alpha", b'STALL ALPHA', b'Radians', 'N'),
+			("ZERO_LIFT_ALPHA", "Zero lift alpha", b'ZERO LIFT ALPHA', b'Radians', 'N'),
+			("CG_AFT_LIMIT", "Aft limit of CG", b'CG AFT LIMIT', b'Percent over 100', 'N'),
+			("CG_FWD_LIMIT", "Forward limit of CG", b'CG FWD LIMIT', b'Percent over 100', 'N'),
+			("CG_MAX_MACH", "Max mach CG", b'CG MAX MACH', b'Machs', 'N'),
+			("CG_MIN_MACH", "Min mach CG", b'CG MIN MACH', b'Machs', 'N'),
+			("PAYLOAD_STATION_NAME", "Descriptive name for payload station", b'PAYLOAD STATION NAME', b'String', 'N'),
+			("ELEVON_DEFLECTION", "Elevon deflection", b'ELEVON DEFLECTION', b'Radians', 'N'),
+			# ['EXIT TYPE', 'One of:']
+			# ['0: Main']
+			# ['1: Cargo']
+			# ['2: Emergency']
+			# ['3: Unknown', 'Enum', 'N', '-']
+			("EXIT_POSX", "Position of exit relative to datum reference point", b'EXIT POSX', b'Feet', 'N'),
+			("EXIT_POSY", "Position of exit relative to datum reference point", b'EXIT POSY', b'Feet', 'N'),
+			("EXIT_POSZ", "Position of exit relative to datum reference point", b'EXIT POSZ', b'Feet', 'N'),
+			("DECISION_HEIGHT", "Design decision height", b'DECISION HEIGHT', b'Feet', 'N'),
+			("DECISION_ALTITUDE_MSL", "Design decision altitude above mean sea level", b'DECISION ALTITUDE MSL', b'Feet', 'N'),
+			("EMPTY_WEIGHT_PITCH_MOI", "Empty weight pitch moment of inertia", b'EMPTY WEIGHT PITCH MOI', b'Slugs per feet squared', 'N'),
+			("EMPTY_WEIGHT_ROLL_MOI", "Empty weight roll moment of inertia", b'EMPTY WEIGHT ROLL MOI', b'Slugs per feet squared', 'N'),
+			("EMPTY_WEIGHT_YAW_MOI", "Empty weight yaw moment of inertia", b'EMPTY WEIGHT YAW MOI', b'Slugs per feet squared', 'N'),
+			("EMPTY_WEIGHT_CROSS_COUPLED_MOI", "Empty weigth cross coupled moment of inertia", b'EMPTY WEIGHT CROSS COUPLED MOI', b'Slugs per feet squared', 'N'),
+			("TOTAL_WEIGHT_PITCH_MOI", "Total weight pitch moment of inertia", b'TOTAL WEIGHT PITCH MOI', b'Slugs per feet squared', 'N'),
+			("TOTAL_WEIGHT_ROLL_MOI", "Total weight roll moment of inertia", b'TOTAL WEIGHT ROLL MOI', b'Slugs per feet squared', 'N'),
+			("TOTAL_WEIGHT_YAW_MOI", "Total weight yaw moment of inertia", b'TOTAL WEIGHT YAW MOI', b'Slugs per feet squared', 'N'),
+			("TOTAL_WEIGHT_CROSS_COUPLED_MOI", "Total weight cross coupled moment of inertia", b'TOTAL WEIGHT CROSS COUPLED MOI', b'Slugs per feet squared', 'N'),
+			("WATER_BALLAST_VALVE", "True if water ballast valve is available", b'WATER BALLAST VALVE', b'Bool', 'N'),
+			("MAX_RATED_ENGINE_RPM", "Maximum rated rpm", b'MAX RATED ENGINE RPM', b'Rpm', 'N'),
+			("FULL_THROTTLE_THRUST_TO_WEIGHT_RATIO", "Full throttle thrust to weight ratio", b'FULL THROTTLE THRUST TO WEIGHT RATIO', b'Number', 'N'),
+			("PROP_AUTO_CRUISE_ACTIVE", "True if prop auto cruise active", b'PROP AUTO CRUISE ACTIVE', b'Bool', 'N'),
+			("PROP_ROTATION_ANGLE", "Prop rotation angle", b'PROP ROTATION ANGLE', b'Radians', 'N'),
+			("PROP_BETA_MAX", "Prop beta max", b'PROP BETA MAX', b'Radians', 'N'),
+			("PROP_BETA_MIN", "Prop beta min", b'PROP BETA MIN', b'Radians', 'N'),
+			("PROP_BETA_MIN_REVERSE", "Prop beta min reverse", b'PROP BETA MIN REVERSE', b'Radians', 'N'),
+			# ['FUEL SELECTED TRANSFER MODE', 'One of:']
+			# ['-1: off']
+			# ['0: auto']
+			# ['1: forward']
+			# ['2: aft']
+			# ['3: manual', 'Enum', 'N', '-']
+			("DROPPABLE_OBJECTS_UI_NAME", "Descriptive name, used in User Interface dialogs, of a droppable object", b'DROPPABLE OBJECTS UI NAME', b'String', 'N'),
+			("MANUAL_FUEL_PUMP_HANDLE", "Position of manual fuel pump handle. 100 is fully deployed.", b'MANUAL FUEL PUMP HANDLE', b'Percent over 100', 'N'),
+			# ['BLEED AIR SOURCE CONTROL', 'One of:']
+			# ['0: min']
+			# ['1: auto']
+			# ['2: off']
+			# ['3: apu']
+			# ['4: engines', 'Enum', 'N', '-']
+			("ELECTRICAL_OLD_CHARGING_AMPS", "Legacy, use ELECTRICAL BATTERY LOAD", b'ELECTRICAL OLD CHARGING AMPS', b'Amps', 'N'),
+			("HYDRAULIC_SWITCH", "True if hydraulic switch is on", b'HYDRAULIC SWITCH', b'Bool', 'N'),
+			# ['CONCORDE VISOR NOSE HANDLE', 'One of:']
+			# ['0: visor up, nose down']
+			# ['1: visor down, nose up']
+			# ['2: visor down, nose 5 degrees']
+			# ['3: visor down, nose 12.5 degrees']
+			# ['Enum', 'N', 'All aircraft']
+			("CONCORDE_VISOR_POSITION_PERCENT", "0 = up, 1.0 = extended/down", b'CONCORDE VISOR POSITION PERCENT', b'Percent over 100', 'N'),
+			("CONCORDE_NOSE_ANGLE", "0 = up", b'CONCORDE NOSE ANGLE', b'Radians', 'N'),
+			("REALISM_CRASH_WITH_OTHERS", "True indicates crashing with other aircraft is possible.", b'REALISM CRASH WITH OTHERS', b'Bool', 'N'),
+			("REALISM_CRASH_DETECTION", "True indicates crash detection is turned on.", b'REALISM CRASH DETECTION', b'Bool', 'N'),
+			("MANUAL_INSTRUMENT_LIGHTS", "True if instrument lights are set manually", b'MANUAL INSTRUMENT LIGHTS', b'Bool', 'N'),
+			("PITOT_ICE_PCT", "Amount of pitot ice. 100 is fully iced.", b'PITOT ICE PCT', b'Percent over 100', 'N'),
+			("SEMIBODY_LOADFACTOR_Y", "Semibody loadfactor x and z are not supported.", b'SEMIBODY LOADFACTOR Y', b'Number', 'N'),
+			("SEMIBODY_LOADFACTOR_YDOT", "Semibody loadfactory ydot", b'SEMIBODY LOADFACTOR YDOT', b'Per second', 'N'),
+			("RAD_INS_SWITCH", "True if Rad INS switch on", b'RAD INS SWITCH', b'Bool', 'N'),
+			("SIMULATED_RADIUS", "Simulated radius", b'SIMULATED RADIUS', b'Feet', 'N'),
+			("STRUCTURAL_ICE_PCT", "Amount of ice on aircraft structure. 100 is fully iced.", b'STRUCTURAL ICE PCT', b'Percent over 100', 'N'),
+			("ARTIFICIAL_GROUND_ELEVATION", "In case scenery is not loaded for AI planes, this variable can be used to set a default surface elevation.", b'ARTIFICIAL GROUND ELEVATION', b'Feet', 'N'),
+			("SURFACE_INFO_VALID", "True indicates SURFACE CONDITION is meaningful.", b'SURFACE INFO VALID', b'Bool', 'N'),
+			# ['SURFACE CONDITION', 'One of:']
+			# ['0: Normal']
+			# ['1: Wet']
+			# ['2: Icy']
+			# ['3: Snow', 'Enum', 'N', '-']
+			("PUSHBACK_ANGLE", "Pushback angle (the heading of the tug)", b'PUSHBACK ANGLE', b'Radians', 'N'),
+			("PUSHBACK_CONTACTX", "The towpoint position, relative to the aircrafts datum reference point.", b'PUSHBACK CONTACTX', b'Feet', 'N'),
+			("PUSHBACK_CONTACTY", "Pushback contact position in vertical direction", b'PUSHBACK CONTACTY', b'Feet', 'N'),
+			("PUSHBACK_CONTACTZ", "Pushback contact position in fore/aft direction", b'PUSHBACK CONTACTZ', b'Feet', 'N'),
+			("PUSHBACK_WAIT", "True if waiting for pushback.", b'PUSHBACK WAIT', b'Bool', 'N'),
+			("YAW_STRING_ANGLE", "The yaw string angle. Yaw strings are attached to gliders as visible indicators of the yaw angle. An animation of this is not implemented in ESP.", b'YAW STRING ANGLE', b'Radians', 'N'),
+			("YAW_STRING_PCT_EXTENDED", "Yaw string angle as a percentage", b'YAW STRING PCT EXTENDED', b'Percent over 100', 'N'),
+			("INDUCTOR_COMPASS_PERCENT_DEVIATION", "Inductor compass deviation reading", b'INDUCTOR COMPASS PERCENT DEVIATION', b'Percent over 100', 'N'),
+			("INDUCTOR_COMPASS_HEADING_REF", "Inductor compass heading", b'INDUCTOR COMPASS HEADING REF', b'Radians', 'N'),
+			("ANEMOMETER_PCT_RPM", "Anemometer rpm as a percentage", b'ANEMOMETER PCT RPM', b'Percent over 100', 'N'),
+			("ROTOR_ROTATION_ANGLE", "Main rotor rotation angle (helicopters only)", b'ROTOR ROTATION ANGLE', b'Radians', 'N'),
+			("DISK_PITCH_ANGLE", "Main rotor pitch angle (helicopters only)", b'DISK PITCH ANGLE', b'Radians', 'N'),
+			("DISK_BANK_ANGLE", "Main rotor bank angle (helicopters only)", b'DISK BANK ANGLE', b'Radians', 'N'),
+			("DISK_PITCH_PCT", "Main rotor pitch percent (helicopters only)", b'DISK PITCH PCT', b'Percent over 100', 'N'),
+			("DISK_BANK_PCT", "Main rotor bank percent (helicopters only)", b'DISK BANK PCT', b'Percent over 100', 'N'),
+			("DISK_CONING_PCT", "Main rotor coning percent (helicopters only)", b'DISK CONING PCT', b'Percent over 100', 'N'),
+			("NAV_VOR_LLAF64", "Nav VOR latitude, longitude, altitude", b'NAV VOR LLAF64', b'LLA structure', 'N'),
+			("NAV_GS_LLAF64", "Nav GS latitude, longitude, altitude", b'NAV GS LLAF64', b'LLA structure', 'N'),
+			("STATIC_CG_TO_GROUND", "Static CG to ground", b'STATIC CG TO GROUND', b'Feet', 'N'),
+			("STATIC_PITCH", "Static pitch", b'STATIC PITCH', b'Radians', 'N'),
+			# ['CRASH SEQUENCE', 'One of:']
+			# ['0: off']
+			# ['1: complete']
+			# ['3: reset']
+			# ['4: pause']
+			# ['11: start', 'Enum', 'N', '-']
+			# ['CRASH FLAG', 'One of:']
+			# ['0: None']
+			# ['2: Mountain']
+			# ['4: General']
+			# ['6: Building']
+			# ['8: Splash']
+			# ['10: Gear up']
+			# ['12: Overstress']
+			# ['14: Building']
+			# ['16: Aircraft']
+			# ['18: Fuel Truck', 'Enum', 'N', 'Shared Cockpit']
+			("TOW_RELEASE_HANDLE", "Position of tow release handle. 100 is fully deployed.", b'TOW RELEASE HANDLE', b'Percent over 100', 'N'),
+			("TOW_CONNECTION", "True if a towline is connected to both tow plane and glider.", b'TOW CONNECTION', b'Bool', 'N'),
+			("APU_PCT_RPM", "Auxiliary power unit rpm, as a percentage", b'APU PCT RPM', b'Percent over 100', 'N'),
+			("APU_PCT_STARTER", "Auxiliary power unit starter, as a percentage", b'APU PCT STARTER', b'Percent over 100', 'N'),
+			("APU_VOLTS", "Auxiliary power unit voltage", b'APU VOLTS', b'Volts', 'N'),
+			("APU_GENERATOR_SWITCH", "True if APU generator switch on", b'APU GENERATOR SWITCH', b'Bool', 'N'),
+			("APU_GENERATOR_ACTIVE", "True if APU generator active", b'APU GENERATOR ACTIVE', b'Bool', 'N'),
+			("APU_ON_FIRE_DETECTED", "True if APU on fire", b'APU ON FIRE DETECTED', b'Bool', 'N'),
+			("PRESSURIZATION_CABIN_ALTITUDE", "The current altitude of the cabin pressurization..", b'PRESSURIZATION CABIN ALTITUDE', b'Feet', 'N'),
+			("PRESSURIZATION_CABIN_ALTITUDE_GOAL", "The set altitude of the cabin pressurization.", b'PRESSURIZATION CABIN ALTITUDE GOAL', b'Feet', 'N'),
+			("PRESSURIZATION_CABIN_ALTITUDE_RATE", "The rate at which cabin pressurization changes.", b'PRESSURIZATION CABIN ALTITUDE RATE', b'Feet per second', 'N'),
+			("PRESSURIZATION_PRESSURE_DIFFERENTIAL", "The difference in pressure between the set altitude pressurization and the current pressurization.", b'PRESSURIZATION PRESSURE DIFFERENTIAL', b'Pounds per square foot', 'N'),
+			("PRESSURIZATION_DUMP_SWITCH", "True if the cabin pressurization dump switch is on.", b'PRESSURIZATION DUMP SWITCH', b'Bool', 'N'),
+			("FIRE_BOTTLE_SWITCH", "True if the fire bottle switch is on.", b'FIRE BOTTLE SWITCH', b'Bool', 'N'),
+			("FIRE_BOTTLE_DISCHARGED", "True if the fire bottle is discharged.", b'FIRE BOTTLE DISCHARGED', b'Bool', 'N'),
+			("CABIN_NO_SMOKING_ALERT_SWITCH", "True if the No Smoking switch is on.", b'CABIN NO SMOKING ALERT SWITCH', b'Bool', 'Y'),
+			("CABIN_SEATBELTS_ALERT_SWITCH", "True if the Seatbelts switch is on.", b'CABIN SEATBELTS ALERT SWITCH', b'Bool', 'Y'),
+			("GPWS_WARNING", "True if Ground Proximity Warning System installed.", b'GPWS WARNING', b'Bool', 'N'),
+			("GPWS_SYSTEM_ACTIVE", "True if the Ground Proximity Warning System is active", b'GPWS SYSTEM ACTIVE', b'Bool', 'Y'),
+			# ['IS LATITUDE LONGITUDE FREEZE ON', 'True if the lat/lon of the aircraft (either user or AI controlled) is frozen. If this variable returns true, it means that the latitude and longitude of the aircraft are not being controlled by ESP, so enabling, for example, a SimConnect client to control the position of the aircraft. This can also apply to altitude and attitude.']
+			# ['Also refer to the range of KEY_FREEZE..... Event IDs.', 'Bool', 'N', '-']
+			("IS_ALTITUDE_FREEZE_ON", "True if the altitude of the aircraft is frozen.", b'IS ALTITUDE FREEZE ON', b'Bool', 'N'),
+			("IS_ATTITUDE_FREEZE_ON", "True if the attitude (pitch, bank and heading) of the aircraft is frozen.", b'IS ATTITUDE FREEZE ON', b'Bool', 'N'),
+		]
 
-		self.String = sm.new_request_holder()
-		self.String.add(
-			'ATC_TYPE',
-			(b'ATC TYPE', b'String (30)'),
-			_dec='Type used by ATC'
-		)
-		self.String.add(
-			'ATC_MODEL',
-			(b'ATC MODEL', b'String (10)'),
-			_dec='Model used by ATC'
-		)
-		self.String.add(
-			'ATC_ID',
-			(b'ATC ID', b'String (10)'),
-			_dec='ID used by ATC'
-		)
-		self.String.add(
-			'ATC_AIRLINE',
-			(b'ATC AIRLINE', b'String (50)'),
-			_dec='Airline used by ATC'
-		)
-		self.String.add(
-			'ATC_FLIGHT_NUMBER',
-			(b'ATC FLIGHT NUMBER', b'String (6)'),
-			_dec='Flight Number used by ATC'
-		)
-		self.String.add(
-			'TITLE',
-			(b'TITLE', b'Variable length string'),
-			_dec='Title from aircraft.cfg'
-		)
-		self.String.add(
-			'HSI_STATION_IDENT',
-			(b'HSI STATION IDENT', b'String(6)'),
-			_dec='Tuned station identifier'
-		)
-		self.String.add(
-			'GPS_WP_PREV_ID',
-			(b'GPS WP_PREV ID', b'String'),
-			_dec='ID of previous GPS waypoint'
-		)
-		self.String.add(
-			'GPS_WP_NEXT_ID',
-			(b'GPS WP_NEXT ID', b'String'),
-			_dec='ID of next GPS waypoint'
-		)
-		self.String.add(
-			'GPS_APPROACH_AIRPORT_ID',
-			(b'GPS APPROACH AIRPORT ID', b'String'),
-			_dec='ID of airport'
-		)
-		self.String.add(
-			'GPS_APPROACH_APPROACH_ID',
-			(b'GPS APPROACH APPROACH ID', b'String'),
-			_dec='ID of approach'
-		)
-		self.String.add(
-			'GPS_APPROACH_TRANSITION_ID',
-			(b'GPS APPROACH TRANSITION ID', b'String'),
-			_dec='ID of approach transition'
-		)
+	class __AircraftStringData(RequestHelper):
+		list = [
+			("ATC_TYPE", "Type used by ATC", b'ATC TYPE', b'String (30)', 'N'),
+			("ATC_MODEL", "Model used by ATC", b'ATC MODEL', b'String (10)', 'N'),
+			("ATC_ID", "ID used by ATC", b'ATC ID', b'String (10)', 'Y'),
+			("ATC_AIRLINE", "Airline used by ATC", b'ATC AIRLINE', b'String (50)', 'Y'),
+			("ATC_FLIGHT_NUMBER", "Flight Number used by ATC", b'ATC FLIGHT NUMBER', b'String (6)', 'Y'),
+			("TITLE", "Title from aircraft.cfg", b'TITLE', b'Variable length string', 'N'),
+			("HSI_STATION_IDENT", "Tuned station identifier", b'HSI STATION IDENT', b'String(6)', 'N'),
+			("GPS_WP_PREV_ID", "ID of previous GPS waypoint", b'GPS WP_PREV ID', b'String', 'N'),
+			("GPS_WP_NEXT_ID", "ID of next GPS waypoint", b'GPS WP_NEXT ID', b'String', 'N'),
+			("GPS_APPROACH_AIRPORT_ID", "ID of airport", b'GPS APPROACH AIRPORT ID', b'String', 'N'),
+			("GPS_APPROACH_APPROACH_ID", "ID of approach", b'GPS APPROACH APPROACH ID', b'String', 'N'),
+			("GPS_APPROACH_TRANSITION_ID", "ID of approach transition", b'GPS APPROACH TRANSITION ID', b'String', 'N'),
+		]
+
+	class __AIControlledAircraft(RequestHelper):
+		list = [
+			("AI_DESIRED_SPEED", "Desired speed of the AI object.", b'AI DESIRED SPEED', b'Knots', 'Y'),
+			("AI_WAYPOINT_LIST", "List of waypoints that an AI controlled object should follow.", b'AI WAYPOINT LIST', b'SIMCONNECT_DATA_WAYPOINT structure list', 'Y'),
+			("AI_CURRENT_WAYPOINT", "Current waypoint in the list", b'AI CURRENT WAYPOINT', b'Number', 'Y'),
+			("AI_DESIRED_HEADING", "Desired heading of the AI object.", b'AI DESIRED HEADING', b'Degrees', 'Y'),
+			("AI_GROUNDTURNTIME", "Time to make a 90 degree turn.", b'AI GROUNDTURNTIME', b'Seconds', 'Y'),
+			("AI_GROUNDCRUISESPEED", "Cruising speed.", b'AI GROUNDCRUISESPEED', b'Knots', 'Y'),
+			("AI_GROUNDTURNSPEED", "Turning speed.", b'AI GROUNDTURNSPEED', b'Knots', 'Y'),
+			("AI_TRAFFIC_ISIFR", "Request whether this aircraft is IFR or VFR See Note 1.", b'AI TRAFFIC ISIFR', b'Boolean', 'N'),
+			# ['AI TRAFFIC STATE', "English string describing an AI object's state.  If the object is an aircraft under ATC control the string will be one of:"]
+			# ['"init"']
+			# ['"sleep"']
+			# ['"flt plan"']
+			# ['"startup"']
+			# ['"preflight support"']
+			# ['"clearance"']
+			# ['"push back 1"']
+			# ['"push back 2"']
+			# ['"pre taxi out"']
+			# ['"taxi out"']
+			# ['"takeoff 1"']
+			# ['"takeoff 2"']
+			# ['"T&G depart"']
+			# ['"enroute"']
+			# ['"pattern"']
+			# ['"landing"']
+			# ['"rollout"']
+			# ['"go around"']
+			# ['"taxi in"']
+			# ['"shutdown"']
+			# ['"postflight support"']
+			# ['']
+			# ['If the AI object is not an aircraft under ATC control, the string is one of:']
+			# ['']
+			# ['"Sleep"']
+			# ['"Waypoint"']
+			# ['"Takeoff"']
+			# ['"Landing"']
+			# ['"Taxi"']
+			# ['']
+			# ['This string also appears in the State column of the Traffic Explorer tool dialog. See Note 1.', 'String', 'N', '-']
+			("AI_TRAFFIC_CURRENT_AIRPORT", "ICAO code of current airport. See Note 1.", b'AI TRAFFIC CURRENT AIRPORT', b'String', 'N'),
+			("AI_TRAFFIC_ASSIGNED_RUNWAY", "Assigned runway name (for example: \"32R\"). See Note 1.", b'AI TRAFFIC ASSIGNED RUNWAY', b'String', 'N'),
+			# ['AI TRAFFIC ASSIGNED PARKING', 'English assigned parking name. The string is the same as the one shown in the Parking column of the Traffic Explorer dialog, and is made up in the form:']
+			# ['']
+			# ['Name + Number, Type ( radius )']
+			# ['']
+			# ['For example:']
+			# ['']
+			# ['Ramp 1, RAMP sml (10m)']
+			# ['Gate G 4, RAMP lrg (18m)']
+			# ['']
+			# ['Refer also to the Taxiway Parking section of the Compiling BGL document.']
+			# ['See Note 1.', 'String', 'N', '-']
+			("AI_TRAFFIC_FROMAIRPORT", "ICAO code of the departure airport in the current schedule. See Note 2.", b'AI TRAFFIC FROMAIRPORT', b'String', 'N'),
+			("AI_TRAFFIC_TOAIRPORT", "ICAO code of the destination airport in the current schedule. See Note 2.", b'AI TRAFFIC TOAIRPORT', b'String', 'N'),
+			("AI_TRAFFIC_ETD", "Estimated time of departure for the current schedule entry, given as the number of seconds difference from the current simulation time. This can be negative if ETD is earlier than the current simulation time. See Note 2.", b'AI TRAFFIC ETD', b'Seconds', 'N'),
+			("AI_TRAFFIC_ETA", "Estimated time of arrival for the current schedule entry, given as the number of seconds difference from the current simulated time. This can be negative if ETA is earlier than the current simulated time. See Note 2.", b'AI TRAFFIC ETA', b'Seconds', 'N'),
+			# ['Notes']
+			# ['These variables make most sense for aircraft with flight plans. If an aircraft does not have a flight plan, the value returned will be 0 (or false), or an empty string, depending on the units.']
+			# ['These variables only make sense for aircraft generated by the traffic database, and so have schedules. If an aircraft does not have a schedule, the value returned will be 0 (or false), or an empty string, depending on the units.']
+		]
+
+	class __CarrierOperations(RequestHelper):
+		list=[
+			("LAUNCHBAR_POSITION", "Installed on aircraft before takeoff from a carrier catapult. Note that gear cannot retract with this extended. 100 = fully extended. Refer to the document Notes on Aircraft Systems.", b'LAUNCHBAR POSITION', b'Percent_over_100', 'N'),
+			("LAUNCHBAR_SWITCH", "If this is set to True the launch bar switch has been engaged.", b'LAUNCHBAR SWITCH', b'Bool', 'N'),
+			("LAUNCHBAR_HELD_EXTENDED", "This will be True if the launchbar is fully extended, and can be used, for example, to change the color of an instrument light.", b'LAUNCHBAR HELD EXTENDED', b'Bool', 'N'),
+			("NUMBER_OF_CATAPULTS", "Maximum of 4. A model can contain more than 4 catapults, but only the first four will be read and recognized by the simulation.", b'NUMBER OF CATAPULTS', b'Number', 'N'),
+			("CATAPULT_STROKE_POSITION:index", "Catapults are indexed from 1. This value will be 0 before the catapult fires, and then up to 100 as the aircraft is propelled down the catapult. The aircraft may takeoff before the value reaches 100 (depending on the aircraft weight, power applied, and other factors), in which case this value will not be further updated. This value could be used to drive a bogie animation.", b'CATAPULT STROKE POSITION:index', b'Number', 'N'),
+			("HOLDBACK_BAR_INSTALLED", "Holdback bars allow build up of thrust before takeoff from a catapult, and are installed by the deck crew of an aircraft carrier.", b'HOLDBACK BAR INSTALLED', b'Bool', 'N'),
+			("BLAST_SHIELD_POSITION:index", "Indexed from 1, 100 is fully deployed, 0 flat on deck", b'BLAST SHIELD POSITION:index', b'Percent_over_100', 'N'),
+			("CABLE_CAUGHT_BY_TAILHOOK", "A number 1 through 4 for the cable number caught by the tailhook. Cable 1 is the one closest to the stern of the carrier. A value of 0 indicates no cable was caught.", b'CABLE CAUGHT BY TAILHOOK', b'Number', 'N'),
+			("TAILHOOK_HANDLE", "True if the tailhook handle is engaged.", b'TAILHOOK HANDLE', b'Bool', 'N'),
+			("SURFACE_RELATIVE_GROUND_SPEED", "The speed of the aircraft relative to the speed of the first surface directly underneath it. Use this to retrieve, for example, an aircraft's taxiing speed while it is moving on a moving carrier. It also applies to airborne aircraft, for example when a helicopter is successfully hovering above a moving ship, this value should be zero. The returned value will be the same as GROUND VELOCITY if the first surface beneath it is not moving.", b'SURFACE RELATIVE GROUND SPEED', b'Feet_per_second', 'N'),
+		]
+
+	class __Racing(RequestHelper):
+		list=[
+			("RECIP_ENG_DETONATING:index", "Indexed from 1. Set to True if the engine is detonating.", b'RECIP ENG DETONATING:index', b'Bool', 'N'),
+			("RECIP_ENG_CYLINDER_HEALTH:index", "Index high 16 bits is engine number, low 16 cylinder number, both indexed from 1.", b'RECIP ENG CYLINDER HEALTH:index', b'Percent_over_100', 'N'),
+			("RECIP_ENG_NUM_CYLINDERS", "Indexed from 1. The number of engine cylinders.", b'RECIP ENG NUM CYLINDERS', b'Number', 'N'),
+			("RECIP_ENG_NUM_CYLINDERS_FAILED", "Indexed from 1. The number of cylinders that have failed.", b'RECIP ENG NUM CYLINDERS FAILED', b'Number', 'N'),
+			("RECIP_ENG_ANTIDETONATION_TANK_VALVE:index", "Indexed from 1, each engine can have one antidetonation tank. Installed on racing aircraft. Refer to the document Notes on Aircraft Systems.", b'RECIP ENG ANTIDETONATION TANK VALVE:index', b'Bool', 'Y'),
+			("RECIP_ENG_ANTIDETONATION_TANK_QUANTITY:index", "Indexed from 1. Refer to the Mission Creation documentationfor the procedure for refilling tanks.", b'RECIP ENG ANTIDETONATION TANK QUANTITY:index', b'Gallons', 'Y'),
+			("RECIP_ENG_ANTIDETONATION_TANK_MAX_QUANTITY:index", "Indexed from 1. This value set in the Aircraft Configuration File.", b'RECIP ENG ANTIDETONATION TANK MAX QUANTITY:index', b'Gallons', 'N'),
+			("RECIP_ENG_NITROUS_TANK_VALVE:index", "Indexed from 1. Each engine can have one Nitrous fuel tank installed.", b'RECIP ENG NITROUS TANK VALVE:index', b'Bool', 'Y'),
+			("RECIP_ENG_NITROUS_TANK_QUANTITY:index", "Indexed from 1. Refer to the Mission Creation documentationfor the procedure for refilling tanks.", b'RECIP ENG NITROUS TANK QUANTITY:index', b'Gallons', 'Y'),
+			("RECIP_ENG_NITROUS_TANK_MAX_QUANTITY:index", "Indexed from 1. This value set in the Aircraft Configuration File.", b'RECIP ENG NITROUS TANK MAX QUANTITY:index', b'Gallons', 'N'),
+		]
+
+	class __EnvironmentData(RequestHelper):
+		list = [
+			("ABSOLUTE_TIME", "Time, as referenced from 12:00 AM January 1, 0000", b'ABSOLUTE TIME', b'Seconds', 'N'),
+			("ZULU_TIME", "Greenwich Mean Time (GMT)", b'ZULU TIME', b'Seconds', 'N'),
+			("ZULU_DAY_OF_WEEK", "GMT day of week", b'ZULU DAY OF WEEK', b'Number', 'N'),
+			("ZULU_DAY_OF_MONTH", "GMT day of month", b'ZULU DAY OF MONTH', b'Number', 'N'),
+			("ZULU_MONTH_OF_YEAR", "GMT month of year", b'ZULU MONTH OF YEAR', b'Number', 'N'),
+			("ZULU_DAY_OF_YEAR", "GMT day of year", b'ZULU DAY OF YEAR', b'Number', 'N'),
+			("ZULU_YEAR", "GMT year", b'ZULU YEAR', b'Number', 'N'),
+			("LOCAL_TIME", "Local time", b'LOCAL TIME', b'Seconds', 'N'),
+			("LOCAL_DAY_OF_WEEK", "Local day of week", b'LOCAL DAY OF WEEK', b'Number', 'N'),
+			("LOCAL_DAY_OF_MONTH", "Local day of month", b'LOCAL DAY OF MONTH', b'Number', 'N'),
+			("LOCAL_MONTH_OF_YEAR", "Local month of year", b'LOCAL MONTH OF YEAR', b'Number', 'N'),
+			("LOCAL_DAY_OF_YEAR", "Local day of year", b'LOCAL DAY OF YEAR', b'Number', 'N'),
+			("LOCAL_YEAR", "Local year", b'LOCAL YEAR', b'Number', 'N'),
+			("TIME_ZONE_OFFSET", "Local time difference from GMT", b'TIME ZONE OFFSET', b'Seconds', 'N'),
+			# ['TIME OF DAY', 'General time of day:']
+			# ['1 = Day']
+			# ['2 = Dusk/Dawn']
+			# ['3 = Night']
+			# ['Enum', 'N', '-']
+		]

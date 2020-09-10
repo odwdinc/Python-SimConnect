@@ -51,12 +51,12 @@ class Request(object):
 
 	@value.setter
 	def value(self, val):
-		if self._deff_test():
+		if self._deff_test() and self.settable:
 			self.outData[self.name] = val
 			self.sm.set_data(self)
 			self.sm.run()
 
-	def __init__(self, _deff, _sm, _time=2000, _dec=None):
+	def __init__(self, _deff, _sm, _time=2000, _dec=None, _settable=False):
 		self.DATA_DEFINITION_ID = None
 		self.definitions = []
 		self.description = _dec
@@ -66,11 +66,14 @@ class Request(object):
 		self.sm = _sm
 		self.time = _time
 		self.defined = False
+		self.settable = _settable
 		self.LastData = 0
 		if ':index' in str(self.definitions[0][0]):
 			self.lastIndex = b':index'
 
 	def setIndex(self, index):
+		if not hasattr(self, "lastIndex"):
+			return False
 		(dec, stype) = self.definitions[0]
 		newindex = str(":" + str(index)).encode()
 		if newindex == self.lastIndex:
@@ -79,6 +82,7 @@ class Request(object):
 		self.lastIndex = newindex
 		self.definitions[0] = (dec, stype)
 		self.redefine()
+		return True
 
 	def redefine(self):
 		if self.DATA_DEFINITION_ID is not None:
@@ -118,46 +122,6 @@ class Request(object):
 		else:
 			LOGGER.error("SIM def" + str(self.definitions[0]))
 			return False
-
-
-class requestHolder:
-	def __init__(self, _sm, _time=2000):
-		self._sm = _sm
-		self._time = _time
-		self.dic = []
-
-	def json(self):
-		map = {}
-		for att in self.dic:
-			val = self.get(att)
-			if val is not None:
-				map[att] = val
-		return map
-
-	def add(self, name, _deff, _dec=''):
-		self.dic.append(name)
-		setattr(
-			self,
-			name,
-			Request(_deff, self._sm, self._time, _dec)
-		)
-
-	def obj(self, _name):
-		return getattr(self, _name)
-
-	def get(self, _name, _dec=False):
-		if getattr(self, _name) is None:
-			return None
-		if _dec is True and getattr(self, _name).description is not None:
-			return (getattr(self, _name).value, getattr(self, _name).description)
-		return getattr(self, _name).value
-
-	def set(self, _name, _value):
-		temp = getattr(self, _name)
-		if temp is None:
-			return False
-		setattr(temp, "value", _value)
-		return True
 
 
 class SimConnect:
@@ -331,9 +295,6 @@ class SimConnect:
 		REQUEST_ID = list(self.dll.DATA_REQUEST_ID)[-1]
 
 		return (DEFINITION_ID, REQUEST_ID)
-
-	def new_request_holder(self, _time=2000):
-		return requestHolder(self, _time)
 
 	def set_pos(
 		self,

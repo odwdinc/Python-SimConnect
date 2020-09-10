@@ -71,6 +71,8 @@ class Request(object):
 	def setIndex(self, index):
 		(dec, stype) = self.definitions[0]
 		newindex = str(":" + str(index)).encode()
+		if newindex == self.lastIndex:
+			return
 		dec = dec.replace(self.lastIndex, newindex)
 		self.lastIndex = newindex
 		self.definitions[0] = (dec, stype)

@@ -10,6 +10,6 @@ with open("requirements_dev.txt") as f:
 
 setup(
 	install_requires=install_requires,
-	tests_require=tests_require
+	tests_require=tests_require,
+	package_data={"": ["*.dll"]}
 )
-print(distutils.sysconfig.get_python_lib())

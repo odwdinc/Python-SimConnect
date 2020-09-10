@@ -418,10 +418,10 @@ def trigger_event(event_name):
 	return jsonify(status)
 
 
-@app.route('/custom_emergency/<emergency_type>')
+@app.route('/custom_emergency/<emergency_type>', methods=["POST"])
 def custom_emergency(emergency_type):
 
-	if emergency_type == "engine_fire":
+	if emergency_type == "random_engine_fire":
 		# Calculate number of engines
 		number_of_engines = aq.get("NUMBER_OF_ENGINES")
 		print ("Number of engines: " + str(number_of_engines))
@@ -430,8 +430,10 @@ def custom_emergency(emergency_type):
 
 		engine_to_set_on_fire = random.randint(1,number_of_engines)
 
-		set_datapoint ("ENG_ON_FIRE:index", engine_to_set_on_fire, 1)
+		set_datapoint ("ENG_ON_FIRE:index", engine_to_set_on_fire, 0)
 
-	return str(engine_to_set_on_fire)
+		text_to_return = "Engine " + str(engine_to_set_on_fire) + " on fire"
+
+	return text_to_return
 
 app.run(host='0.0.0.0', port=5000, debug=True)

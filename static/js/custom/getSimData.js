@@ -214,7 +214,8 @@ function triggerSimEventFromField(eventToTrigger, fieldToUse, messageToDisplay =
 }
 
 function triggerCustomEmergency(emergency_type) {
-
+    url_to_call = "/custom_emergency/" + emergency_type
+    $.post (url_to_call)
 }
 
 

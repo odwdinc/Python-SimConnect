@@ -418,7 +418,7 @@ def trigger_event(event_name):
 	return jsonify(status)
 
 
-@app.route('/custom_emergency/<emergency_type>', methods=["POST"])
+@app.route('/custom_emergency/<emergency_type>', methods=["GET", "POST"])
 def custom_emergency(emergency_type):
 
 	if emergency_type == "random_engine_fire":

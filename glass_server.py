@@ -421,6 +421,8 @@ def trigger_event(event_name):
 @app.route('/custom_emergency/<emergency_type>', methods=["GET", "POST"])
 def custom_emergency(emergency_type):
 
+	text_to_return = "No valid emergency type passed"
+	
 	if emergency_type == "random_engine_fire":
 		# Calculate number of engines
 		number_of_engines = aq.get("NUMBER_OF_ENGINES")
@@ -430,7 +432,7 @@ def custom_emergency(emergency_type):
 
 		engine_to_set_on_fire = random.randint(1,number_of_engines)
 
-		set_datapoint ("ENG_ON_FIRE:index", engine_to_set_on_fire, 0)
+		set_datapoint ("ENG_ON_FIRE:index", engine_to_set_on_fire, 1)
 
 		text_to_return = "Engine " + str(engine_to_set_on_fire) + " on fire"
 

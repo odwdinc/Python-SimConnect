@@ -112,12 +112,14 @@ function displayData() {
     checkAndUpdateButton("#autopilot-airspeed-hold", autopilot_airspeed_hold);
     checkAndUpdateButton("#autopilot-attitude-hold", autopilot_attitude_hold);
     checkAndUpdateButton("#autopilot-backcourse-hold", autopilot_backcourse_hold);
-    checkAndUpdateButton("#autopilot-approach-hold", autopilot_approach_hold)
+    checkAndUpdateButton("#autopilot-approach-hold", autopilot_approach_hold);
+    checkAndUpdateButton("#autopilot-vertical-hold", autopilot_vertical_hold);
 
     $("#autopilot-heading-lock-dir").attr('placeholder', autopilot_heading_lock_dir);
     $("#autopilot-altitude-lock-var").attr('placeholder', autopilot_altitude_lock_var);
     $("#autopilot-airspeed-hold-var").attr('placeholder', autopilot_airspeed_hold_var);
     $("#autopilot-pitch-hold-ref").attr('placeholder', autopilot_pitch_hold_ref);
+    ¢("#autopilot-vertical-hold-ref"),attr('placeholder', autopilot_vertical_hold_var);
 
     //Control surfaces
     $("#gear-handle-position").html(gear_handle_position);

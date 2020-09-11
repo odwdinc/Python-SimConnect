@@ -34,7 +34,7 @@ event_to_trigger = ae.find("AP_ALT_VAR_SET_ENGLISH")  # Sets AP autopilot hold l
 event_to_trigger(target_altitude)
 ````
 
-## Browser interface example
+## HTTP interface example
 
 Run `glass_server.py` using Python 3.
 
@@ -97,7 +97,7 @@ Description: Triggers an event in the simulator
 
 ## Events and Variables
 
-Below are links to the Microsoft documentation for events which can be triggered using this 
+Below are links to the Microsoft documentation 
 
 [Event IDs](https://docs.microsoft.com/en-us/previous-versions/microsoft-esp/cc526980(v=msdn.10))
 

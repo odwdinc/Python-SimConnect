@@ -38,14 +38,14 @@ event_to_trigger(target_altitude)
 
 Run `glass_server.py` using Python 3.
 
-#### http://localhost:5000
+### `http://localhost:5000`
 Method: GET
 
 Variables: None
 
 Output: Web interface with moving map and aircraft information
 
-#### http://localhost:5000/dataset/<dataset_name>
+### `http://localhost:5000/dataset/<dataset_name>`
 Method: GET
 
 Arguments to pass:
@@ -57,7 +57,7 @@ Arguments to pass:
 Description: Returns set of variables from simulator in JSON format
 
 
-#### http://localhost:5000/datapoint/<datapoint_name>/get
+### `http://localhost:5000/datapoint/<datapoint_name>/get`
 Method: GET
 
 Arguments to pass:
@@ -69,7 +69,7 @@ Arguments to pass:
 Description: Returns individual variable from simulator in JSON format
 
 
-#### http://localhost:5000/datapoint/<datapoint_name>/set
+### `http://localhost:5000/datapoint/<datapoint_name>/set`
 Method: POST
 
 Arguments to pass:
@@ -83,7 +83,7 @@ Arguments to pass:
 Description: Sets datapoint in the simulator
 
 
-#### http://localhost:5000/event/<event_name>/trigger
+### `http://localhost:5000/event/<event_name>/trigger`
 Method: POST
 
 Arguments to pass:

@@ -137,10 +137,17 @@ class RequestHelper:
 
 class AircraftRequests():
 	def find(self, key):
+		index = None
+		if ':' in key:
+			(keyname, index) = key.split(":", 1)
+			key = "%s:index" % (keyname)
 		for clas in self.list:
 			for test in clas.list:
 				if key == test[0]:
-					return getattr(clas, key)
+					rqest = getattr(clas, key)
+					if index is not None:
+						rqest.setIndex(index)
+					return rqest
 		return None
 
 	def get(self, key):

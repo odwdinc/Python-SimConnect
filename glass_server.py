@@ -450,7 +450,6 @@ def custom_emergency(emergency_type):
 	if emergency_type == "random_engine_fire":
 		# Calculate number of engines
 		number_of_engines = aq.get("NUMBER_OF_ENGINES")
-		#print ("Number of engines: " + str(number_of_engines))
 
 		if number_of_engines < 0: return "error, no engines found - is sim running?"
 		engine_to_set_on_fire = random.randint(1,number_of_engines)

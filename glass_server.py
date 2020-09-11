@@ -368,6 +368,8 @@ def get_datapoint(datapoint_name, index=None):
 
 @app.route('/datapoint/<datapoint_name>/get', methods=["GET"])
 def get_datapoint_endpoint(datapoint_name):
+	# This is the http endpoint wrapper for getting a datapoint
+
 	ds = request.get_json() if request.is_json else request.form
 	index = ds.get('index')
 
@@ -448,7 +450,6 @@ def custom_emergency(emergency_type):
 	if emergency_type == "random_engine_fire":
 		# Calculate number of engines
 		number_of_engines = aq.get("NUMBER_OF_ENGINES")
-		#print ("Number of engines: " + str(number_of_engines))
 
 		if number_of_engines < 0: return "error, no engines found - is sim running?"
 		engine_to_set_on_fire = random.randint(1,number_of_engines)

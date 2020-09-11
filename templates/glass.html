@@ -364,6 +364,18 @@
 													</td>
 												</tr>
 												<tr>
+													<td>Vertical Speed</td>
+													<td width="100"><button onclick="temporaryAlert('Error', 'Vertical speed cannot be enabled/disabled from here - please do so in simulator', 'error')" id="autopilot-vertical-hold" type="button" class="btn m-1 btn-danger" style="width: 75px">?</button></td>
+													<td>
+														<div class="input-group sim-input-field">
+															<input id="autopilot-vertical-hold-var" type="text" class="form-control" placeholder="?" aria-describedby="basic-addon2">
+															<div class="input-group-append">
+																<button onclick='triggerSimEventFromField ("AP_VS_VAR_SET_ENGLISH", "autopilot-vertical-hold-var", "Setting vertical speed hold")' class="btn btn-outline-primary" type="button">Set</button>
+															</div>
+														</div>
+													</td>
+												</tr>
+												<tr>
 													<td>Airspeed</td>
 													<td width="100"><button onclick="triggerSimEvent('AP_AIRSPEED_HOLD')" id="autopilot-airspeed-hold" type="button" class="btn m-1 btn-danger" style="width: 75px">?</button></td>
 													<td>

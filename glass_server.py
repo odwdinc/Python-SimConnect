@@ -368,6 +368,8 @@ def get_datapoint(datapoint_name, index=None):
 
 @app.route('/datapoint/<datapoint_name>/get', methods=["GET"])
 def get_datapoint_endpoint(datapoint_name):
+	# This is the http endpoint wrapper for getting a datapoint
+
 	ds = request.get_json() if request.is_json else request.form
 	index = ds.get('index')
 

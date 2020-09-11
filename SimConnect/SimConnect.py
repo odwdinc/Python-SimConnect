@@ -11,120 +11,15 @@ _library_path = os.path.abspath(__file__).replace(".py", ".dll")
 LOGGER = logging.getLogger(__name__)
 
 
-def IsHR(hr, value):
-	_hr = ctypes.HRESULT(hr)
-	return ctypes.c_ulong(_hr.value).value == value
-
-
 def millis():
 	return int(round(time.time() * 1000))
 
 
-class Event(object):
-
-	def __call__(self, value=0):
-		if self.event is None:
-			self.event = self.sm.map_to_sim_event(self.deff)
-		self.sm.send_event(self.event, DWORD(value))
-
-	def __init__(self, _deff, _sm, _dec=''):
-		self.deff = _deff
-		self.event = None
-		self.description = _dec
-		self.sm = _sm
-
-
-class Request(object):
-
-	@property
-	def value(self):
-		if self._deff_test():
-			self.sm.run()
-			if (self.LastData + self.time) < millis():
-				if self.sm.get_data(self):
-					self.LastData = millis()
-				else:
-					return -999999
-			return self.outData[self.name]
-		else:
-			return None
-
-	@value.setter
-	def value(self, val):
-		if self._deff_test() and self.settable:
-			self.outData[self.name] = val
-			self.sm.set_data(self)
-			self.sm.run()
-
-	def __init__(self, _deff, _sm, _time=2000, _dec=None, _settable=False):
-		self.DATA_DEFINITION_ID = None
-		self.definitions = []
-		self.description = _dec
-		self.definitions.append(_deff)
-		self.name = "_name"
-		self.outData = {self.name: 0}
-		self.sm = _sm
-		self.time = _time
-		self.defined = False
-		self.settable = _settable
-		self.LastData = 0
-		if ':index' in str(self.definitions[0][0]):
-			self.lastIndex = b':index'
-
-	def setIndex(self, index):
-		if not hasattr(self, "lastIndex"):
-			return False
-		(dec, stype) = self.definitions[0]
-		newindex = str(":" + str(index)).encode()
-		if newindex == self.lastIndex:
-			return
-		dec = dec.replace(self.lastIndex, newindex)
-		self.lastIndex = newindex
-		self.definitions[0] = (dec, stype)
-		self.redefine()
-		return True
-
-	def redefine(self):
-		if self.DATA_DEFINITION_ID is not None:
-			self.sm.dll.ClearDataDefinition(
-				self.sm.hSimConnect,
-				self.DATA_DEFINITION_ID.value,
-			)
-			self.defined = False
-			self.sm.run()
-		if self._deff_test():
-			self.sm.run()
-			self.sm.get_data(self)
-
-	def _deff_test(self):
-		if ':index' in str(self.definitions[0][0]):
-			self.lastIndex = b':index'
-			return False
-		if self.defined is True:
-			return True
-		if self.DATA_DEFINITION_ID is None:
-			(self.DATA_DEFINITION_ID, self.DATA_REQUEST_ID) = self.sm.new_request_id()
-			self.sm.out_data[self.DATA_REQUEST_ID] = None
-			self.sm.Requests.append(self)
-
-		err = self.sm.dll.AddToDataDefinition(
-			self.sm.hSimConnect,
-			self.DATA_DEFINITION_ID.value,
-			self.definitions[0][0],
-			self.definitions[0][1],
-			SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_FLOAT64,
-			0,
-			SIMCONNECT_UNUSED,
-		)
-		if IsHR(err, 0):
-			self.defined = True
-			return True
-		else:
-			LOGGER.error("SIM def" + str(self.definitions[0]))
-			return False
-
-
 class SimConnect:
+
+	def IsHR(self, hr, value):
+		_hr = ctypes.HRESULT(hr)
+		return ctypes.c_ulong(_hr.value).value == value
 
 	# TODO: update callbackfunction to expand functions.
 	def my_dispatch_proc(self, pData, cbData, pContext):
@@ -175,7 +70,7 @@ class SimConnect:
 			err = self.dll.Open(
 				byref(self.hSimConnect), LPCSTR(b"Request Data"), None, 0, 0, 0
 			)
-			if IsHR(err, 0):
+			if self.IsHR(err, 0):
 				LOGGER.debug("Connected to Flight Simulator!")
 				# Set up the data definition, but do not yet do anything with itd
 				# Request an event when the simulation starts
@@ -205,7 +100,7 @@ class SimConnect:
 		self.dll.EventID = Enum(self.dll.EventID.__name__, names)
 		evnt = list(self.dll.EventID)[-1]
 		err = self.dll.MapClientEventToSimEvent(self.hSimConnect, evnt.value, name)
-		if IsHR(err, 0):
+		if self.IsHR(err, 0):
 			return evnt
 		else:
 			LOGGER.error("Error: MapToSimEvent")
@@ -242,7 +137,7 @@ class SimConnect:
 			sizeof(ctypes.c_double) * len(pyarr),
 			pObjData
 		)
-		if IsHR(err, 0):
+		if self.IsHR(err, 0):
 			# LOGGER.debug("Request Sent")
 			return True
 		else:
@@ -275,7 +170,7 @@ class SimConnect:
 			SIMCONNECT_GROUP_PRIORITY_HIGHEST,
 			DWORD(16),
 		)
-		if IsHR(err, 0):
+		if self.IsHR(err, 0):
 			# LOGGER.debug("Event Sent")
 			return True
 		else:
@@ -338,7 +233,7 @@ class SimConnect:
 			sizeof(Init),
 			pointer(Init)
 		)
-		if IsHR(err, 0):
+		if self.IsHR(err, 0):
 			return True
 		else:
 			return False

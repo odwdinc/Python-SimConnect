@@ -1,6 +1,20 @@
 from SimConnect import *
 
 
+class Event(object):
+
+	def __call__(self, value=0):
+		if self.event is None:
+			self.event = self.sm.map_to_sim_event(self.deff)
+		self.sm.send_event(self.event, DWORD(value))
+
+	def __init__(self, _deff, _sm, _dec=''):
+		self.deff = _deff
+		self.event = None
+		self.description = _dec
+		self.sm = _sm
+
+
 class EventHelper:
 	def __init__(self, _sm):
 		self.sm = _sm

@@ -1,4 +1,95 @@
 from SimConnect import *
+from .Enum import *
+from .Constants import *
+
+class Request(object):
+
+	@property
+	def value(self):
+		if self._deff_test():
+			self.sm.run()
+			if (self.LastData + self.time) < millis():
+				if self.sm.get_data(self):
+					self.LastData = millis()
+				else:
+					return -999999
+			return self.outData[self.name]
+		else:
+			return None
+
+	@value.setter
+	def value(self, val):
+		if self._deff_test() and self.settable:
+			self.outData[self.name] = val
+			self.sm.set_data(self)
+			self.sm.run()
+
+	def __init__(self, _deff, _sm, _time=2000, _dec=None, _settable=False):
+		self.DATA_DEFINITION_ID = None
+		self.definitions = []
+		self.description = _dec
+		self.definitions.append(_deff)
+		self.name = "_name"
+		self.outData = {self.name: 0}
+		self.sm = _sm
+		self.time = _time
+		self.defined = False
+		self.settable = _settable
+		self.LastData = 0
+		if ':index' in str(self.definitions[0][0]):
+			self.lastIndex = b':index'
+
+	def setIndex(self, index):
+		if not hasattr(self, "lastIndex"):
+			return False
+		(dec, stype) = self.definitions[0]
+		newindex = str(":" + str(index)).encode()
+		if newindex == self.lastIndex:
+			return
+		dec = dec.replace(self.lastIndex, newindex)
+		self.lastIndex = newindex
+		self.definitions[0] = (dec, stype)
+		self.redefine()
+		return True
+
+	def redefine(self):
+		if self.DATA_DEFINITION_ID is not None:
+			self.sm.dll.ClearDataDefinition(
+				self.sm.hSimConnect,
+				self.DATA_DEFINITION_ID.value,
+			)
+			self.defined = False
+			self.sm.run()
+		if self._deff_test():
+			self.sm.run()
+			self.sm.get_data(self)
+
+	def _deff_test(self):
+		if ':index' in str(self.definitions[0][0]):
+			self.lastIndex = b':index'
+			return False
+		if self.defined is True:
+			return True
+		if self.DATA_DEFINITION_ID is None:
+			(self.DATA_DEFINITION_ID, self.DATA_REQUEST_ID) = self.sm.new_request_id()
+			self.sm.out_data[self.DATA_REQUEST_ID] = None
+			self.sm.Requests.append(self)
+
+		err = self.sm.dll.AddToDataDefinition(
+			self.sm.hSimConnect,
+			self.DATA_DEFINITION_ID.value,
+			self.definitions[0][0],
+			self.definitions[0][1],
+			SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_FLOAT64,
+			0,
+			SIMCONNECT_UNUSED,
+		)
+		if self.sm.IsHR(err, 0):
+			self.defined = True
+			return True
+		else:
+			LOGGER.error("SIM def" + str(self.definitions[0]))
+			return False
 
 
 class RequestHelper:
@@ -1269,7 +1360,7 @@ class AircraftRequests():
 		]
 
 	class __CarrierOperations(RequestHelper):
-		list=[
+		list = [
 			("LAUNCHBAR_POSITION", "Installed on aircraft before takeoff from a carrier catapult. Note that gear cannot retract with this extended. 100 = fully extended. Refer to the document Notes on Aircraft Systems.", b'LAUNCHBAR POSITION', b'Percent_over_100', 'N'),
 			("LAUNCHBAR_SWITCH", "If this is set to True the launch bar switch has been engaged.", b'LAUNCHBAR SWITCH', b'Bool', 'N'),
 			("LAUNCHBAR_HELD_EXTENDED", "This will be True if the launchbar is fully extended, and can be used, for example, to change the color of an instrument light.", b'LAUNCHBAR HELD EXTENDED', b'Bool', 'N'),
@@ -1283,7 +1374,7 @@ class AircraftRequests():
 		]
 
 	class __Racing(RequestHelper):
-		list=[
+		list = [
 			("RECIP_ENG_DETONATING:index", "Indexed from 1. Set to True if the engine is detonating.", b'RECIP ENG DETONATING:index', b'Bool', 'N'),
 			("RECIP_ENG_CYLINDER_HEALTH:index", "Index high 16 bits is engine number, low 16 cylinder number, both indexed from 1.", b'RECIP ENG CYLINDER HEALTH:index', b'Percent_over_100', 'N'),
 			("RECIP_ENG_NUM_CYLINDERS", "Indexed from 1. The number of engine cylinders.", b'RECIP ENG NUM CYLINDERS', b'Number', 'N'),

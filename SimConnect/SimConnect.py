@@ -38,14 +38,21 @@ class SimConnect:
 			dwRequestID = pObjData.dwRequestID
 			for _request in self.Requests:
 				if dwRequestID == _request.DATA_REQUEST_ID.value:
-					self.out_data[_request.DATA_REQUEST_ID] = cast(
-						pObjData.dwData, POINTER(c_double * len(_request.definitions))
-					).contents
+					# print(_request.definitions[0][1])
+					rtype = _request.definitions[0][1].decode()
+					if 'String' in rtype or 'string' in rtype:
+						pS = cast(pObjData.dwData, c_char_p)
+						self.out_data[_request.DATA_REQUEST_ID] = [pS.value]
+						# self.dll.RetrieveString(pObjData.dwData, cbData, strings, &pszTitle;, &cbTitle;)
+					else:
+						self.out_data[_request.DATA_REQUEST_ID] = cast(
+							pObjData.dwData, POINTER(c_double * len(_request.definitions))
+						).contents
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
 			LOGGER.info("SIM OPEN")
 			self.ok = True
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EXCEPTION:
-			pass  # LOGGER.warn("ID EXCEPTION")
+			LOGGER.warn("ID EXCEPTION")
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_QUIT:
 			self.quit = 1
 		else:

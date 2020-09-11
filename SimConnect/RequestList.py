@@ -75,12 +75,18 @@ class Request(object):
 			self.sm.out_data[self.DATA_REQUEST_ID] = None
 			self.sm.Requests.append(self)
 
+		rtype = self.definitions[0][1]
+		DATATYPE = SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_FLOAT64
+		if 'String' in rtype.decode() or 'string' in rtype.decode():
+			rtype = None
+			DATATYPE = SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_STRINGV
+
 		err = self.sm.dll.AddToDataDefinition(
 			self.sm.hSimConnect,
 			self.DATA_DEFINITION_ID.value,
 			self.definitions[0][0],
-			self.definitions[0][1],
-			SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_FLOAT64,
+			rtype,
+			DATATYPE,
 			0,
 			SIMCONNECT_UNUSED,
 		)
@@ -1288,13 +1294,13 @@ class AircraftRequests():
 
 	class __AircraftStringData(RequestHelper):
 		list = [
-			("ATC_TYPE", "Type used by ATC", b'ATC TYPE', b'String (30)', 'N'),
-			("ATC_MODEL", "Model used by ATC", b'ATC MODEL', b'String (10)', 'N'),
-			("ATC_ID", "ID used by ATC", b'ATC ID', b'String (10)', 'Y'),
-			("ATC_AIRLINE", "Airline used by ATC", b'ATC AIRLINE', b'String (50)', 'Y'),
-			("ATC_FLIGHT_NUMBER", "Flight Number used by ATC", b'ATC FLIGHT NUMBER', b'String (6)', 'Y'),
-			("TITLE", "Title from aircraft.cfg", b'TITLE', b'Variable length string', 'N'),
-			("HSI_STATION_IDENT", "Tuned station identifier", b'HSI STATION IDENT', b'String(6)', 'N'),
+			("ATC_TYPE", "Type used by ATC", b'ATC TYPE', b'String', 'N'),
+			("ATC_MODEL", "Model used by ATC", b'ATC MODEL', b'String', 'N'),
+			("ATC_ID", "ID used by ATC", b'ATC ID', b'String', 'Y'),
+			("ATC_AIRLINE", "Airline used by ATC", b'ATC AIRLINE', b'String', 'Y'),
+			("ATC_FLIGHT_NUMBER", "Flight Number used by ATC", b'ATC FLIGHT NUMBER', b'String', 'Y'),
+			("TITLE", "Title from aircraft.cfg", b'TITLE', b'String', 'N'),
+			("HSI_STATION_IDENT", "Tuned station identifier", b'HSI STATION IDENT', b'String', 'N'),
 			("GPS_WP_PREV_ID", "ID of previous GPS waypoint", b'GPS WP_PREV ID', b'String', 'N'),
 			("GPS_WP_NEXT_ID", "ID of next GPS waypoint", b'GPS WP_NEXT ID', b'String', 'N'),
 			("GPS_APPROACH_AIRPORT_ID", "ID of airport", b'GPS APPROACH AIRPORT ID', b'String', 'N'),

@@ -14,7 +14,10 @@ ct_g = millis()
 sm = SimConnect()
 aq = AircraftRequests(sm)
 ae = AircraftEvents(sm)
+fs = FacilitiesRequests(sm)
 
+print('ALTITUDE', aq.PositionandSpeedData.get('PLANE_ALTITUDE'))
+print('ATC_ID', aq.StringData.get('ATC_ID'))
 
 # Set pos arund space nedle in WA.
 sm.set_pos(

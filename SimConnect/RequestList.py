@@ -2,6 +2,7 @@ from SimConnect import *
 from .Enum import *
 from .Constants import *
 
+
 class Request(object):
 
 	@property
@@ -13,14 +14,14 @@ class Request(object):
 					self.LastData = millis()
 				else:
 					return -999999
-			return self.outData[self.name]
+			return self.outData
 		else:
 			return None
 
 	@value.setter
 	def value(self, val):
 		if self._deff_test() and self.settable:
-			self.outData[self.name] = val
+			self.outData = val
 			self.sm.set_data(self)
 			self.sm.run()
 
@@ -28,14 +29,15 @@ class Request(object):
 		self.DATA_DEFINITION_ID = None
 		self.definitions = []
 		self.description = _dec
+		self._name = None
 		self.definitions.append(_deff)
-		self.name = "_name"
-		self.outData = {self.name: 0}
+		self.outData = None
 		self.sm = _sm
 		self.time = _time
 		self.defined = False
 		self.settable = _settable
 		self.LastData = 0
+		self.LastID = 0
 		if ':index' in str(self.definitions[0][0]):
 			self.lastIndex = b':index'
 
@@ -71,8 +73,9 @@ class Request(object):
 		if self.defined is True:
 			return True
 		if self.DATA_DEFINITION_ID is None:
-			(self.DATA_DEFINITION_ID, self.DATA_REQUEST_ID) = self.sm.new_request_id()
-			self.sm.out_data[self.DATA_REQUEST_ID] = None
+			self.DATA_DEFINITION_ID = self.sm.new_def_id()
+			self.DATA_REQUEST_ID = self.sm.new_request_id()
+			self.outData = None
 			self.sm.Requests.append(self)
 
 		rtype = self.definitions[0][1]
@@ -92,6 +95,9 @@ class Request(object):
 		)
 		if self.sm.IsHR(err, 0):
 			self.defined = True
+			temp = DWORD(0)
+			self.sm.dll.GetLastSentPacketID(self.sm.hSimConnect, temp)
+			self.LastID = temp.value
 			return True
 		else:
 			LOGGER.error("SIM def" + str(self.definitions[0]))
@@ -216,19 +222,9 @@ class AircraftRequests():
 	class __AircraftEngineData(RequestHelper):
 		list = [
 			("NUMBER_OF_ENGINES", "Number of engines (minimum 0, maximum 4)", b'NUMBER OF ENGINES', b'Number', 'N'),
-			# ['ENGINE CONTROL SELECT', 'Selected engines (combination of bit flags)']
-			# ['1 = Engine 1']
-			# ['2 = Engine 2']
-			# ['4 = Engine 3']
-			# ['8 = Engine 4', 'Mask', 'Y', '-']
+			("ENGINE_CONTROL_SELECT", "Selected engines (combination of bit flags); 1 = Engine 1; 2 = Engine 2; 4 = Engine 3; 8 = Engine 4", b'ENGINE CONTROL SELECT', b'Mask', 'Y'),
 			("THROTTLE_LOWER_LIMIT", "Percent throttle defining lower limit (negative for reverse thrust equipped airplanes)", b'THROTTLE LOWER LIMIT', b'Percent', 'N'),
-			# ['ENGINE TYPE', 'Engine type:']
-			# ['0 = Piston']
-			# ['1 = Jet']
-			# ['2 = None']
-			# ['3 = Helo(Bell) turbine']
-			# ['4 = Unsupported']
-			# ['5 = Turboprop', 'Enum', 'N', '-']
+			("ENGINE_TYPE", "Engine type:; 0 = Piston; 1 = Jet; 2 = None; 3 = Helo(Bell) turbine; 4 = Unsupported; 5 = Turboprop", b'ENGINE TYPE', b'Enum', 'N'),
 			("MASTER_IGNITION_SWITCH", "Aircraft master ignition switch (grounds all engines magnetos)", b'MASTER IGNITION SWITCH', b'Bool', 'N'),
 			("GENERAL_ENG_COMBUSTION:index", "Combustion flag", b'GENERAL ENG COMBUSTION:index', b'Bool', 'Y'),
 			("GENERAL_ENG_MASTER_ALTERNATOR:index", "Alternator (generator) switch", b'GENERAL ENG MASTER ALTERNATOR:index', b'Bool', 'N'),
@@ -273,18 +269,7 @@ class AircraftRequests():
 			("RECIP_ENG_FUEL_AVAILABLE:index", "True if fuel is available", b'RECIP ENG FUEL AVAILABLE:index', b'Bool', 'Y'),
 			("RECIP_ENG_FUEL_FLOW:index", "Engine fuel flow", b'RECIP ENG FUEL FLOW:index', b'Pounds per hour', 'Y'),
 			("RECIP_ENG_FUEL_TANK_SELECTOR:index", "Fuel tank selected for engine. See fuel tank list.", b'RECIP ENG FUEL TANK SELECTOR:index', b'Enum', 'N'),
-			# ['RECIP ENG FUEL TANKS USED:index', 'Fuel tanks used, one or more of the following bit flags:']
-			# ['Center 1 Bit 0']
-			# ['Center 2 Bit 1']
-			# ['Center 3 Bit 2']
-			# ['Left Main Bit 3']
-			# ['Left Aux Bit 4']
-			# ['Left Tip Bit 5']
-			# ['Right Main Bit 6']
-			# ['Right Aux Bit 7']
-			# ['Right Tip Bit 8']
-			# ['External 1 Bit 9']
-			# ['External 2 Bit 10', 'Mask', 'Y', '-']
+			("ENGINE_TYPE", "Engine type:; 0 = Piston; 1 = Jet; 2 = None; 3 = Helo(Bell) turbine; 4 = Unsupported; 5 = Turboprop", b'ENGINE TYPE', b'Enum', 'N'),
 			("RECIP_ENG_FUEL_NUMBER_TANKS_USED:index", "Number of tanks currently being used", b'RECIP ENG FUEL NUMBER TANKS USED:index', b'Number', 'N'),
 			("RECIP_CARBURETOR_TEMPERATURE:index", "Carburetor temperature", b'RECIP CARBURETOR TEMPERATURE:index', b'Celsius', 'Y'),
 			("RECIP_MIXTURE_RATIO:index", "Fuel / Air mixture ratio", b'RECIP MIXTURE RATIO:index', b'Ratio', 'Y'),
@@ -300,18 +285,7 @@ class AircraftRequests():
 			("TURB_ENG_JET_THRUST:index", "Engine jet thrust", b'TURB ENG JET THRUST:index', b'Pounds', 'N'),
 			("TURB_ENG_BLEED_AIR:index", "Bleed air pressure", b'TURB ENG BLEED AIR:index', b'Psi', 'N'),
 			("TURB_ENG_TANK_SELECTOR:index", "Fuel tank selected for engine. See fuel tank list.", b'TURB ENG TANK SELECTOR:index', b'Enum', 'N'),
-			# ['TURB ENG TANKS USED:index', 'Fuel tanks used, one or more of the following bit flags:']
-			# ['Center 1 Bit 0']
-			# ['Center 2 Bit 1']
-			# ['Center 3 Bit 2']
-			# ['Left Main Bit 3']
-			# ['Left Aux Bit 4']
-			# ['Left Tip Bit 5']
-			# ['Right Main Bit 6']
-			# ['Right Aux Bit 7']
-			# ['Right Tip Bit 8']
-			# ['External 1 Bit 9']
-			# ['External 2 Bit 10', 'Mask', 'N', '-']
+			("ENGINE_TYPE", "Engine type:; 0 = Piston; 1 = Jet; 2 = None; 3 = Helo(Bell) turbine; 4 = Unsupported; 5 = Turboprop", b'ENGINE TYPE', b'Enum', 'N'),
 			("TURB_ENG_NUM_TANKS_USED:index", "Number of tanks currently being used", b'TURB ENG NUM TANKS USED:index', b'Number', 'N'),
 			("TURB_ENG_FUEL_FLOW_PPH:index", "Engine fuel flow", b'TURB ENG FUEL FLOW PPH:index', b'Pounds per hour', 'N'),
 			("TURB_ENG_FUEL_AVAILABLE:index", "True if fuel is available", b'TURB ENG FUEL AVAILABLE:index', b'Bool', 'N'),
@@ -364,28 +338,6 @@ class AircraftRequests():
 
 	class __FuelTankSelection(RequestHelper):
 		list = [
-			# ['Number']
-			# ['0', 'Off']
-			# ['1', 'All']
-			# ['2', 'Left']
-			# ['3', 'Right']
-			# ['4', 'Left auxiliary']
-			# ['5', 'Right auxiliary']
-			# ['6', 'Center']
-			# ['7', 'Center2']
-			# ['8', 'Center3']
-			# ['9', 'External1']
-			# ['10', 'External2']
-			# ['11', 'Right tip']
-			# ['12', 'Left tip']
-			# ['13', 'Crossfeed']
-			# ['14', 'Crossfeed left to right']
-			# ['15', 'Crossfeed right to left']
-			# ['16', 'Both']
-			# ['17', 'External']
-			# ['18', 'Isolate']
-			# ['19', 'Left main']
-			# ['20', 'Right main']
 		]
 
 	class __AircraftFuelData(RequestHelper):
@@ -430,9 +382,7 @@ class AircraftRequests():
 			("FUEL_TOTAL_QUANTITY", "Current quantity in volume", b'FUEL TOTAL QUANTITY', b'Gallons', 'N'),
 			("FUEL_WEIGHT_PER_GALLON", "Fuel weight per gallon", b'FUEL WEIGHT PER GALLON', b'Pounds', 'N'),
 			("FUEL_TANK_SELECTOR:index", "Which tank is selected. See fuel tank list.", b'FUEL TANK SELECTOR:index', b'Enum', 'N'),
-			# ['FUEL CROSS FEED', 'Cross feed valve:']
-			# ['0 = Closed']
-			# ['1 = Open', 'Enum', 'N', '-']
+			("FUEL_CROSS_FEED", "Cross feed valve:; 0 = Closed; 1 = Open", b'FUEL CROSS FEED', b'Enum', 'N'),
 			("FUEL_TOTAL_CAPACITY", "Total capacity of the aircraft", b'FUEL TOTAL CAPACITY', b'Gallons', 'N'),
 			("FUEL_SELECTED_QUANTITY_PERCENT", "Percent or capacity for selected tank", b'FUEL SELECTED QUANTITY PERCENT', b'Percent Over 100', 'N'),
 			("FUEL_SELECTED_QUANTITY", "Quantity of selected tank", b'FUEL SELECTED QUANTITY', b'Gallons', 'N'),
@@ -454,17 +404,7 @@ class AircraftRequests():
 			("LIGHT_WING", "Light switch state", b'LIGHT WING', b'Bool', 'N'),
 			("LIGHT_RECOGNITION", "Light switch state", b'LIGHT RECOGNITION', b'Bool', 'N'),
 			("LIGHT_CABIN", "Light switch state", b'LIGHT CABIN', b'Bool', 'N'),
-			# ['LIGHT ON STATES', 'Bit mask:']
-			# ['0x0001: Nav']
-			# ['0x0002: Beacon']
-			# ['0x0004: Landing']
-			# ['0x0008: Taxi']
-			# ['0x0010: Strobe']
-			# ['0x0020: Panel']
-			# ['0x0040: Recognition']
-			# ['0x0080: Wing']
-			# ['0x0100: Logo']
-			# ['0x0200: Cabin', 'Mask', 'N', '-']
+			("LIGHT_ON_STATES", "Bit mask:; 0x0001: Nav; 0x0002: Beacon; 0x0004: Landing; 0x0008: Taxi; 0x0010: Strobe; 0x0020: Panel; 0x0040: Recognition; 0x0080: Wing; 0x0100: Logo; 0x0200: Cabin", b'LIGHT ON STATES', b'Mask', 'N'),
 			("LIGHT_STATES", "Same as LIGHT ON STATES", b'LIGHT STATES', b'Mask', 'N'),
 			("LANDING_LIGHT_PBH", "Landing light pitch bank and heading", b'LANDING LIGHT PBH', b'SIMCONNECT_DATA_XYZ structure', 'N'),
 			("LIGHT_TAXI_ON", "Return true if the light is on.", b'LIGHT TAXI ON', b'Bool', 'N'),
@@ -513,33 +453,6 @@ class AircraftRequests():
 			("PLANE_HEADING_DEGREES_MAGNETIC", "Heading relative to magnetic north, although the name mentions degrees the units used are radians", b'PLANE HEADING DEGREES MAGNETIC', b'Radians', 'Y'),
 			("MAGVAR", "Magnetic variation", b'MAGVAR', b'Degrees', 'N'),
 			("GROUND_ALTITUDE", "Altitude of surface", b'GROUND ALTITUDE', b'Meters', 'N'),
-			# ['SURFACE TYPE', 'Type of surface:']
-			# ['0 = Concrete']
-			# ['1 = Grass']
-			# ['2 = Water']
-			# ['3 = Grass_bumpy']
-			# ['4 = Asphalt']
-			# ['5 = Short_grass']
-			# ['6 = Long_grass']
-			# ['7 = Hard_turf']
-			# ['8 = Snow']
-			# ['9 = Ice']
-			# ['10 = Urban']
-			# ['11 = Forest']
-			# ['12 = Dirt']
-			# ['13 = Coral']
-			# ['14 = Gravel']
-			# ['15 = Oil_treated']
-			# ['16 = Steel_mats']
-			# ['17 = Bituminus']
-			# ['18 = Brick']
-			# ['19 = Macadam']
-			# ['20 = Planks']
-			# ['21 = Sand']
-			# ['22 = Shale']
-			# ['23 = Tarmac']
-			# ['24 = Wright_flyer_track']
-			# ['Enum', 'N', '-']
 			("SIM_ON_GROUND", "On ground flag", b'SIM ON GROUND', b'Bool', 'N'),
 			("INCIDENCE_ALPHA", "Angle of attack", b'INCIDENCE ALPHA', b'Radians', 'N'),
 			("INCIDENCE_BETA", "Sideslip angle", b'INCIDENCE BETA', b'Radians', 'N'),
@@ -618,13 +531,6 @@ class AircraftRequests():
 			("COM_RECIEVE_ALL", "Flag if all Coms receiving", b'COM RECIEVE ALL', b'Bool', 'N'),
 			("COM_ACTIVE_FREQUENCY:index", "Com frequency. Index is 1 or 2.", b'COM ACTIVE FREQUENCY:index', b'Frequency BCD16', 'N'),
 			("COM_STANDBY_FREQUENCY:index", "Com standby frequency. Index is 1 or 2.", b'COM STANDBY FREQUENCY:index', b'Frequency BCD16', 'N'),
-			# ['COM STATUS:index', 'Radio status flag :']
-			# ['-1 =Invalid']
-			# ['0 = OK']
-			# ['1 = Does not exist']
-			# ['2 = No electricity']
-			# ['3 = Failed']
-			# ['Enum', 'N', '-']
 			("NAV_AVAILABLE:index", "Flag if Nav equipped on aircraft", b'NAV AVAILABLE:index', b'Bool', 'N'),
 			("NAV_ACTIVE_FREQUENCY:index", "Nav active frequency. Index is 1 or 2.", b'NAV ACTIVE FREQUENCY:index', b'MHz', 'N'),
 			("NAV_STANDBY_FREQUENCY:index", "Nav standby frequency. Index is 1 or 2.", b'NAV STANDBY FREQUENCY:index', b'MHz', 'N'),
@@ -633,11 +539,7 @@ class AircraftRequests():
 			("NAV_HAS_LOCALIZER:index", "Flag if tuned station is a localizer", b'NAV HAS LOCALIZER:index', b'Bool', 'N'),
 			("NAV_HAS_DME:index", "Flag if tuned station has a DME", b'NAV HAS DME:index', b'Bool', 'N'),
 			("NAV_HAS_GLIDE_SLOPE:index", "Flag if tuned station has a glideslope", b'NAV HAS GLIDE SLOPE:index', b'Bool', 'N'),
-			# ['NAV BACK COURSE FLAGS:index', 'Returns the following bit flags:']
-			# ['BIT0: 1=back course available']
-			# ['BIT1: 1=localizer tuned in']
-			# ['BIT2: 1=on course']
-			# ['BIT7: 1=station active', 'Flags', 'N', '-']
+			("NAV_BACK_COURSE_FLAGS:index", "Returns the following bit flags:; BIT0: 1=back course available; BIT1: 1=localizer tuned in; BIT2: 1=on course; BIT7: 1=station active", b'NAV BACK COURSE FLAGS:index', b'Flags', 'N'),
 			("NAV_MAGVAR:index", "Magnetic variation of tuned nav station", b'NAV MAGVAR:index', b'Degrees', 'N'),
 			("NAV_RADIAL:index", "Radial that aircraft is on", b'NAV RADIAL:index', b'Degrees', 'N'),
 			("NAV_RADIAL_ERROR:index", "Difference between current radial and OBS tuned radial", b'NAV RADIAL ERROR:index', b'Degrees', 'N'),
@@ -645,11 +547,6 @@ class AircraftRequests():
 			("NAV_GLIDE_SLOPE_ERROR:index", "Difference between current position and glideslope angle. Note that this provides 32 bit floating point precision, rather than the 8 bit integer precision of NAV GSI.", b'NAV GLIDE SLOPE ERROR:index', b'Degrees', 'N'),
 			("NAV_CDI:index", "CDI needle deflection (+/- 127)", b'NAV CDI:index', b'Number', 'N'),
 			("NAV_GSI:index", "Glideslope needle deflection (+/- 119). Note that this provides only 8 bit precision, whereas NAV GLIDE SLOPE ERROR provides 32 bit floating point precision.", b'NAV GSI:index', b'Number', 'N'),
-			# ['NAV TOFROM:index', 'Nav TO/FROM flag:']
-			# ['0 = Off']
-			# ['1 = TO']
-			# ['2 = FROM']
-			# ['Enum', 'N', '-']
 			("NAV_GS_FLAG:index", "Glideslope flag", b'NAV GS FLAG:index', b'Bool', 'N'),
 			("NAV_OBS:index", "OBS setting. Index of 1 or 2.", b'NAV OBS:index', b'Degrees', 'N'),
 			("NAV_DME:index", "DME distance", b'NAV DME:index', b'Nautical miles', 'N'),
@@ -659,11 +556,7 @@ class AircraftRequests():
 			("ADF_RADIAL:index", "Current direction from NDB station", b'ADF RADIAL:index', b'Degrees', 'N'),
 			("ADF_SIGNAL:index", "Signal strength", b'ADF SIGNAL:index', b'Number', 'N'),
 			("TRANSPONDER_CODE:index", "4-digit code", b'TRANSPONDER CODE:index', b'BCO16', 'N'),
-			# ['MARKER BEACON STATE', 'Marker beacon state:']
-			# ['0 = None']
-			# ['1 = Outer']
-			# ['2 = Middle']
-			# ['3 = Inner', 'Enum', 'Y', '-']
+			("MARKER_BEACON_STATE", "Marker beacon state:; 0 = None; 1 = Outer; 2 = Middle; 3 = Inner", b'MARKER BEACON STATE', b'Enum', 'Y'),
 			("INNER_MARKER", "Inner marker state", b'INNER MARKER', b'Bool', 'Y'),
 			("MIDDLE_MARKER", "Middle marker state", b'MIDDLE MARKER', b'Bool', 'Y'),
 			("OUTER_MARKER", "Outer marker state", b'OUTER MARKER', b'Bool', 'Y'),
@@ -673,10 +566,7 @@ class AircraftRequests():
 			("HSI_GSI_NEEDLE", "Needle deflection (+/- 119)", b'HSI GSI NEEDLE', b'Number', 'N'),
 			("HSI_CDI_NEEDLE_VALID", "Signal valid", b'HSI CDI NEEDLE VALID', b'Bool', 'N'),
 			("HSI_GSI_NEEDLE_VALID", "Signal valid", b'HSI GSI NEEDLE VALID', b'Bool', 'N'),
-			# ['HSI TF FLAGS', 'Nav TO/FROM flag:']
-			# ['0 = Off']
-			# ['1 = TO']
-			# ['2 = FROM', 'Enum', 'N', '-']
+			("HSI_TF_FLAGS", "Nav TO/FROM flag:; 0 = Off; 1 = TO; 2 = FROM", b'HSI TF FLAGS', b'Enum', 'N'),
 			("HSI_BEARING_VALID", "This will return true if the HSI BEARING variable contains valid data.", b'HSI BEARING VALID', b'Bool', 'N'),
 			("HSI_BEARING", "If the GPS DRIVES NAV1 variable is true and the HSI BEARING VALID variable is true, this variable contains the HSI needle bearing. If the GPS DRIVES NAV1 variable is false and the HSI BEARING VALID variable is true, this variable contains the ADF1 frequency.", b'HSI BEARING', b'Degrees', 'N'),
 			("HSI_HAS_LOCALIZER", "Station is a localizer", b'HSI HAS LOCALIZER', b'Bool', 'N'),
@@ -719,47 +609,8 @@ class AircraftRequests():
 			("GPS_IS_ACTIVE_WP_LOCKED", "Is switching to next waypoint locked", b'GPS IS ACTIVE WP LOCKED', b'Bool', 'N'),
 			("GPS_IS_APPROACH_LOADED", "Is approach loaded", b'GPS IS APPROACH LOADED', b'Bool', 'N'),
 			("GPS_IS_APPROACH_ACTIVE", "Is approach mode active", b'GPS IS APPROACH ACTIVE', b'Bool', 'N'),
-			# ['GPS APPROACH MODE', 'Sub mode within approach mode :']
-			# ['0 = None']
-			# ['1 = Transition']
-			# ['2 = Final']
-			# ['3 = Missed']
-			# ['Enum', 'N', '-']
-			# ['GPS APPROACH WP TYPE', 'Waypoint type within approach mode :']
-			# ['0 = None']
-			# ['1 = Fix']
-			# ['2 = Procedure turn left']
-			# ['3 = Procedure turn right']
-			# ['4 = Dme arc left']
-			# ['5 = Dme arc right']
-			# ['6 = Holding left']
-			# ['7 = Holding right']
-			# ['8 = Distance']
-			# ['9 = Altitude']
-			# ['10 = Manual sequence']
-			# ['11 = Vector to final']
-			# ['Enum', 'N', '-']
 			("GPS_APPROACH_IS_WP_RUNWAY", "Waypoint is the runway", b'GPS APPROACH IS WP RUNWAY', b'Bool', 'N'),
-			# ['GPS APPROACH SEGMENT TYPE', 'Segment type within approach :']
-			# ['0 = Line']
-			# ['1 = Arc clockwise']
-			# ['2 = Arc counter-clockwise']
-			# ['Enum', 'N', '-']
 			("GPS_APPROACH_APPROACH_INDEX", "Index of approach for given airport", b'GPS APPROACH APPROACH INDEX', b'Number', 'N'),
-			# ['GPS APPROACH APPROACH TYPE', 'Approach type :']
-			# ['0 = None']
-			# ['1 = GPS']
-			# ['2 = VOR']
-			# ['3 = NDB']
-			# ['4 = ILS']
-			# ['5 = Localizer']
-			# ['6 = SDF']
-			# ['7 = LDA']
-			# ['8 = VOR/DME']
-			# ['9 = NDB/DME']
-			# ['10 = RNAV']
-			# ['11 = Backcourse']
-			# ['Enum', 'N', '-']
 			("GPS_APPROACH_TRANSITION_INDEX", "Index of approach transition", b'GPS APPROACH TRANSITION INDEX', b'Number', 'N'),
 			("GPS_APPROACH_IS_FINAL", "Is approach transition final approach segment", b'GPS APPROACH IS FINAL', b'Bool', 'N'),
 			("GPS_APPROACH_IS_MISSED", "Is approach segment missed approach segment", b'GPS APPROACH IS MISSED', b'Bool', 'N'),
@@ -778,15 +629,7 @@ class AircraftRequests():
 			("ADF_NAME", "Descriptive name", b'ADF NAME', b'String', 'N'),
 			("NAV_IDENT", "ICAO code", b'NAV IDENT', b'String', 'N'),
 			("NAV_NAME", "Descriptive name", b'NAV NAME', b'String', 'N'),
-			# ['NAV CODES:index', 'Returns bit flags with the following meaning:']
-			# ['BIT7: 0= VOR  1= Localizer']
-			# ['BIT6: 1= glideslope available']
-			# ['BIT5: 1= no localizer backcourse']
-			# ['BIT4: 1= DME transmitter at glide slope transmitter']
-			# ['BIT3: 1= no nav signal available']
-			# ['BIT2: 1= voice available']
-			# ['BIT1: 1 = TACAN available']
-			# ['BIT0: 1= DME available', 'Flags', 'N', '-']
+			("NAV_CODES:index", "Returns bit flags with the following meaning:; BIT7: 0= VOR  1= Localizer; BIT6: 1= glideslope available; BIT5: 1= no localizer backcourse; BIT4: 1= DME transmitter at glide slope transmitter; BIT3: 1= no nav signal available; BIT2: 1= voice available; BIT1: 1 = TACAN available; BIT0: 1= DME available", b'NAV CODES:index', b'Flags', 'N'),
 			("NAV_GLIDE_SLOPE", "The glide slope gradient.", b'NAV GLIDE SLOPE', b'Number', 'N'),
 			("NAV_RELATIVE_BEARING_TO_STATION:index", "Relative bearing to station", b'NAV RELATIVE BEARING TO STATION:index', b'Degrees', 'N'),
 			("SELECTED_DME", "Selected DME", b'SELECTED DME', b'Number', 'N'),
@@ -914,10 +757,7 @@ class AircraftRequests():
 			("GEAR_RIGHT_POSITION", "Percent right gear extended", b'GEAR RIGHT POSITION', b'Percent Over 100', 'Y'),
 			("GEAR_TAIL_POSITION", "Percent tail gear extended", b'GEAR TAIL POSITION', b'Percent Over 100', 'N'),
 			("GEAR_AUX_POSITION", "Percent auxiliary gear extended", b'GEAR AUX POSITION', b'Percent Over 100', 'N'),
-			# ['GEAR POSITION:index', 'Position of landing gear:']
-			# ['0 = unknown']
-			# ['1 = up']
-			# ['2 = down', 'Enum', 'Y', '-']
+			("GEAR_POSITION:index", "Position of landing gear:; 0 = unknown; 1 = up; 2 = down", b'GEAR POSITION:index', b'Enum', 'Y'),
 			("GEAR_ANIMATION_POSITION:index", "Percent gear animation extended", b'GEAR ANIMATION POSITION:index', b'Number', 'N'),
 			("GEAR_TOTAL_PCT_EXTENDED", "Percent total gear extended", b'GEAR TOTAL PCT EXTENDED', b'Percentage', 'N'),
 			("AUTO_BRAKE_SWITCH_CB", "Auto brake switch position", b'AUTO BRAKE SWITCH CB', b'Number', 'N'),
@@ -928,47 +768,28 @@ class AircraftRequests():
 			("GEAR_LEFT_STEER_ANGLE", "Left wheel angle, negative to the left, positive to the right.", b'GEAR LEFT STEER ANGLE', b'Percent Over 100', 'N'),
 			("GEAR_RIGHT_STEER_ANGLE", "Right wheel angle, negative to the left, positive to the right.", b'GEAR RIGHT STEER ANGLE', b'Percent Over 100', 'N'),
 			("GEAR_AUX_STEER_ANGLE", "Aux wheel angle, negative to the left, positive to the right. The aux wheel is the fourth set of gear, sometimes used on helicopters.", b'GEAR AUX STEER ANGLE', b'Percent Over 100', 'N'),
-			# ['GEAR STEER ANGLE:index', 'Alternative method of getting the steer angle. Index is']
-			# ['0 = center']
-			# ['1 = left']
-			# ['2 = right']
-			# ['3 = aux', 'Percent Over 100', 'N', '-']
+			("GEAR_STEER_ANGLE:index", "Alternative method of getting the steer angle. Index is; 0 = center; 1 = left; 2 = right; 3 = aux", b'GEAR STEER ANGLE:index', b'Percent Over 100', 'N'),
 			("WATER_LEFT_RUDDER_STEER_ANGLE", "Water left rudder angle, negative to the left, positive to the right.", b'WATER LEFT RUDDER STEER ANGLE', b'Percent Over 100', 'N'),
 			("WATER_RIGHT_RUDDER_STEER_ANGLE", "Water right rudder angle, negative to the left, positive to the right.", b'WATER RIGHT RUDDER STEER ANGLE', b'Percent Over 100', 'N'),
 			("GEAR_CENTER_STEER_ANGLE_PCT", "Center steer angle as a percentage", b'GEAR CENTER STEER ANGLE PCT', b'Percent Over 100', 'N'),
 			("GEAR_LEFT_STEER_ANGLE_PCT", "Left steer angle as a percentage", b'GEAR LEFT STEER ANGLE PCT', b'Percent Over 100', 'N'),
 			("GEAR_RIGHT_STEER_ANGLE_PCT", "Right steer angle as a percentage", b'GEAR RIGHT STEER ANGLE PCT', b'Percent Over 100', 'N'),
 			("GEAR_AUX_STEER_ANGLE_PCT", "Aux steer angle as a percentage", b'GEAR AUX STEER ANGLE PCT', b'Percent Over 100', 'N'),
-			# ['GEAR STEER ANGLE PCT:index', 'Alternative method of getting steer angle as a percentage. Index is']
-			# ['0 = center']
-			# ['1 = left']
-			# ['2 = right']
-			# ['3 = aux', 'Percent Over 100', 'N', '-']
+			("GEAR_STEER_ANGLE_PCT:index", "Alternative method of getting steer angle as a percentage. Index is; 0 = center; 1 = left; 2 = right; 3 = aux", b'GEAR STEER ANGLE PCT:index', b'Percent Over 100', 'N'),
 			("WATER_LEFT_RUDDER_STEER_ANGLE_PCT", "Water left rudder angle as a percentage", b'WATER LEFT RUDDER STEER ANGLE PCT', b'Percent Over 100', 'N'),
 			("WATER_RIGHT_RUDDER_STEER_ANGLE_PCT", "Water right rudder as a percentage", b'WATER RIGHT RUDDER STEER ANGLE PCT', b'Percent Over 100', 'N'),
-			# ['WHEEL RPM:index', 'Wheel rpm. Index is']
-			# ['0 = center']
-			# ['1 = left']
-			# ['2 = right']
-			# ['3 = aux', 'Rpm', 'N', '-']
+			("WHEEL_RPM:index", "Wheel rpm. Index is; 0 = center; 1 = left; 2 = right; 3 = aux", b'WHEEL RPM:index', b'Rpm', 'N'),
 			("CENTER_WHEEL_RPM", "Center landing gear rpm", b'CENTER WHEEL RPM', b'Rpm', 'N'),
 			("LEFT_WHEEL_RPM", "Left landing gear rpm", b'LEFT WHEEL RPM', b'Rpm', 'N'),
 			("RIGHT_WHEEL_RPM", "Right landing gear rpm", b'RIGHT WHEEL RPM', b'Rpm', 'N'),
 			("AUX_WHEEL_RPM", "Rpm of fourth set of gear wheels.", b'AUX WHEEL RPM', b'Rpm', 'N'),
-			# ['WHEEL ROTATION ANGLE:index', 'Wheel rotation angle. Index is']
-			# ['0 = center']
-			# ['1 = left']
-			# ['2 = right']
-			# ['3 = aux', 'Radians', 'N', '-']
+			("WHEEL_ROTATION_ANGLE:index", "Wheel rotation angle. Index is; 0 = center; 1 = left; 2 = right; 3 = aux", b'WHEEL ROTATION ANGLE:index', b'Radians', 'N'),
 			("CENTER_WHEEL_ROTATION_ANGLE", "Center wheel rotation angle", b'CENTER WHEEL ROTATION ANGLE', b'Radians', 'N'),
 			("LEFT_WHEEL_ROTATION_ANGLE", "Left wheel rotation angle", b'LEFT WHEEL ROTATION ANGLE', b'Radians', 'N'),
 			("RIGHT_WHEEL_ROTATION_ANGLE", "Right wheel rotation angle", b'RIGHT WHEEL ROTATION ANGLE', b'Radians', 'N'),
 			("AUX_WHEEL_ROTATION_ANGLE", "Aux wheel rotation angle", b'AUX WHEEL ROTATION ANGLE', b'Radians', 'N'),
 			("GEAR_EMERGENCY_HANDLE_POSITION", "True if gear emergency handle applied", b'GEAR EMERGENCY HANDLE POSITION', b'Bool', 'N'),
-			# ['GEAR WARNING', 'One of:']
-			# ['0: unknown']
-			# ['1: normal']
-			# ['2: amphib', 'Enum', 'N', '-']
+			("GEAR_WARNING", "One of:; 0: unknown; 1: normal; 2: amphib", b'GEAR WARNING', b'Enum', 'N'),
 			("ANTISKID_BRAKES_ACTIVE", "True if antiskid brakes active", b'ANTISKID BRAKES ACTIVE', b'Bool', 'N'),
 			("RETRACT_FLOAT_SWITCH", "True if retract float switch on", b'RETRACT FLOAT SWITCH', b'Bool', 'N'),
 			("RETRACT_LEFT_FLOAT_EXTENDED", "If aircraft has retractable floats.", b'RETRACT LEFT FLOAT EXTENDED', b'Percent (0 is fully retracted, 100 is fully extended)', 'N'),
@@ -990,11 +811,6 @@ class AircraftRequests():
 			("AMBIENT_WIND_Y", "Wind component in vertical direction.", b'AMBIENT WIND Y', b'Meters per second', 'N'),
 			("AMBIENT_WIND_Z", "Wind component in North/South direction.", b'AMBIENT WIND Z', b'Meters per second', 'N'),
 			("STRUCT_AMBIENT_WIND", "X (latitude), Y (vertical) and Z (longitude) components of the wind.", b'STRUCT AMBIENT WIND', b'Feet_per_second', 'N'),
-			# ['AMBIENT PRECIP STATE', 'Precip state (bit field)']
-			# ['2 = None']
-			# ['4 = Rain']
-			# ['8 = Snow']
-			# ['Mask', 'N', '-']
 			("AIRCRAFT_WIND_X", "Wind component in aircraft lateral axis", b'AIRCRAFT WIND X', b'Knots', 'N'),
 			("AIRCRAFT_WIND_Y", "Wind component in aircraft vertical axis", b'AIRCRAFT WIND Y', b'Knots', 'N'),
 			("AIRCRAFT_WIND_Z", "Wind component in aircraft longitudinal axis", b'AIRCRAFT WIND Z', b'Knots', 'N'),
@@ -1039,8 +855,6 @@ class AircraftRequests():
 			("SLING_CABLE_EXTENDED_LENGTH:index", "The length of the cable extending from the aircraft.", b'SLING CABLE EXTENDED LENGTH:index', b'Feet', 'Y'),
 			("SLING_ACTIVE_PAYLOAD_STATION:index", "The payload station (identified by the parameter) where objects will be placed from the sling (identified by the index).", b'SLING ACTIVE PAYLOAD STATION:index', b'Number', 'Y'),
 			("SLING_HOIST_PERCENT_DEPLOYED:index", "The percentage of the full length of the sling cable deployed.", b'SLING HOIST PERCENT DEPLOYED:index', b'Percent_over_100', 'N'),
-			# ['SLING HOOK IN PICKUP MODE:index']
-			# ['A Boolean for whether or not the hook is in pickup mode, so capable of picking up another object. ', 'Bool', 'N', '-']
 			("IS_ATTACHED_TO_SLING", "Set to true if this object is attached to a sling.", b'IS ATTACHED TO SLING', b'Bool', 'N'),
 		]
 
@@ -1061,10 +875,7 @@ class AircraftRequests():
 			("IS_TAIL_DRAGGER", "True if the aircraft is a taildragger", b'IS TAIL DRAGGER', b'Bool', 'N'),
 			("STROBES_AVAILABLE", "True if strobe lights are available", b'STROBES AVAILABLE', b'Bool', 'N'),
 			("TOE_BRAKES_AVAILABLE", "True if toe brakes are available", b'TOE BRAKES AVAILABLE', b'Bool', 'N'),
-			# ['PUSHBACK STATE', 'Type of pushback :']
-			# ['0 = Straight']
-			# ['1 = Left']
-			# ['2 = Right', 'Enum', 'Y', '-']
+			("PUSHBACK_STATE", "Type of pushback :; 0 = Straight; 1 = Left; 2 = Right", b'PUSHBACK STATE', b'Enum', 'Y'),
 			("ELECTRICAL_MASTER_BATTERY", "Battery switch position", b'ELECTRICAL MASTER BATTERY', b'Bool', 'Y'),
 			("ELECTRICAL_TOTAL_LOAD_AMPS", "Total load amps", b'ELECTRICAL TOTAL LOAD AMPS', b'Amperes', 'Y'),
 			("ELECTRICAL_BATTERY_LOAD", "Battery load", b'ELECTRICAL BATTERY LOAD', b'Amperes', 'Y'),
@@ -1129,14 +940,7 @@ class AircraftRequests():
 			("USER_INPUT_ENABLED", "Is input allowed from the user", b'USER INPUT ENABLED', b'Bool', 'Y'),
 			("TYPICAL_DESCENT_RATE", "Normal descent rate", b'TYPICAL DESCENT RATE', b'Feet per minute', 'N'),
 			("VISUAL_MODEL_RADIUS", "Model radius", b'VISUAL MODEL RADIUS', b'Meters', 'N'),
-			# ['CATEGORY', 'One of the following:']
-			# ['"Airplane",']
-			# ['"Helicopter",']
-			# ['"Boat",']
-			# ['"GroundVehicle",']
-			# ['"ControlTower",']
-			# ['"SimpleObject",']
-			# ['"Viewer"', 'String', 'N', '-']
+			("SimpleObject", "; Viewer", b'SimpleObject', b'String', 'N'),
 			("SIGMA_SQRT", "Sigma sqrt", b'SIGMA SQRT', b'Number', 'N'),
 			("DYNAMIC_PRESSURE", "Dynamic pressure", b'DYNAMIC PRESSURE', b'Pounds per square foot', 'N'),
 			("TOTAL_VELOCITY", "Velocity regardless of direction. For example, if a helicopter is ascending vertically at 100 fps, getting this variable will return 100.", b'TOTAL VELOCITY', b'Feet per second', 'N'),
@@ -1164,11 +968,7 @@ class AircraftRequests():
 			("CG_MIN_MACH", "Min mach CG", b'CG MIN MACH', b'Machs', 'N'),
 			("PAYLOAD_STATION_NAME", "Descriptive name for payload station", b'PAYLOAD STATION NAME', b'String', 'N'),
 			("ELEVON_DEFLECTION", "Elevon deflection", b'ELEVON DEFLECTION', b'Radians', 'N'),
-			# ['EXIT TYPE', 'One of:']
-			# ['0: Main']
-			# ['1: Cargo']
-			# ['2: Emergency']
-			# ['3: Unknown', 'Enum', 'N', '-']
+			("EXIT_TYPE", "One of:; 0: Main; 1: Cargo; 2: Emergency; 3: Unknown", b'EXIT TYPE', b'Enum', 'N'),
 			("EXIT_POSX", "Position of exit relative to datum reference point", b'EXIT POSX', b'Feet', 'N'),
 			("EXIT_POSY", "Position of exit relative to datum reference point", b'EXIT POSY', b'Feet', 'N'),
 			("EXIT_POSZ", "Position of exit relative to datum reference point", b'EXIT POSZ', b'Feet', 'N'),
@@ -1190,28 +990,12 @@ class AircraftRequests():
 			("PROP_BETA_MAX", "Prop beta max", b'PROP BETA MAX', b'Radians', 'N'),
 			("PROP_BETA_MIN", "Prop beta min", b'PROP BETA MIN', b'Radians', 'N'),
 			("PROP_BETA_MIN_REVERSE", "Prop beta min reverse", b'PROP BETA MIN REVERSE', b'Radians', 'N'),
-			# ['FUEL SELECTED TRANSFER MODE', 'One of:']
-			# ['-1: off']
-			# ['0: auto']
-			# ['1: forward']
-			# ['2: aft']
-			# ['3: manual', 'Enum', 'N', '-']
+			("FUEL_SELECTED_TRANSFER_MODE", "One of:; -1: off; 0: auto; 1: forward; 2: aft; 3: manual", b'FUEL SELECTED TRANSFER MODE', b'Enum', 'N'),
 			("DROPPABLE_OBJECTS_UI_NAME", "Descriptive name, used in User Interface dialogs, of a droppable object", b'DROPPABLE OBJECTS UI NAME', b'String', 'N'),
 			("MANUAL_FUEL_PUMP_HANDLE", "Position of manual fuel pump handle. 100 is fully deployed.", b'MANUAL FUEL PUMP HANDLE', b'Percent over 100', 'N'),
-			# ['BLEED AIR SOURCE CONTROL', 'One of:']
-			# ['0: min']
-			# ['1: auto']
-			# ['2: off']
-			# ['3: apu']
-			# ['4: engines', 'Enum', 'N', '-']
+			("BLEED_AIR_SOURCE_CONTROL", "One of:; 0: min; 1: auto; 2: off; 3: apu; 4: engines", b'BLEED AIR SOURCE CONTROL', b'Enum', 'N'),
 			("ELECTRICAL_OLD_CHARGING_AMPS", "Legacy, use ELECTRICAL BATTERY LOAD", b'ELECTRICAL OLD CHARGING AMPS', b'Amps', 'N'),
 			("HYDRAULIC_SWITCH", "True if hydraulic switch is on", b'HYDRAULIC SWITCH', b'Bool', 'N'),
-			# ['CONCORDE VISOR NOSE HANDLE', 'One of:']
-			# ['0: visor up, nose down']
-			# ['1: visor down, nose up']
-			# ['2: visor down, nose 5 degrees']
-			# ['3: visor down, nose 12.5 degrees']
-			# ['Enum', 'N', 'All aircraft']
 			("CONCORDE_VISOR_POSITION_PERCENT", "0 = up, 1.0 = extended/down", b'CONCORDE VISOR POSITION PERCENT', b'Percent over 100', 'N'),
 			("CONCORDE_NOSE_ANGLE", "0 = up", b'CONCORDE NOSE ANGLE', b'Radians', 'N'),
 			("REALISM_CRASH_WITH_OTHERS", "True indicates crashing with other aircraft is possible.", b'REALISM CRASH WITH OTHERS', b'Bool', 'N'),
@@ -1225,11 +1009,7 @@ class AircraftRequests():
 			("STRUCTURAL_ICE_PCT", "Amount of ice on aircraft structure. 100 is fully iced.", b'STRUCTURAL ICE PCT', b'Percent over 100', 'N'),
 			("ARTIFICIAL_GROUND_ELEVATION", "In case scenery is not loaded for AI planes, this variable can be used to set a default surface elevation.", b'ARTIFICIAL GROUND ELEVATION', b'Feet', 'N'),
 			("SURFACE_INFO_VALID", "True indicates SURFACE CONDITION is meaningful.", b'SURFACE INFO VALID', b'Bool', 'N'),
-			# ['SURFACE CONDITION', 'One of:']
-			# ['0: Normal']
-			# ['1: Wet']
-			# ['2: Icy']
-			# ['3: Snow', 'Enum', 'N', '-']
+			("SURFACE_CONDITION", "One of:; 0: Normal; 1: Wet; 2: Icy; 3: Snow", b'SURFACE CONDITION', b'Enum', 'N'),
 			("PUSHBACK_ANGLE", "Pushback angle (the heading of the tug)", b'PUSHBACK ANGLE', b'Radians', 'N'),
 			("PUSHBACK_CONTACTX", "The towpoint position, relative to the aircrafts datum reference point.", b'PUSHBACK CONTACTX', b'Feet', 'N'),
 			("PUSHBACK_CONTACTY", "Pushback contact position in vertical direction", b'PUSHBACK CONTACTY', b'Feet', 'N'),
@@ -1250,23 +1030,8 @@ class AircraftRequests():
 			("NAV_GS_LLAF64", "Nav GS latitude, longitude, altitude", b'NAV GS LLAF64', b'LLA structure', 'N'),
 			("STATIC_CG_TO_GROUND", "Static CG to ground", b'STATIC CG TO GROUND', b'Feet', 'N'),
 			("STATIC_PITCH", "Static pitch", b'STATIC PITCH', b'Radians', 'N'),
-			# ['CRASH SEQUENCE', 'One of:']
-			# ['0: off']
-			# ['1: complete']
-			# ['3: reset']
-			# ['4: pause']
-			# ['11: start', 'Enum', 'N', '-']
-			# ['CRASH FLAG', 'One of:']
-			# ['0: None']
-			# ['2: Mountain']
-			# ['4: General']
-			# ['6: Building']
-			# ['8: Splash']
-			# ['10: Gear up']
-			# ['12: Overstress']
-			# ['14: Building']
-			# ['16: Aircraft']
-			# ['18: Fuel Truck', 'Enum', 'N', 'Shared Cockpit']
+			("CRASH_SEQUENCE", "One of:; 0: off; 1: complete; 3: reset; 4: pause; 11: start", b'CRASH SEQUENCE', b'Enum', 'N'),
+			("CRASH_FLAG", "One of:; 0: None; 2: Mountain; 4: General; 6: Building; 8: Splash; 10: Gear up; 12: Overstress; 14: Building; 16: Aircraft; 18: Fuel Truck", b'CRASH FLAG', b'Enum', 'N'),
 			("TOW_RELEASE_HANDLE", "Position of tow release handle. 100 is fully deployed.", b'TOW RELEASE HANDLE', b'Percent over 100', 'N'),
 			("TOW_CONNECTION", "True if a towline is connected to both tow plane and glider.", b'TOW CONNECTION', b'Bool', 'N'),
 			("APU_PCT_RPM", "Auxiliary power unit rpm, as a percentage", b'APU PCT RPM', b'Percent over 100', 'N'),
@@ -1286,8 +1051,7 @@ class AircraftRequests():
 			("CABIN_SEATBELTS_ALERT_SWITCH", "True if the Seatbelts switch is on.", b'CABIN SEATBELTS ALERT SWITCH', b'Bool', 'Y'),
 			("GPWS_WARNING", "True if Ground Proximity Warning System installed.", b'GPWS WARNING', b'Bool', 'N'),
 			("GPWS_SYSTEM_ACTIVE", "True if the Ground Proximity Warning System is active", b'GPWS SYSTEM ACTIVE', b'Bool', 'Y'),
-			# ['IS LATITUDE LONGITUDE FREEZE ON', 'True if the lat/lon of the aircraft (either user or AI controlled) is frozen. If this variable returns true, it means that the latitude and longitude of the aircraft are not being controlled by ESP, so enabling, for example, a SimConnect client to control the position of the aircraft. This can also apply to altitude and attitude.']
-			# ['Also refer to the range of KEY_FREEZE..... Event IDs.', 'Bool', 'N', '-']
+			("CRASH_FLAG", "One of:; 0: None; 2: Mountain; 4: General; 6: Building; 8: Splash; 10: Gear up; 12: Overstress; 14: Building; 16: Aircraft; 18: Fuel Truck", b'CRASH FLAG', b'Enum', 'N'),
 			("IS_ALTITUDE_FREEZE_ON", "True if the altitude of the aircraft is frozen.", b'IS ALTITUDE FREEZE ON', b'Bool', 'N'),
 			("IS_ATTITUDE_FREEZE_ON", "True if the attitude (pitch, bank and heading) of the aircraft is frozen.", b'IS ATTITUDE FREEZE ON', b'Bool', 'N'),
 		]
@@ -1301,8 +1065,8 @@ class AircraftRequests():
 			("ATC_FLIGHT_NUMBER", "Flight Number used by ATC", b'ATC FLIGHT NUMBER', b'String', 'Y'),
 			("TITLE", "Title from aircraft.cfg", b'TITLE', b'String', 'N'),
 			("HSI_STATION_IDENT", "Tuned station identifier", b'HSI STATION IDENT', b'String', 'N'),
-			("GPS_WP_PREV_ID", "ID of previous GPS waypoint", b'GPS WP_PREV ID', b'String', 'N'),
-			("GPS_WP_NEXT_ID", "ID of next GPS waypoint", b'GPS WP_NEXT ID', b'String', 'N'),
+			("GPS_WP_PREV_ID", "ID of previous GPS waypoint", b'GPS WP PREV ID', b'String', 'N'),
+			("GPS_WP_NEXT_ID", "ID of next GPS waypoint", b'GPS WP NEXT ID', b'String', 'N'),
 			("GPS_APPROACH_AIRPORT_ID", "ID of airport", b'GPS APPROACH AIRPORT ID', b'String', 'N'),
 			("GPS_APPROACH_APPROACH_ID", "ID of approach", b'GPS APPROACH APPROACH ID', b'String', 'N'),
 			("GPS_APPROACH_TRANSITION_ID", "ID of approach transition", b'GPS APPROACH TRANSITION ID', b'String', 'N'),
@@ -1318,58 +1082,15 @@ class AircraftRequests():
 			("AI_GROUNDCRUISESPEED", "Cruising speed.", b'AI GROUNDCRUISESPEED', b'Knots', 'Y'),
 			("AI_GROUNDTURNSPEED", "Turning speed.", b'AI GROUNDTURNSPEED', b'Knots', 'Y'),
 			("AI_TRAFFIC_ISIFR", "Request whether this aircraft is IFR or VFR See Note 1.", b'AI TRAFFIC ISIFR', b'Boolean', 'N'),
-			# ['AI TRAFFIC STATE', "English string describing an AI object's state.  If the object is an aircraft under ATC control the string will be one of:"]
-			# ['"init"']
-			# ['"sleep"']
-			# ['"flt plan"']
-			# ['"startup"']
-			# ['"preflight support"']
-			# ['"clearance"']
-			# ['"push back 1"']
-			# ['"push back 2"']
-			# ['"pre taxi out"']
-			# ['"taxi out"']
-			# ['"takeoff 1"']
-			# ['"takeoff 2"']
-			# ['"T&G depart"']
-			# ['"enroute"']
-			# ['"pattern"']
-			# ['"landing"']
-			# ['"rollout"']
-			# ['"go around"']
-			# ['"taxi in"']
-			# ['"shutdown"']
-			# ['"postflight support"']
-			# ['']
-			# ['If the AI object is not an aircraft under ATC control, the string is one of:']
-			# ['']
-			# ['"Sleep"']
-			# ['"Waypoint"']
-			# ['"Takeoff"']
-			# ['"Landing"']
-			# ['"Taxi"']
-			# ['']
-			# ['This string also appears in the State column of the Traffic Explorer tool dialog. See Note 1.', 'String', 'N', '-']
+			("If_the_AI_object_is_not_an_aircraft_under_ATC_control", "the string is one of:; ; Sleep; Waypoint; Takeoff; Landing; Taxi; ; This string also appears in the State column of the Traffic Explorer tool dialog. See Note 1.", b'If the AI object is not an aircraft under ATC control', b'String', 'N'),
 			("AI_TRAFFIC_CURRENT_AIRPORT", "ICAO code of current airport. See Note 1.", b'AI TRAFFIC CURRENT AIRPORT', b'String', 'N'),
 			("AI_TRAFFIC_ASSIGNED_RUNWAY", "Assigned runway name (for example: \"32R\"). See Note 1.", b'AI TRAFFIC ASSIGNED RUNWAY', b'String', 'N'),
-			# ['AI TRAFFIC ASSIGNED PARKING', 'English assigned parking name. The string is the same as the one shown in the Parking column of the Traffic Explorer dialog, and is made up in the form:']
-			# ['']
-			# ['Name + Number, Type ( radius )']
-			# ['']
-			# ['For example:']
-			# ['']
-			# ['Ramp 1, RAMP sml (10m)']
-			# ['Gate G 4, RAMP lrg (18m)']
-			# ['']
-			# ['Refer also to the Taxiway Parking section of the Compiling BGL document.']
-			# ['See Note 1.', 'String', 'N', '-']
+			("Gate_G_4", "RAMP lrg (18m); ; Refer also to the Taxiway Parking section of the Compiling BGL document.; See Note 1.", b'Gate G 4', b'String', 'N'),
 			("AI_TRAFFIC_FROMAIRPORT", "ICAO code of the departure airport in the current schedule. See Note 2.", b'AI TRAFFIC FROMAIRPORT', b'String', 'N'),
 			("AI_TRAFFIC_TOAIRPORT", "ICAO code of the destination airport in the current schedule. See Note 2.", b'AI TRAFFIC TOAIRPORT', b'String', 'N'),
 			("AI_TRAFFIC_ETD", "Estimated time of departure for the current schedule entry, given as the number of seconds difference from the current simulation time. This can be negative if ETD is earlier than the current simulation time. See Note 2.", b'AI TRAFFIC ETD', b'Seconds', 'N'),
 			("AI_TRAFFIC_ETA", "Estimated time of arrival for the current schedule entry, given as the number of seconds difference from the current simulated time. This can be negative if ETA is earlier than the current simulated time. See Note 2.", b'AI TRAFFIC ETA', b'Seconds', 'N'),
-			# ['Notes']
-			# ['These variables make most sense for aircraft with flight plans. If an aircraft does not have a flight plan, the value returned will be 0 (or false), or an empty string, depending on the units.']
-			# ['These variables only make sense for aircraft generated by the traffic database, and so have schedules. If an aircraft does not have a schedule, the value returned will be 0 (or false), or an empty string, depending on the units.']
+			("Gate_G_4", "RAMP lrg (18m); ; Refer also to the Taxiway Parking section of the Compiling BGL document.; See Note 1.", b'Gate G 4', b'String', 'N'),
 		]
 
 	class __CarrierOperations(RequestHelper):
@@ -1416,9 +1137,4 @@ class AircraftRequests():
 			("LOCAL_DAY_OF_YEAR", "Local day of year", b'LOCAL DAY OF YEAR', b'Number', 'N'),
 			("LOCAL_YEAR", "Local year", b'LOCAL YEAR', b'Number', 'N'),
 			("TIME_ZONE_OFFSET", "Local time difference from GMT", b'TIME ZONE OFFSET', b'Seconds', 'N'),
-			# ['TIME OF DAY', 'General time of day:']
-			# ['1 = Day']
-			# ['2 = Dusk/Dawn']
-			# ['3 = Night']
-			# ['Enum', 'N', '-']
 		]

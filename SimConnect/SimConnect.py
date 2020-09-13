@@ -21,48 +21,90 @@ class SimConnect:
 		_hr = ctypes.HRESULT(hr)
 		return ctypes.c_ulong(_hr.value).value == value
 
+	def handle_id_event(self, event):
+		uEventID = event.uEventID
+		if uEventID == self.dll.EventID.EVENT_SIM_START:
+			LOGGER.info("SIM START")
+
+	def handle_simobject_event(self, ObjData):
+		dwRequestID = ObjData.dwRequestID
+		for _request in self.Requests:
+			if dwRequestID == _request.DATA_REQUEST_ID.value:
+				# print(_request.definitions[0][1])
+				rtype = _request.definitions[0][1].decode()
+				if 'String' in rtype or 'string' in rtype:
+					pS = cast(ObjData.dwData, c_char_p)
+					_request.outData = pS.value
+				else:
+					_request.outData = cast(
+						ObjData.dwData, POINTER(c_double * len(_request.definitions))
+					).contents[0]
+
+	def handle_exception_event(self, exc):
+		_exception = SIMCONNECT_EXCEPTION(exc.dwException).name
+		_unsendid = exc.UNKNOWN_SENDID
+		_sendid = exc.dwSendID
+		_unindex = exc.UNKNOWN_INDEX
+		_index = exc.dwIndex
+
+		# request exceptions
+		for _request in self.Requests:
+			if _request.LastID == _unsendid:
+				LOGGER.warn("%s: in %s" % (_exception, _request.definitions[0]))
+				return
+
+		LOGGER.warn(_exception)
+
 	# TODO: update callbackfunction to expand functions.
 	def my_dispatch_proc(self, pData, cbData, pContext):
 		dwID = pData.contents.dwID
 		self.pS = None
 		if dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EVENT:
-			evt = cast(pData, POINTER(SIMCONNECT_RECV_EVENT))
-			uEventID = evt.contents.uEventID
-			if uEventID == self.dll.EventID.EVENT_SIM_START:
-				LOGGER.info("SIM START")
-
+			evt = cast(pData, POINTER(SIMCONNECT_RECV_EVENT)).contents
+			self.handle_id_event(evt)
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE:
 			pObjData = cast(
 				pData, POINTER(SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE)
 			).contents
-			dwRequestID = pObjData.dwRequestID
-			for _request in self.Requests:
-				if dwRequestID == _request.DATA_REQUEST_ID.value:
-					# print(_request.definitions[0][1])
-					rtype = _request.definitions[0][1].decode()
-					if 'String' in rtype or 'string' in rtype:
-						pS = cast(pObjData.dwData, c_char_p)
-						self.out_data[_request.DATA_REQUEST_ID] = [pS.value]
-						# self.dll.RetrieveString(pObjData.dwData, cbData, strings, &pszTitle;, &cbTitle;)
-					else:
-						self.out_data[_request.DATA_REQUEST_ID] = cast(
-							pObjData.dwData, POINTER(c_double * len(_request.definitions))
-						).contents
+			self.handle_simobject_event(pObjData)
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
 			LOGGER.info("SIM OPEN")
 			self.ok = True
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EXCEPTION:
-			LOGGER.warn("ID EXCEPTION")
+			exc = cast(pData, POINTER(SIMCONNECT_RECV_EXCEPTION)).contents
+			self.handle_exception_event(exc)
+			_exception = SIMCONNECT_EXCEPTION(exc.dwException).name
+			LOGGER.warn(_exception)
+
+			_unsendid = exc.UNKNOWN_SENDID
+			_sendid = exc.dwSendID
+			_unindex = exc.UNKNOWN_INDEX
+			_index = exc.dwIndex
+
+			# print("" % (_unsendid, _sendid, _unindex, _index))
+		elif (dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_AIRPORT_LIST) or (
+			dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_WAYPOINT_LIST) or (
+			dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_NDB_LIST) or (
+			dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_VOR_LIST):
+			pObjData = cast(
+				pData, POINTER(SIMCONNECT_RECV_FACILITIES_LIST)
+			).contents
+			dwRequestID = pObjData.dwRequestID
+			for _facilitie in self.Facilities:
+				if dwRequestID == _facilitie.REQUEST_ID.value:
+					_facilitie.parent.dump(pData)
+					_facilitie.dump(pData)
+
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_QUIT:
 			self.quit = 1
 		else:
-			LOGGER.debug("Received:", dwID)
+			LOGGER.debug("Received:", SIMCONNECT_RECV_ID(dwID))
 		return
 
 	def __init__(self, auto_connect=True, library_path=_library_path):
 
 		self.Requests = []
-		self.out_data = {}
+		self.Facilities = []
 		self.dll = SimConnectDll(library_path)
 		self.hSimConnect = HANDLE()
 		self.quit = 0
@@ -119,7 +161,7 @@ class SimConnect:
 		)
 
 	def request_data(self, _Request):
-		self.out_data[_Request.DATA_REQUEST_ID] = None
+		_Request.outData = None
 		self.dll.RequestDataOnSimObjectType(
 			self.hSimConnect,
 			_Request.DATA_REQUEST_ID.value,
@@ -127,10 +169,12 @@ class SimConnect:
 			0,
 			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER,
 		)
+		temp = DWORD(0)
+		self.dll.GetLastSentPacketID(self.hSimConnect, temp)
+		_Request.LastID = temp.value
 
 	def set_data(self, _Request):
-		_data = _Request.outData
-		pyarr = list(_data.values())
+		pyarr = list([Request.outData])
 		dataarray = (ctypes.c_double * len(pyarr))(*pyarr)
 		pObjData = cast(
 			dataarray, c_void_p
@@ -154,18 +198,13 @@ class SimConnect:
 		self.request_data(_Request)
 		self.run()
 		attemps = 0
-		while self.out_data[_Request.DATA_REQUEST_ID] is None and attemps < 4:
+
+		while _Request.outData is None and attemps < 4:
 			self.run()
 			attemps += 1
-
-		if self.out_data[_Request.DATA_REQUEST_ID] is None:
+		if _Request.outData is None:
 			return False
 
-		newData = self.out_data[_Request.DATA_REQUEST_ID]
-		for od in _Request.outData:
-			index = list(_Request.outData.keys()).index(od)
-			_Request.outData[od] = newData[index]
-		self.out_data[_Request.DATA_REQUEST_ID] = None
 		return True
 
 	def send_event(self, evnt, data=DWORD(0)):
@@ -177,26 +216,28 @@ class SimConnect:
 			SIMCONNECT_GROUP_PRIORITY_HIGHEST,
 			DWORD(16),
 		)
+
 		if self.IsHR(err, 0):
 			# LOGGER.debug("Event Sent")
 			return True
 		else:
 			return False
 
-	def new_def_id(self, _name):
+	def new_def_id(self):
+		_name = "Definition" + str(len(list(self.dll.DATA_DEFINITION_ID)))
 		names = [m.name for m in self.dll.DATA_DEFINITION_ID] + [_name]
+
 		self.dll.DATA_DEFINITION_ID = Enum(self.dll.DATA_DEFINITION_ID.__name__, names)
-		return list(self.dll.DATA_DEFINITION_ID)[-1]
+		DEFINITION_ID = list(self.dll.DATA_DEFINITION_ID)[-1]
+		return DEFINITION_ID
 
 	def new_request_id(self):
-		name = "Request" + str(len(self.Requests))
-		DEFINITION_ID = self.new_def_id(name)
-
+		name = "Request" + str(len(self.dll.DATA_REQUEST_ID))
 		names = [m.name for m in self.dll.DATA_REQUEST_ID] + [name]
 		self.dll.DATA_REQUEST_ID = Enum(self.dll.DATA_REQUEST_ID.__name__, names)
 		REQUEST_ID = list(self.dll.DATA_REQUEST_ID)[-1]
 
-		return (DEFINITION_ID, REQUEST_ID)
+		return REQUEST_ID
 
 	def set_pos(
 		self,

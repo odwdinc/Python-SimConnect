@@ -675,7 +675,7 @@ class SimConnectDll(object):
 		#   DWORD * pdwError);
 		self.GetLastSentPacketID = self.SimConnect.SimConnect_GetLastSentPacketID
 		self.GetLastSentPacketID.restype = HRESULT
-		self.GetLastSentPacketID.argtypes = [HANDLE, DWORD]
+		self.GetLastSentPacketID.argtypes = [HANDLE, POINTER(DWORD)]
 
 		# SIMCONNECTAPI SimConnect_GetNextDispatch(
 		#   HANDLE hSimConnect,

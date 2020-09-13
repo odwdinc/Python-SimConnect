@@ -14,39 +14,7 @@ ct_g = millis()
 sm = SimConnect()
 aq = AircraftRequests(sm)
 ae = AircraftEvents(sm)
-fs = FacilitiesRequests(sm)
 
-#print('ALTITUDE', aq.PositionandSpeedData.get('PLANE_ALTITUDE'))
-#print('ATC_ID', aq.StringData.get('ATC_ID'))
-
-wp = [SIMCONNECT_DATA_WAYPOINT() for i in range(3)]
-wp[0].Flags = SIMCONNECT_WAYPOINT_FLAGS.SIMCONNECT_WAYPOINT_SPEED_REQUESTED.value.value
-wp[0].Altitude = 800
-wp[0].Latitude = 47 + (27.79 / 60)
-wp[0].Longitude = -122 - (18.46 / 60)
-wp[0].ktsSpeed = 100
-
-wp[1].Flags = SIMCONNECT_WAYPOINT_FLAGS.SIMCONNECT_WAYPOINT_SPEED_REQUESTED.value.value
-wp[1].Altitude = 600
-wp[1].Latitude = 47 + (27.79 / 60)
-wp[1].Longitude = -122 - (17.37 / 60)
-wp[1].ktsSpeed = 100
-
-wp[2].Flags = SIMCONNECT_WAYPOINT_FLAGS.SIMCONNECT_WAYPOINT_WRAP_TO_FIRST.value.value | SIMCONNECT_WAYPOINT_FLAGS.SIMCONNECT_WAYPOINT_SPEED_REQUESTED.value.value
-wp[2].Altitude = 800
-wp[2].Latitude = 47 + (27.79 / 60)
-wp[2].Longitude = -122 - (19.92 / 60)
-wp[2].ktsSpeed = 100
-
-if sm.add_waypoints(wp):
-	print("Sent")
-
-while not sm.quit:
-	print('RUDDER', aq.find('RUDDER_TRIM_PCT').value)
-	sm.run()
-	sleep(.500)
-sm.exit()
-quit()
 # Set pos arund space nedle in WA.
 sm.set_pos(
 	_Altitude=1000.0,

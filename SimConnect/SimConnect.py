@@ -101,7 +101,7 @@ class SimConnect:
 
 	def __init__(self, auto_connect=True, library_path=_library_path):
 
-		self.Requests = []
+		self.Requests = {}
 		self.Facilities = []
 		self.dll = SimConnectDll(library_path)
 		self.hSimConnect = HANDLE()

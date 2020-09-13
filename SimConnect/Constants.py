@@ -13,7 +13,6 @@ DWORD_MAX = DWORD(0xFFFFFFFF)
 SIMCONNECT_UNUSED = DWORD_MAX
 SIMCONNECT_OBJECT_ID_USER = DWORD(0)  # proxy value for User vehicle ObjectID
 SIMCONNECT_UNUSED = DWORD_MAX  # special value to indicate unused event, ID
-SIMCONNECT_OBJECT_ID_USER = DWORD(0)  # proxy value for User vehicle ObjectID
 
 SIMCONNECT_CAMERA_IGNORE_FIELD = c_float(
 	-1

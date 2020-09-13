@@ -28,17 +28,18 @@ class SimConnect:
 
 	def handle_simobject_event(self, ObjData):
 		dwRequestID = ObjData.dwRequestID
-		for _request in self.Requests:
-			if dwRequestID == _request.DATA_REQUEST_ID.value:
-				# print(_request.definitions[0][1])
-				rtype = _request.definitions[0][1].decode()
-				if 'String' in rtype or 'string' in rtype:
-					pS = cast(ObjData.dwData, c_char_p)
-					_request.outData = pS.value
-				else:
-					_request.outData = cast(
-						ObjData.dwData, POINTER(c_double * len(_request.definitions))
-					).contents[0]
+		if dwRequestID in self.Requests:
+			_request = self.Requests[dwRequestID]
+			rtype = _request.definitions[0][1].decode()
+			if 'String' in rtype or 'string' in rtype:
+				pS = cast(ObjData.dwData, c_char_p)
+				_request.outData = pS.value
+			else:
+				_request.outData = cast(
+					ObjData.dwData, POINTER(c_double * len(_request.definitions))
+				).contents[0]
+		else:
+			LOGGER.warn("Event ID: %d Not Handled." % (dwRequestID))
 
 	def handle_exception_event(self, exc):
 		_exception = SIMCONNECT_EXCEPTION(exc.dwException).name
@@ -48,7 +49,8 @@ class SimConnect:
 		_index = exc.dwIndex
 
 		# request exceptions
-		for _request in self.Requests:
+		for _reqin in self.Requests:
+			_request = self.Requests[_reqin]
 			if _request.LastID == _unsendid:
 				LOGGER.warn("%s: in %s" % (_exception, _request.definitions[0]))
 				return
@@ -59,29 +61,25 @@ class SimConnect:
 	def my_dispatch_proc(self, pData, cbData, pContext):
 		dwID = pData.contents.dwID
 		self.pS = None
+
 		if dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EVENT:
 			evt = cast(pData, POINTER(SIMCONNECT_RECV_EVENT)).contents
 			self.handle_id_event(evt)
+
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE:
 			pObjData = cast(
 				pData, POINTER(SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE)
 			).contents
 			self.handle_simobject_event(pObjData)
+
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
 			LOGGER.info("SIM OPEN")
 			self.ok = True
+
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EXCEPTION:
 			exc = cast(pData, POINTER(SIMCONNECT_RECV_EXCEPTION)).contents
 			self.handle_exception_event(exc)
-			_exception = SIMCONNECT_EXCEPTION(exc.dwException).name
-			LOGGER.warn(_exception)
 
-			_unsendid = exc.UNKNOWN_SENDID
-			_sendid = exc.dwSendID
-			_unindex = exc.UNKNOWN_INDEX
-			_index = exc.dwIndex
-
-			# print("" % (_unsendid, _sendid, _unindex, _index))
 		elif (dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_AIRPORT_LIST) or (
 			dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_WAYPOINT_LIST) or (
 			dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_NDB_LIST) or (

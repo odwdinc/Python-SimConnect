@@ -108,6 +108,7 @@ class SimConnect:
 		self.quit = 0
 		self.ok = False
 		self.DEFINITION_POS = None
+		self.DEFINITION_WAYPOINT = None
 		self.my_dispatch_proc_rd = self.dll.DispatchProc(self.my_dispatch_proc)
 		if auto_connect:
 			self.connect()
@@ -236,6 +237,42 @@ class SimConnect:
 		REQUEST_ID = list(self.dll.DATA_REQUEST_ID)[-1]
 
 		return REQUEST_ID
+
+	def add_waypoints(self, _waypointlist):
+		if self.DEFINITION_WAYPOINT is None:
+			self.DEFINITION_WAYPOINT = self.new_def_id()
+			err = self.dll.AddToDataDefinition(
+				self.hSimConnect,
+				self.DEFINITION_WAYPOINT.value,
+				b'AI WAYPOINT LIST',
+				b'number',
+				SIMCONNECT_DATATYPE.SIMCONNECT_DATATYPE_WAYPOINT,
+				0,
+				SIMCONNECT_UNUSED,
+			)
+		pyarr = []
+		for waypt in _waypointlist:
+			for e in waypt._fields_:
+				pyarr.append(getattr(waypt, e[0]))
+		dataarray = (ctypes.c_double * len(pyarr))(*pyarr)
+		pObjData = cast(
+			dataarray, c_void_p
+		)
+		sx = int(sizeof(ctypes.c_double) * (len(pyarr) / len(_waypointlist)))
+		return
+		hr = self.dll.SetDataOnSimObject(
+			self.hSimConnect,
+			self.DEFINITION_WAYPOINT.value,
+			SIMCONNECT_OBJECT_ID_USER,
+			0,
+			len(_waypointlist),
+			sx,
+			pObjData
+		)
+		if self.IsHR(err, 0):
+			return True
+		else:
+			return False
 
 	def set_pos(
 		self,

@@ -173,7 +173,7 @@ class SimConnect:
 		_Request.LastID = temp.value
 
 	def set_data(self, _Request):
-		pyarr = list([Request.outData])
+		pyarr = list([_Request.outData])
 		dataarray = (ctypes.c_double * len(pyarr))(*pyarr)
 		pObjData = cast(
 			dataarray, c_void_p

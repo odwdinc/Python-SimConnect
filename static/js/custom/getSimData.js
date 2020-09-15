@@ -190,16 +190,13 @@ function setSimDatapoint(datapointToSet, valueToUse) {
     $.post( url_to_call, { value_to_use: valueToUse } );
 }
 
-function triggerSimEvent(eventToTrigger, valueToUse){
+function triggerSimEvent(eventToTrigger, valueToUse, hideAlert = false){
     url_to_call = "/event/"+eventToTrigger+"/trigger";
     $.post( url_to_call, { value_to_use: valueToUse } );
 
-    temporaryAlert('', "Sending instruction", "success")
-}
-
-function triggerSimEventNoAlert(eventToTrigger, valueToUse){
-    url_to_call = "/event/"+eventToTrigger+"/trigger";
-    $.post( url_to_call, { value_to_use: valueToUse } );
+    if (!hideAlert) {
+        temporaryAlert('', "Sending instruction", "success")
+    }
 }
 
 function triggerSimEventFromField(eventToTrigger, fieldToUse, messageToDisplay = null){

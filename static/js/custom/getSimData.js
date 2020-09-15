@@ -197,6 +197,11 @@ function triggerSimEvent(eventToTrigger, valueToUse){
     temporaryAlert('', "Sending instruction", "success")
 }
 
+function triggerSimEventNoAlert(eventToTrigger, valueToUse){
+    url_to_call = "/event/"+eventToTrigger+"/trigger";
+    $.post( url_to_call, { value_to_use: valueToUse } );
+}
+
 function triggerSimEventFromField(eventToTrigger, fieldToUse, messageToDisplay = null){
     // Get the field and the value in there
     fieldToUse = "#" + fieldToUse

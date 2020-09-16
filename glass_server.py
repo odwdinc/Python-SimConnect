@@ -263,6 +263,64 @@ request_cabin = [
 	'CABIN_NO_SMOKING_ALERT_SWITCH'
 ]
 
+request_engine = [
+	'NUMBER_OF_ENGINES',
+	'ENGINE_CONTROL_SELECT',
+	'ENGINE_TYPE',
+	'MASTER_IGNITION_SWITCH',
+
+	'GENERAL_ENG_COMBUSTION:index',
+	'GENERAL_ENG_MASTER_ALTERNATOR:index',
+	'GENERAL_ENG_FUEL_PUMP_SWITCH:index',
+	'GENERAL_ENG_FUEL_PUMP_ON:index',
+	'GENERAL_ENG_RPM:index',
+	'GENERAL_ENG_PCT_MAX_RPM:index',
+	'GENERAL_ENG_MAX_REACHED_RPM:index',
+	'GENERAL_ENG_THROTTLE_LEVER_POSITION:index',
+	'GENERAL_ENG_MIXTURE_LEVER_POSITION:index',
+	'GENERAL_ENG_PROPELLER_LEVER_POSITION:index',
+	'GENERAL_ENG_STARTER:index',
+	'GENERAL_ENG_EXHAUST_GAS_TEMPERATURE:index',
+	'GENERAL_ENG_OIL_PRESSURE:index',
+	'GENERAL_ENG_OIL_LEAKED_PERCENT:index',
+	'GENERAL_ENG_COMBUSTION_SOUND_PERCENT:index',
+	'GENERAL_ENG_DAMAGE_PERCENT:index',
+	'GENERAL_ENG_OIL_TEMPERATURE:index',
+	'GENERAL_ENG_FAILED:index',
+	'GENERAL_ENG_GENERATOR_SWITCH:index',
+	'GENERAL_ENG_GENERATOR_ACTIVE:index',
+	'GENERAL_ENG_ANTI_ICE_POSITION:index',
+	'GENERAL_ENG_FUEL_VALVE:index',
+	'GENERAL_ENG_FUEL_PRESSURE:index',
+	'GENERAL_ENG_ELAPSED_TIME:index'
+]
+
+request_recip_engine = [
+	'RECIP_ENG_COWL_FLAP_POSITION:index',
+	'RECIP_ENG_PRIMER:index',
+	'RECIP_ENG_MANIFOLD_PRESSURE:index',
+	'RECIP_ENG_ALTERNATE_AIR_POSITION:index',
+	'RECIP_ENG_COOLANT_RESERVOIR_PERCENT:index',
+	'RECIP_ENG_LEFT_MAGNETO:index',
+	'RECIP_ENG_RIGHT_MAGNETO:index',
+	'RECIP_ENG_BRAKE_POWER:index',
+	'RECIP_ENG_STARTER_TORQUE:index',
+	'RECIP_ENG_TURBOCHARGER_FAILED:index',
+	'RECIP_ENG_EMERGENCY_BOOST_ACTIVE:index',
+	'RECIP_ENG_EMERGENCY_BOOST_ELAPSED_TIME:index',
+	'RECIP_ENG_WASTEGATE_POSITION:index',
+	'RECIP_ENG_TURBINE_INLET_TEMPERATURE:index',
+	'RECIP_ENG_CYLINDER_HEAD_TEMPERATURE:index',
+	'RECIP_ENG_RADIATOR_TEMPERATURE:index',
+	'RECIP_ENG_FUEL_AVAILABLE:index',
+	'RECIP_ENG_FUEL_FLOW:index',
+	'RECIP_ENG_FUEL_TANK_SELECTOR:index',
+	'RECIP_ENG_FUEL_TANKS_USED:index',
+	'RECIP_ENG_FUEL_NUMBER_TANKS_USED:index',
+	'RECIP_CARBURETOR_TEMPERATURE:index',
+	'RECIP_MIXTURE_RATIO:index'
+]
+
 
 def thousandify(x):
 	return f"{x:,}"
@@ -285,6 +343,8 @@ def get_dataset(data_type):
 	if data_type == "trim": request_to_action = request_trim
 	if data_type == "autopilot": request_to_action = request_autopilot
 	if data_type == 'cabin': request_to_action = request_cabin
+	if data_type == 'engine': request_to_action = request_engine
+	if data_type == 'recip_engine': request_to_action = request_recip_engine
 	#if data_type == "ui": request_to_action = request_ui   # see comment above as to why I've removed this
 
 	return request_to_action

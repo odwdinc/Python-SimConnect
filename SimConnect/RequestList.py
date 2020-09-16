@@ -5,6 +5,12 @@ from .Constants import *
 
 class Request(object):
 
+	def get(self):
+		return self.value
+
+	def set(self, _value):
+		self.value = _value
+
 	@property
 	def value(self):
 		if self._deff_test():

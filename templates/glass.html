@@ -112,6 +112,11 @@
 					</button>
 				</li>
 				<li class="nav-item m-1">
+					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseRadios" aria-expanded="true" aria-controls="collapseRadios" aria-label="Radios" data-microtip-position="bottom" role="tooltip">
+						<i class="fas fa-broadcast-tower"></i>
+					</button>
+				</li>
+				<li class="nav-item m-1">
 					<button class="btn btn-info" type="button" data-toggle="collapse" data-target="#collapseCabin" aria-expanded="true" aria-controls="collapseCabin" aria-label="Cabin" data-microtip-position="bottom" role="tooltip">
 						<i class="fas fa-users"></i>
 					</button>
@@ -401,6 +406,69 @@
 													<td>Approach</td>
 													<td width="100"><button onclick="triggerSimEvent('AP_APR_HOLD')" id="autopilot-approach-hold" type="button" class="btn m-1 btn-danger" style="width: 75px">?</button></td>
 													<td></td>
+												</tr>
+											</table>
+
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<!-- RADIOS -->
+				<div class="card">
+					<div id="collapseRadios" class="collapse" aria-labelledby="collapseRadios" data-parent="#accordionHUD">
+						<div class="card-body text-center">
+							<div class="row">
+								<div class="col-sm-12">
+									<div class="card bg-light mb-3">
+										<div class="card-body text-left">
+
+											<table style="border-collapse:separate; border-spacing:0 5px; vertical-align: center">
+												<tr>
+													<td>COM1 Frequency</td>
+													<td colspan="2">
+														<button onclick="triggerSimEvent ('COM_RADIO_WHOLE_DEC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Decrease COM1 frequency by 1 MHz" style="width:55px">&lt;&lt;</button>
+														<button onclick="triggerSimEvent ('COM_RADIO_FRACT_DEC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Decrease COM1 frequency by 25 kHz" style="width:55px">&lt;</button>
+														<button onclick="triggerSimEvent ('COM_RADIO_FRACT_INC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Increase COM1 frequency by 25 kHz" style="width:55px">&gt;</button>
+														<button onclick="triggerSimEvent ('COM_RADIO_WHOLE_INC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Increase COM1 frequency by 1 MHz" style="width:55px">&gt;&gt;</button>
+														<button onclick="triggerSimEvent ('COM_STBY_RADIO_SWAP', 0, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Swap COM1 Standby frequency" style="width:65px">&lt;--&gt;</button>
+													</td>
+												</tr>
+
+												<tr>
+													<td>COM2 Frequency</td>
+													<td colspan="2">
+														<button onclick="triggerSimEvent ('COM2_RADIO_WHOLE_DEC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Decrease COM2 frequency by 1 MHz" style="width:55px">&lt;&lt;</button>
+														<button onclick="triggerSimEvent ('COM2_RADIO_FRACT_DEC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Decrease COM2 frequency by 25 kHz" style="width:55px">&lt;</button>
+														<button onclick="triggerSimEvent ('COM2_RADIO_FRACT_INC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Increase COM2 frequency by 25 kHz" style="width:55px">&gt;</button>
+														<button onclick="triggerSimEvent ('COM2_RADIO_WHOLE_INC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Increase COM2 frequency by 1 MHz" style="width:55px">&gt;&gt;</button>
+														<button onclick="triggerSimEvent ('COM2_RADIO_SWAP', 0, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Swap COM2 Standby frequency" style="width:65px">&lt;--&gt;</button>
+													</td>
+												</tr>
+
+												<tr>
+													<td>NAV1 Frequency</td>
+													<td colspan="2">
+														<button onclick="triggerSimEvent ('NAV1_RADIO_WHOLE_DEC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Decrease NAV1 frequency by 1 MHz" style="width:55px">&lt;&lt;</button>
+														<button onclick="triggerSimEvent ('NAV1_RADIO_FRACT_DEC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Decrease NAV1 frequency by 25 kHz" style="width:55px">&lt;</button>
+														<button onclick="triggerSimEvent ('NAV1_RADIO_FRACT_INC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Increase NAV1 frequency by 25 kHz" style="width:55px">&gt;</button>
+														<button onclick="triggerSimEvent ('NAV1_RADIO_WHOLE_INC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Increase NAV1 frequency by 1 MHz" style="width:55px">&gt;&gt;</button>
+														<button onclick="triggerSimEvent ('NAV1_RADIO_SWAP', 0, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Swap NAV1 Standby frequency" style="width:65px">&lt;--&gt;</button>
+													</td>
+												</tr>
+
+												<tr>
+													<td>NAV2 Frequency</td>
+													<td colspan="2">
+														<button onclick="triggerSimEvent ('NAV2_RADIO_WHOLE_DEC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Decrease NAV2 frequency by 1 MHz" style="width:55px">&lt;&lt;</button>
+														<button onclick="triggerSimEvent ('NAV2_RADIO_FRACT_DEC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Decrease NAV2 frequency by 25 kHz" style="width:55px">&lt;</button>
+														<button onclick="triggerSimEvent ('NAV2_RADIO_FRACT_INC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Increase NAV2 frequency by 25 kHz" style="width:55px">&gt;</button>
+														<button onclick="triggerSimEvent ('NAV2_RADIO_WHOLE_INC', 1, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Increase NAV2 frequency by 1 MHz" style="width:55px">&gt;&gt;</button>
+														<button onclick="triggerSimEvent ('NAV2_RADIO_SWAP', 0, true)" id="autopilot-com-freq" type="button" class="btn m-1 btn-danger" title="Swap NAV2 Standby frequency" style="width:65px">&lt;--&gt;</button>
+													</td>
 												</tr>
 											</table>
 

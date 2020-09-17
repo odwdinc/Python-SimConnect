@@ -141,14 +141,3 @@ dmypy.json
 .idea/inspectionProfiles/Project_Default.xml
 .idea/CodeStyles/codeStyleConfig.xml
 .idea/MSFS2020-cockpit-companion.iml
-
-# Visual Studio
-.vs/
-
-# RStudio
-.RData
-.Rhistory
-.Rproj.user
-*.Rproj
-
-

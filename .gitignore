@@ -144,3 +144,9 @@ dmypy.json
 
 # Visual Studio
 .vs/
+
+# RStudio
+.RData
+.Rproj.user
+*.Rproj
+

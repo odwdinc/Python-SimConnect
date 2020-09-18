@@ -368,6 +368,9 @@ class SIMCONNECT_DATA_REQUEST_ID(AutoName):  # client-defined request data ID
 
 class SIMCONNECT_CLIENT_EVENT_ID(AutoName):  # client-defined client event ID
 	EVENT_SIM_START = auto()
+	EVENT_SIM_STOP = auto()
+	EVENT_SIM_PAUSED = auto()
+	EVENT_SIM_UNPAUSED = auto()
 	pass
 
 

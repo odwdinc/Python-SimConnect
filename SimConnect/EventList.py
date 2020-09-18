@@ -92,9 +92,9 @@ class AircraftEvents():
 
 	class __Engine(EventHelper):
 		list = [
-			(b' THROTTLE_FULL', "Set throttles max", "Shared Cockpit"),
-			(b' THROTTLE_INCR', "Increment throttles", "Shared Cockpit"),
-			(b' THROTTLE_INCR_SMALL', "Increment throttles small", "Shared Cockpit"),
+			(b'THROTTLE_FULL', "Set throttles max", "Shared Cockpit"),
+			(b'THROTTLE_INCR', "Increment throttles", "Shared Cockpit"),
+			(b'THROTTLE_INCR_SMALL', "Increment throttles small", "Shared Cockpit"),
 			(b'THROTTLE_DECR', "Decrement throttles", "Shared Cockpit"),
 			(b'THROTTLE_DECR_SMALL', "Decrease throttles small", "Shared Cockpit"),
 			(b'THROTTLE_CUT', "Set throttles to idle", "Shared Cockpit"),

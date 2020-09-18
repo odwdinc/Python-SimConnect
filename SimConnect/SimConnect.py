@@ -68,6 +68,10 @@ class SimConnect:
 
 		LOGGER.warn(_exception)
 
+	def handle_state_event(self, pData):
+		print("I:", pData.dwInteger, "F:", pData.fFloat, "S:", pData.szString)
+
+
 	# TODO: update callbackfunction to expand functions.
 	def my_dispatch_proc(self, pData, cbData, pContext):
 		dwID = pData.contents.dwID
@@ -76,6 +80,10 @@ class SimConnect:
 		if dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EVENT:
 			evt = cast(pData, POINTER(SIMCONNECT_RECV_EVENT)).contents
 			self.handle_id_event(evt)
+
+		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_SYSTEM_STATE:
+			state = cast(pData, POINTER(SIMCONNECT_RECV_SYSTEM_STATE)).contents
+			self.handle_state_event(state)
 
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_SIMOBJECT_DATA_BYTYPE:
 			pObjData = cast(
@@ -145,11 +153,11 @@ class SimConnect:
 				)
 				# Request a notification when the flight is paused
 				self.dll.SubscribeToSystemEvent(
-					self.hSimConnect, self.dll.EventID.EVENT_SIM_STOP, b"Paused"
+					self.hSimConnect, self.dll.EventID.EVENT_SIM_PAUSED, b"Paused"
 				)
 				# Request a notification when the flight is un-paused.
 				self.dll.SubscribeToSystemEvent(
-					self.hSimConnect, self.dll.EventID.EVENT_SIM_STOP, b"Unpaused"
+					self.hSimConnect, self.dll.EventID.EVENT_SIM_UNPAUSED, b"Unpaused"
 				)
 
 				while self.ok is False:
@@ -347,3 +355,10 @@ class SimConnect:
 			return True
 		else:
 			return False
+
+	def get_paused(self):
+		hr = self.dll.RequestSystemState(
+			self.hSimConnect,
+			self.dll.EventID.EVENT_SIM_PAUSED,
+			b"Sim"
+		)

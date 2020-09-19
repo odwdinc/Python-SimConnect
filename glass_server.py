@@ -375,6 +375,9 @@ def get_datapoint_endpoint(datapoint_name):
 
 	output = get_datapoint(datapoint_name, index)
 
+	if isinstance(output, bytes):
+		output = output.decode('ascii')
+
 	return jsonify(output)
 
 

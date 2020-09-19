@@ -357,7 +357,21 @@ class SimConnect:
 			sizeof(Init),
 			pointer(Init)
 		)
-		if self.IsHR(err, 0):
+		if self.IsHR(hr, 0):
+			return True
+		else:
+			return False
+
+	def load_flight(self, flt_path):
+		hr = self.dll.FlightLoad(self.hSimConnect, flt_path.encode())
+		if self.IsHR(hr, 0):
+			return True
+		else:
+			return False
+
+	def save_flight(self, flt_path, flt_title, flt_description):
+		hr = self.dll.FlightSave(self.hSimConnect, flt_path.encode(), flt_title.encode(), flt_description.encode(), 0)
+		if self.IsHR(hr, 0):
 			return True
 		else:
 			return False

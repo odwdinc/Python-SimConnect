@@ -42,7 +42,7 @@ class SimConnect:
 		if dwRequestID in self.Requests:
 			_request = self.Requests[dwRequestID]
 			rtype = _request.definitions[0][1].decode()
-			if 'String' in rtype or 'string' in rtype:
+			if 'string' in rtype.lower():
 				pS = cast(ObjData.dwData, c_char_p)
 				_request.outData = pS.value
 			else:
@@ -208,8 +208,14 @@ class SimConnect:
 		_Request.LastID = temp.value
 
 	def set_data(self, _Request):
-		pyarr = list([_Request.outData])
-		dataarray = (ctypes.c_double * len(pyarr))(*pyarr)
+		rtype = _Request.definitions[0][1].decode()
+		if 'string' in rtype.lower():
+			pyarr = bytearray(_Request.outData)
+			dataarray = (ctypes.c_char * len(pyarr))(*pyarr)
+		else:
+			pyarr = list([_Request.outData])
+			dataarray = (ctypes.c_double * len(pyarr))(*pyarr)
+
 		pObjData = cast(
 			dataarray, c_void_p
 		)

@@ -16,8 +16,17 @@ from SimConnect import *
 
 # Create SimConnect link
 sm = SimConnect()
-aq = AircraftRequests(sm)
-ae = AircraftEvents(sm)
+# Note the default _time is 2000 as to refreshed at 2s
+aq = AircraftRequests(sm, _time=2000)
+# Use _time=ms where ms is the millsec to refresh data to cash.
+# setting ms to 0 will disable data cashing and allwas pull new data form sim.
+# There is still a timeout of 4 trys with a 10ms delay between checks. 
+# If no data is recived in 40ms the value will be set to -999999
+# Each Requests can be fine tuned by seting the time pram.
+# To find and set time out of cashed data to 200ms
+
+altitude = aq.find("PLANE_ALTITUDE")
+altitude.time = 200
 
 # Get the aircraft's current altitude
 altitude = aq.get("PLANE_ALTITUDE")
@@ -26,6 +35,7 @@ altitude = altitude + 1000
 # Set the aircraft's current altitude
 aq.set("PLANE_ALTITUDE", altitude)
 
+ae = AircraftEvents(sm)
 # Trigger a simple event
 event_to_trigger = ae.find("AP_MASTER")  # Toggles autopilot on or off
 event_to_trigger()

@@ -369,6 +369,13 @@ class SimConnect:
 		else:
 			return False
 
+	def load_flight_plan(self, pln_path):
+		hr = self.dll.FlightPlanLoad(self.hSimConnect, pln_path.encode())
+		if self.IsHR(hr, 0):
+			return True
+		else:
+			return False
+
 	def save_flight(self, flt_path, flt_title, flt_description):
 		hr = self.dll.FlightSave(self.hSimConnect, flt_path.encode(), flt_title.encode(), flt_description.encode(), 0)
 		if self.IsHR(hr, 0):

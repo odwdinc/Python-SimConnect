@@ -6,6 +6,8 @@ from .Enum import *
 from .Constants import *
 from .Attributes import *
 import os
+import threading
+
 _library_path = os.path.abspath(__file__).replace(".py", ".dll")
 
 LOGGER = logging.getLogger(__name__)
@@ -71,12 +73,10 @@ class SimConnect:
 	def handle_state_event(self, pData):
 		print("I:", pData.dwInteger, "F:", pData.fFloat, "S:", pData.szString)
 
-
 	# TODO: update callbackfunction to expand functions.
 	def my_dispatch_proc(self, pData, cbData, pContext):
+		# print("my_dispatch_proc")
 		dwID = pData.contents.dwID
-		self.pS = None
-
 		if dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_EVENT:
 			evt = cast(pData, POINTER(SIMCONNECT_RECV_EVENT)).contents
 			self.handle_id_event(evt)
@@ -159,18 +159,22 @@ class SimConnect:
 				self.dll.SubscribeToSystemEvent(
 					self.hSimConnect, self.dll.EventID.EVENT_SIM_UNPAUSED, b"Unpaused"
 				)
-
+				self.timerThread = threading.Thread(target=self._run)
+				self.timerThread.daemon = True
+				self.timerThread.start()
 				while self.ok is False:
-					self.run()
+					pass
 		except OSError:
 			LOGGER.debug("Did not find Flight Simulator running.")
 			exit(0)
 
-	def run(self):
-		time.sleep(.01)
-		self.dll.CallDispatch(self.hSimConnect, self.my_dispatch_proc_rd, None)
+	def _run(self):
+		while self.quit == 0:
+			self.dll.CallDispatch(self.hSimConnect, self.my_dispatch_proc_rd, None)
 
 	def exit(self):
+		self.quit = 1
+		self.timerThread.join()
 		self.dll.Close(self.hSimConnect)
 
 	def map_to_sim_event(self, name):
@@ -236,11 +240,12 @@ class SimConnect:
 
 	def get_data(self, _Request):
 		self.request_data(_Request)
-		self.run()
+		# self.run()
 		attemps = 0
 
 		while _Request.outData is None and attemps < 4:
-			self.run()
+			# self.run()
+			time.sleep(.01)
 			attemps += 1
 		if _Request.outData is None:
 			return False

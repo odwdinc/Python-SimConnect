@@ -14,7 +14,7 @@ class Request(object):
 	@property
 	def value(self):
 		if self._deff_test():
-			self.sm.run()
+			# self.sm.run()
 			if (self.LastData + self.time) < millis():
 				if self.sm.get_data(self):
 					self.LastData = millis()
@@ -29,7 +29,7 @@ class Request(object):
 		if self._deff_test() and self.settable:
 			self.outData = val
 			self.sm.set_data(self)
-			self.sm.run()
+			# self.sm.run()
 
 	def __init__(self, _deff, _sm, _time=2000, _dec=None, _settable=False):
 		self.DATA_DEFINITION_ID = None
@@ -67,9 +67,9 @@ class Request(object):
 				self.DATA_DEFINITION_ID.value,
 			)
 			self.defined = False
-			self.sm.run()
+			# self.sm.run()
 		if self._deff_test():
-			self.sm.run()
+			# self.sm.run()
 			self.sm.get_data(self)
 
 	def _deff_test(self):

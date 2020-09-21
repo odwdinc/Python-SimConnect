@@ -40,7 +40,7 @@ class FacilitiesHelper:
 				SIMCONNECT_FACILITY_LIST_TYPE(self.item),
 				self.REQUEST_ID.value
 			)
-			self.sm.run()
+			# self.sm.run()
 
 
 class FacilitiesRequests():

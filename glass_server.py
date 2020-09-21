@@ -3,6 +3,7 @@ from SimConnect import *
 from time import sleep
 import random
 
+
 app = Flask(__name__)
 
 # SIMCONNECTION RELATED STARTUPS
@@ -10,7 +11,7 @@ app = Flask(__name__)
 # Create simconnection
 sm = SimConnect()
 ae = AircraftEvents(sm)
-aq = AircraftRequests(sm)
+aq = AircraftRequests(sm, _time=10)
 
 # Create request holders
 

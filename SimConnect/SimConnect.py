@@ -389,3 +389,40 @@ class SimConnect:
 			self.dll.EventID.EVENT_SIM_PAUSED,
 			b"Sim"
 		)
+
+	#	not working
+	# def dic_to_flight(self, dic):
+	# 	data_folder = os.path.dirname(os.path.realpath(__file__))
+	# 	file_to_open = os.path.join(data_folder, "TEMP.FLT")
+	# 	if os.path.isfile(file_to_open):
+	# 		os.remove(file_to_open)
+	# 	with open(file_to_open, "w") as tempfile:
+	# 		for root in dic:
+	# 			tempfile.write("\n[%s]\n" % root)
+	# 			for member in dic[root]:
+	# 				tempfile.write("%s=%s\n" % (member, dic[root][member]))
+	# 	if os.path.isfile(file_to_open):
+	# 		self.load_flight(file_to_open)
+
+	def flight_to_dic(self):
+		data_folder = os.path.dirname(os.path.realpath(__file__))
+		file_to_open = os.path.join(data_folder, "TEMP.FLT")
+		if os.path.isfile(file_to_open):
+			os.remove(file_to_open)
+		self.save_flight(file_to_open, "Flight", "Supper Cool flight")
+		while not os.path.isfile(file_to_open):
+			pass
+		time.sleep(0.5)
+		dic = {}
+		index = ""
+		with open(file_to_open, "r") as tempfile:
+			for line in tempfile.readlines():
+				if line[0] == '[':
+					index = line[1:-2]
+					dic[index] = {}
+				else:
+					if index != "" and line != '\n':
+						temp = line.split("=")
+						dic[index][temp[0]] = temp[1].strip()
+		os.remove(file_to_open)
+		return dic

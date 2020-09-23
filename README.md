@@ -94,7 +94,6 @@ Arguments to pass:
 
 Description: Sets datapoint in the simulator
 
-
 #### `http://localhost:5000/event/<event_name>/trigger`
 Method: POST
 
@@ -107,10 +106,55 @@ Arguments to pass:
 
 Description: Triggers an event in the simulator
 
+## Runing SimConnect on other system.
+
+#### Note: At this time SimConnect can only run on Windows hosts.
+
+Creat a file called SimConnect.cfg in the same folder as your script.
+#### Sample SimConnect.cfg:
+```
+; Example SimConnect client configurations
+[SimConnect]
+Protocol=IPv4
+Address=<ip of server>
+Port=500
+```
+To enable the host running the sim to share over network, 
+
+add \<Address\>0.0.0.0\</Address\>
+
+under the \<Port\>500\</Port\> in SimConnect.xml
+
+SimConnect.xml can be located at
+#### `%AppData%\Microsoft Flight Simulator\SimConnect.xml`
+
+#### Sample SimConnect.xml:
+```
+<?xml version="1.0" encoding="Windows-1252"?>
+
+<SimBase.Document Type="SimConnect" version="1,0">
+    <Descr>SimConnect Server Configuration</Descr>
+    <Filename>SimConnect.xml</Filename>
+    <SimConnect.Comm>
+        <Descr>Static IP4 port</Descr>
+        <Protocol>IPv4</Protocol>
+        <Scope>local</Scope>
+        <Port>500</Port>
+        <Address>0.0.0.0</Address>
+        <MaxClients>64</MaxClients>
+        <MaxRecvSize>41088</MaxRecvSize>
+    </SimConnect.Comm>
+...
+```
+
 ## Events and Variables
 
 Below are links to the Microsoft documentation 
 
+[Function](https://docs.microsoft.com/en-us/previous-versions/microsoft-esp/cc526983(v=msdn.10))
+
 [Event IDs](https://docs.microsoft.com/en-us/previous-versions/microsoft-esp/cc526980(v=msdn.10))
 
 [Simulation Variables](https://docs.microsoft.com/en-us/previous-versions/microsoft-esp/cc526981(v=msdn.10))
+
+

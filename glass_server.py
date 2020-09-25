@@ -274,6 +274,11 @@ def glass():
 	return render_template("glass.html")
 
 
+@app.route('/attitude-indicator')
+def AttInd():
+	return render_template("attitude-indicator/index.html")
+
+
 def get_dataset(data_type):
 	if data_type == "navigation": request_to_action = request_location
 	if data_type == "airspeed": request_to_action = request_airspeed

@@ -1,0 +1,332 @@
+.casing {
+  background: #111 url("../img/metal.jpg") repeat;
+  border: 1px solid #aaa;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #000;
+  padding: 20px;
+  height: 334px;
+  width: 334px;
+}
+
+.inner-case {
+  background: #222;
+  border: 2px solid #333;
+  border-radius: 165px;
+  box-shadow: 0 0 10px #000;
+  height: 300px;
+  overflow: hidden;
+  padding: 15px;
+}
+
+.case-control {
+  box-shadow: 0px 2px 0px #333;
+  border-bottom: 1px solid #555;
+  height: 230px;
+  overflow: hidden;
+}
+
+/* panel */
+.panel {
+  box-shadow: 0 0 10px #111;
+  border-radius: 30px 30px 300px 300px;
+  background: #333;
+  color: #aaa;
+  font-family: Arial;
+  margin: 13px 0 0 55px;
+  width: 190px;
+  height: 40px;
+}
+.panel ul {
+  padding: 0;
+}
+.panel li {
+  list-style-type: none;
+  float: left;
+}
+
+/* labels */
+.labels li {
+  margin: 3px 8px;
+}
+.labels li:nth-child(3) {
+  margin-left: 25px;
+}
+
+/* lights */
+.light {
+  background: #555;
+  border-radius: 10px;
+  height: 10px;
+  margin: 0 23px;
+  width: 10px;
+}
+.light:nth-child(3) {
+  margin-left: 42px;
+}
+.light.on {
+  box-shadow: 0 0 8px #3f3;
+  background: #6f6;
+}
+.light.off {
+  box-shadow: 0 0 8px #f33;
+  background: #f66;
+}
+
+.weight {
+  position: absolute;
+  height: 300px;
+  width: 300px;
+  z-index: 3;
+}
+
+.aircraft div {
+  background: #e98219;
+  border-radius: 5px;
+  box-shadow: 0 0 6px #000;
+  position: absolute;
+  top: 150px;
+  height: 5px;
+}
+
+/* up-chevron */
+.up-chevron {
+  position: relative;
+  top: 50px;
+  left: 140px;
+}
+.up-chevron div {
+  background: #e98219;
+  border-radius: 5px;
+  box-shadow: 0 0 6px #000;
+  position: absolute;
+  width: 5px;
+}
+.up-chevron div:nth-child(1),
+.up-chevron div:nth-child(2) {
+  height: 35px;
+}
+.up-chevron div:nth-child(3) {
+  height: 25px;
+}
+.up-chevron div:nth-child(1) {
+  box-shadow: 2px 0px 2px #555;
+  transform: rotate(-20deg);
+  top: 0;
+  left: 11px;
+}
+.up-chevron div:nth-child(2) {
+  box-shadow: -2px 0px 2px #555;
+  transform: rotate(20deg);
+  top: 0;
+  left: 0;
+}
+.up-chevron div:nth-child(3) {
+  box-shadow: 2px 0px 2px #555;
+  transform: rotate(90deg);
+  top: 19px;
+  left: 5px;
+}
+
+.left {
+  left: 80px;
+  width: 50px;
+}
+
+.centre {
+  left: 150px;
+  width: 5px;
+}
+
+.right {
+  left: 175px;
+  width: 50px;
+}
+
+.sky {
+  background: #558ebb;
+}
+
+.terrain {
+  background: #503723;
+}
+
+.mechanism {
+  transform: rotate(0deg); /* dynamic */
+}
+
+/* back */
+.back.sky {
+  border-radius: 150px 150px 0 0;
+  height: 150px;
+  width: 300px;
+}
+.back.terrain {
+  border-radius: 0 0 150px 150px;
+  height: 150px;
+  width: 300px;
+}
+
+.roll {
+  border-top: 50px solid #558ebb;
+  border-right: 50px solid #558ebb;
+  border-bottom: 50px solid #503723;
+  border-left: 50px solid #503723;
+  border-radius: 200px;
+  box-shadow: inset 0 0 20px #000;
+  transform: rotate(-45deg);
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 200px;
+  width: 200px;
+  z-index: 2;
+}
+
+/* roll-lines */
+.roll-lines {
+  transform: rotate(45deg);
+  position: absolute;
+}
+.roll-lines div {
+  background: #fff;
+  position: absolute;
+  height: 4px;
+  width: 40px;
+}
+
+#ninety-left,
+#ninety-right {
+  width: 50px;
+  top: -1px;
+}
+#ninety-left {
+  left: -9px;
+}
+#ninety-right {
+  left: 242px;
+}
+
+#zero {
+  background: none;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-top: 40px solid #fff;
+  top: -140px;
+  left: 126px;
+  height: 0;
+  width: 0;
+}
+
+#fortyfive-left,
+#fortyfive-right {
+  background: none;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 15px solid #fff;
+  top: -81px;
+  left: 57px;
+  height: 0;
+  width: 0;
+}
+#fortyfive-left {
+  transform: rotate(-45deg);
+}
+#fortyfive-right {
+  transform: rotate(45deg);
+  left: 215px;
+}
+#thirty-left,
+#thirty-right {
+  top: -60px;
+}
+#thirty-left {
+  transform: rotate(30deg);
+  left: 16px;
+}
+#thirty-right {
+  transform: rotate(-30deg);
+  left: 227px;
+}
+#sixty-left,
+#sixty-right {
+  top: -105px;
+}
+#sixty-left {
+  transform: rotate(60deg);
+  left: 60px;
+}
+#sixty-right {
+  transform: rotate(-60deg);
+  left: 183px;
+}
+
+.ball {
+  position: absolute;
+  border-radius: 75px;
+  box-shadow: 0 0 10px #000;
+  left: 50px;
+  top: 75px; /* dynamic */
+  z-index: 1;
+}
+
+/* pitch-lines */
+.pitch-lines {
+  position: absolute;
+  padding: 8px 70px;
+}
+.pitch-lines div {
+  background: #fff;
+  margin-top: 12px;
+  height: 2px;
+  width: 25px;
+}
+.pitch-lines .small {
+  margin-left: 18px;
+}
+
+#ten,
+#minus-ten {
+  margin-left: 10px;
+  width: 40px;
+}
+#twenty,
+#minus-twenty {
+  width: 60px;
+}
+#minus-five {
+  margin-top: 24px;
+}
+
+/* ball */
+.ball .sky {
+  width: 200px;
+  height: 75px;
+  background-image: linear-gradient(top, #558ebb, #9ccbe5);
+  border-radius: 100px 100px 0 0;
+  border-bottom: 2px solid #fff;
+}
+.ball .terrain {
+  width: 200px;
+  height: 75px;
+  background-image: linear-gradient(top, #553a29, #3d2618);
+  border-radius: 0 0 100px 100px;
+}
+
+.cage-toggle {
+  background: #222;
+  border: 2px solid #333;
+  border-radius: 40px;
+  box-shadow: 0 0 10px #000;
+  color: #aaa;
+  font-family: Arial;
+  font-size: 10px;
+  height: 40px;
+  line-height: 13px;
+  left: 315px;
+  padding: 5px;
+  position: absolute;
+  top: 315px;
+  text-align: center;
+  transform: rotate(-34deg);
+  width: 40px;
+}

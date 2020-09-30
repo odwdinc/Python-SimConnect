@@ -166,7 +166,7 @@ class SimConnect:
 					pass
 		except OSError:
 			LOGGER.debug("Did not find Flight Simulator running.")
-			exit(0)
+			raise ConnectionError("Did not find Flight Simulator running.")
 
 	def _run(self):
 		while self.quit == 0:

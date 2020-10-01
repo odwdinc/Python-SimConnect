@@ -48,7 +48,7 @@ function getSimulatorData() {
         //Navigation
         altitude = data.ALTITUDE;
         vertical_speed = data.VERTICAL_SPEED;
-        compass = data.MAGNETIC_COMPASS;
+        compass = data.MAGNETIC_COMPASS + data.MAGVAR;
         airspeed = data.AIRSPEED_INDICATE;
         latitude = data.LATITUDE;
         longitude = data.LONGITUDE;

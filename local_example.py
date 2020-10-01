@@ -15,6 +15,14 @@ sm = SimConnect()
 aq = AircraftRequests(sm)
 ae = AircraftEvents(sm)
 
+
+mc = aq.find("MAGNETIC_COMPASS")
+mv = aq.find("MAGVAR")
+print(mc.get() + mv.get())
+
+sm.exit()
+quit()
+
 # Set pos arund space nedle in WA.
 sm.set_pos(
 	_Altitude=1000.0,

@@ -323,6 +323,7 @@ def output_ui_variables():
 	ui_friendly_dictionary["LATITUDE"] = aq.get("PLANE_LATITUDE")
 	ui_friendly_dictionary["LONGITUDE"] = aq.get("PLANE_LONGITUDE")
 	ui_friendly_dictionary["MAGNETIC_COMPASS"] = round(aq.get("MAGNETIC_COMPASS"))
+	ui_friendly_dictionary["MAGVAR"] = round(aq.get("MAGVAR"))
 	ui_friendly_dictionary["VERTICAL_SPEED"] = round(aq.get("VERTICAL_SPEED"))
 
 	# Autopilot

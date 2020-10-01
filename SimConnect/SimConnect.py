@@ -243,8 +243,7 @@ class SimConnect:
 		self.request_data(_Request)
 		# self.run()
 		attemps = 0
-
-		while _Request.outData is None and attemps < 4:
+		while _Request.outData is None and attemps < _Request.attemps:
 			# self.run()
 			time.sleep(.01)
 			attemps += 1

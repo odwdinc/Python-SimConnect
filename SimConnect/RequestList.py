@@ -31,13 +31,14 @@ class Request(object):
 			self.sm.set_data(self)
 			# self.sm.run()
 
-	def __init__(self, _deff, _sm, _time=2000, _dec=None, _settable=False):
+	def __init__(self, _deff, _sm, _time=2000, _dec=None, _settable=False, _attemps=4):
 		self.DATA_DEFINITION_ID = None
 		self.definitions = []
 		self.description = _dec
 		self._name = None
 		self.definitions.append(_deff)
 		self.outData = None
+		self.attemps = _attemps
 		self.sm = _sm
 		self.time = _time
 		self.defined = False
@@ -185,48 +186,48 @@ class AircraftRequests():
 		request.value = _value
 		return True
 
-	def __init__(self, _sm, _time=2000):
+	def __init__(self, _sm, _time=2000, _attemps=4):
 		self.sm = _sm
 		self.list = []
-		self.EngineData = self.__AircraftEngineData(_sm, _time)
+		self.EngineData = self.__AircraftEngineData(_sm, _time, _attemps)
 		self.list.append(self.EngineData)
-		self.FuelTankSelection = self.__FuelTankSelection(_sm, _time)
+		self.FuelTankSelection = self.__FuelTankSelection(_sm, _time, _attemps)
 		self.list.append(self.FuelTankSelection)
-		self.FuelData = self.__AircraftFuelData(_sm, _time)
+		self.FuelData = self.__AircraftFuelData(_sm, _time, _attemps)
 		self.list.append(self.FuelData)
-		self.LightsData = self.__AircraftLightsData(_sm, _time)
+		self.LightsData = self.__AircraftLightsData(_sm, _time, _attemps)
 		self.list.append(self.LightsData)
-		self.PositionandSpeedData = self.__AircraftPositionandSpeedData(_sm, _time)
+		self.PositionandSpeedData = self.__AircraftPositionandSpeedData(_sm, _time, _attemps)
 		self.list.append(self.PositionandSpeedData)
-		self.FlightInstrumentationData = self.__AircraftFlightInstrumentationData(_sm, _time)
+		self.FlightInstrumentationData = self.__AircraftFlightInstrumentationData(_sm, _time, _attemps)
 		self.list.append(self.FlightInstrumentationData)
-		self.AvionicsData = self.__AircraftAvionicsData(_sm, _time)
+		self.AvionicsData = self.__AircraftAvionicsData(_sm, _time, _attemps)
 		self.list.append(self.AvionicsData)
-		self.ControlsData = self.__AircraftControlsData(_sm, _time)
+		self.ControlsData = self.__AircraftControlsData(_sm, _time, _attemps)
 		self.list.append(self.ControlsData)
-		self.AutopilotData = self.__AircraftAutopilotData(_sm, _time)
+		self.AutopilotData = self.__AircraftAutopilotData(_sm, _time, _attemps)
 		self.list.append(self.AutopilotData)
-		self.LandingGearData = self.__AircraftLandingGearData(_sm, _time)
+		self.LandingGearData = self.__AircraftLandingGearData(_sm, _time, _attemps)
 		self.list.append(self.LandingGearData)
-		self.EnvironmentData = self.__AircraftEnvironmentData(_sm, _time)
+		self.EnvironmentData = self.__AircraftEnvironmentData(_sm, _time, _attemps)
 		self.list.append(self.EnvironmentData)
-		self.HelicopterSpecificData = self.__HelicopterSpecificData(_sm, _time)
+		self.HelicopterSpecificData = self.__HelicopterSpecificData(_sm, _time, _attemps)
 		self.list.append(self.HelicopterSpecificData)
-		self.MiscellaneousSystemsData = self.__AircraftMiscellaneousSystemsData(_sm, _time)
+		self.MiscellaneousSystemsData = self.__AircraftMiscellaneousSystemsData(_sm, _time, _attemps)
 		self.list.append(self.MiscellaneousSystemsData)
-		self.MiscellaneousData = self.__AircraftMiscellaneousData(_sm, _time)
+		self.MiscellaneousData = self.__AircraftMiscellaneousData(_sm, _time, _attemps)
 		self.list.append(self.MiscellaneousData)
-		self.StringData = self.__AircraftStringData(_sm, _time)
+		self.StringData = self.__AircraftStringData(_sm, _time, _attemps)
 		self.list.append(self.StringData)
-		self.AIControlledAircraft = self.__AIControlledAircraft(_sm, _time)
+		self.AIControlledAircraft = self.__AIControlledAircraft(_sm, _time, _attemps)
 		self.list.append(self.AIControlledAircraft)
-		self.CarrierOperations = self.__CarrierOperations(_sm, _time)
+		self.CarrierOperations = self.__CarrierOperations(_sm, _time, _attemps)
 		self.list.append(self.CarrierOperations)
-		self.Racing = self.__Racing(_sm, _time)
+		self.Racing = self.__Racing(_sm, _time, _attemps)
 		self.list.append(self.Racing)
-		self.EnvironmentData = self.__EnvironmentData(_sm, _time)
+		self.EnvironmentData = self.__EnvironmentData(_sm, _time, _attemps)
 		self.list.append(self.EnvironmentData)
-		self.SlingsandHoists = self.__SlingsandHoists(_sm, _time)
+		self.SlingsandHoists = self.__SlingsandHoists(_sm, _time, _attemps)
 		self.list.append(self.SlingsandHoists)
 
 	class __AircraftEngineData(RequestHelper):

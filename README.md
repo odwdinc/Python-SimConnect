@@ -44,6 +44,8 @@ event_to_trigger()
 target_altitude = 15000
 event_to_trigger = ae.find("AP_ALT_VAR_SET_ENGLISH")  # Sets AP autopilot hold level
 event_to_trigger(target_altitude)
+sm.quit()
+exit()
 ````
 
 ## HTTP interface example

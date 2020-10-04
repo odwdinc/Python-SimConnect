@@ -751,6 +751,7 @@ class AircraftRequests():
 			"FLY_BY_WIRE_ELAC_FAILED": ["True if the Elevators and Ailerons computer has failed.", b'FLY BY WIRE ELAC FAILED', b'Bool', 'N'],
 			"FLY_BY_WIRE_FAC_FAILED": ["True if the Flight Augmentation computer has failed.", b'FLY BY WIRE FAC FAILED', b'Bool', 'N'],
 			"FLY_BY_WIRE_SEC_FAILED": ["True if the Spoilers and Elevators computer has failed.", b'FLY BY WIRE SEC FAILED', b'Bool', 'N'],
+			"AUTOPILOT_FLIGHT_LEVEL_CHANGE": ["True if autopilot FLC mode applied", b'AUTOPILOT FLIGHT LEVEL CHANGE', b'Bool', 'N'],
 		}
 
 	class __AircraftLandingGearData(RequestHelper):

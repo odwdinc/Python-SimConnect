@@ -481,6 +481,8 @@ class AircraftEvents():
 			(b'FLY_BY_WIRE_ELAC_TOGGLE', "Turn on or off the fly by wire Elevators and Ailerons computer.", "Shared Cockpit"),
 			(b'FLY_BY_WIRE_FAC_TOGGLE', "Turn on or off the fly by wire Flight Augmentation computer.", "Shared Cockpit"),
 			(b'FLY_BY_WIRE_SEC_TOGGLE', "Turn on or off the fly by wire Spoilers and Elevators computer.", "Shared Cockpit"),
+			(b'AP_VS_HOLD', "Toggle VS hold mode", "Shared Cockpit"),
+			(b'FLIGHT_LEVEL_CHANGE', "Toggle FLC mode", "Shared Cockpit"),
 		]
 
 	class __Fuel_System(EventHelper):

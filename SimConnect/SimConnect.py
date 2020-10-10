@@ -171,7 +171,7 @@ class SimConnect:
 	def _run(self):
 		while self.quit == 0:
 			self.dll.CallDispatch(self.hSimConnect, self.my_dispatch_proc_rd, None)
-			time.sleep(.001)
+			time.sleep(.002)
 
 	def exit(self):
 		self.quit = 1

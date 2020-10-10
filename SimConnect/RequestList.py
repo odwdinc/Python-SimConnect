@@ -19,7 +19,7 @@ class Request(object):
 				if self.sm.get_data(self):
 					self.LastData = millis()
 				else:
-					return -999999
+					return None
 			return self.outData
 		else:
 			return None

@@ -148,6 +148,13 @@ SimConnect.xml can be located at
     </SimConnect.Comm>
 ...
 ```
+## Notes:
+
+Python 64-bit is needed. You may see this Error if running 32-bit python:
+
+```OSError: [WinError 193] %1 is not a valid Win32 application```
+
+
 
 ## Events and Variables
 

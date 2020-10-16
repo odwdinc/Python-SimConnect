@@ -1,8 +1,8 @@
 name: Test and Publish
-on: 
+on:
   push:
-    branches:
-      - master
+    paths:
+    - 'SimConnect/__init__.py'
 
 jobs:
   build-n-publish:

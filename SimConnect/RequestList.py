@@ -1,28 +1,27 @@
 from SimConnect import *
 from .Enum import *
 from .Constants import *
+import asyncio
 
 
 class Request(object):
 
-	def get(self):
+	async def get(self):
 		return self.value
 
 	def set(self, _value):
 		self.value = _value
 
 	@property
-	def value(self):
+	async def value(self):
 		if self._deff_test():
 			# self.sm.run()
 			if (self.LastData + self.time) < millis():
-				if self.sm.get_data(self):
-					self.LastData = millis()
-				else:
-					return None
+				await self.sm.get_data(self)
+				self.LastData = millis()
 			return self.outData
 		else:
-			return None
+			raise Exception(self.definitions[0][0])
 
 	@value.setter
 	def value(self, val):
@@ -69,9 +68,9 @@ class Request(object):
 			)
 			self.defined = False
 			# self.sm.run()
-		if self._deff_test():
-			# self.sm.run()
-			self.sm.get_data(self)
+		# if self._deff_test():
+		# 	# self.sm.run()
+		# 	self.sm.get_data(self)
 
 	def _deff_test(self):
 		if ':index' in str(self.definitions[0][0]):
@@ -132,10 +131,10 @@ class RequestHelper:
 			return ne
 		return None
 
-	def get(self, _name):
+	async def get(self, _name):
 		if getattr(self, _name) is None:
 			return None
-		return getattr(self, _name).value
+		return await getattr(self, _name).value
 
 	def set(self, _name, _value=0):
 		temp = getattr(self, _name)
@@ -170,6 +169,8 @@ class AircraftRequests():
 			if key in clas.list:
 				rqest = getattr(clas, key)
 				if index is not None:
+					if 'index' in index:
+						index = 0
 					rqest.setIndex(index)
 				return rqest
 		return None

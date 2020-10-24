@@ -31,7 +31,7 @@ class Request(object):
 			self.sm.set_data(self)
 			# self.sm.run()
 
-	def __init__(self, _deff, _sm, _time=2000, _dec=None, _settable=False, _attemps=4):
+	def __init__(self, _deff, _sm, _time=10, _dec=None, _settable=False, _attemps=10):
 		self.DATA_DEFINITION_ID = None
 		self.definitions = []
 		self.description = _dec
@@ -112,7 +112,7 @@ class Request(object):
 
 
 class RequestHelper:
-	def __init__(self, _sm, _time=2000, _attemps=4):
+	def __init__(self, _sm, _time=10, _attemps=10):
 		self.sm = _sm
 		self.dic = []
 		self.time = _time
@@ -187,7 +187,7 @@ class AircraftRequests():
 		request.value = _value
 		return True
 
-	def __init__(self, _sm, _time=2000, _attemps=4):
+	def __init__(self, _sm, _time=10, _attemps=10):
 		self.sm = _sm
 		self.list = []
 		self.EngineData = self.__AircraftEngineData(_sm, _time, _attemps)

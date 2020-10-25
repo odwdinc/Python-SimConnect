@@ -50,11 +50,13 @@ async def main():
 	ct_g = millis()
 	while not sm.quit:
 		print("Throttle:", await Throttle.value)
-		print("Alt=%f Lat=%f Lon=%f Kohlsman=%.2f" % (
-			await aq.PositionandSpeedData.get('PLANE_ALTITUDE'),
-			await aq.PositionandSpeedData.get('PLANE_LATITUDE'),
-			await aq.PositionandSpeedData.get('PLANE_LONGITUDE'),
-			await aq.FlightInstrumentationData.get('KOHLSMAN_SETTING_HG')
+		print("Lat=%f Lon=%f Alt=%f Kohlsman=%.2f" % tuple(
+			await asyncio.gather(
+				aq.PositionandSpeedData.get('PLANE_LATITUDE'),
+				aq.PositionandSpeedData.get('PLANE_LONGITUDE'),
+				aq.PositionandSpeedData.get('PLANE_ALTITUDE'),
+				aq.FlightInstrumentationData.get('KOHLSMAN_SETTING_HG')
+			)
 		))
 		sleep(2)
 
@@ -67,11 +69,11 @@ async def main():
 		# PARKING_BRAKES()
 
 		# send new data inine @ 5s
-		if ct_g + 5000 < millis():
-			if await Throttle.value < 100:
-				Throttle.set(await Throttle.value + 5)
-				print("THROTTLE SET")
-			ct_g = millis()
+		# if ct_g + 5000 < millis():
+		# 	if await Throttle.value < 100:
+		# 		Throttle.set(await Throttle.value + 5)
+		# 		print("THROTTLE SET")
+		# 	ct_g = millis()
 	sm.exit()
 
 asyncio.run(main())

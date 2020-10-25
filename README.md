@@ -11,20 +11,20 @@ Full documentation for this example can be found at [https://msfs2020.cc](https:
 
 ## Python interface example
 
-````
+```py
 from SimConnect import *
 
 # Create SimConnect link
 sm = SimConnect()
-# Note the default _time is 2000 as to refreshed at 2s
+# Note the default _time is 2000 to be refreshed every 2 seconds
 aq = AircraftRequests(sm, _time=2000)
-# Use _time=ms where ms is the millsec to refresh data to cash.
-# setting ms to 0 will disable data cashing and allwas pull new data form sim.
-# There is still a timeout of 4 trys with a 10ms delay between checks. 
-# If no data is received in 40ms the value will be set to -999999
-# Each Requests can be fine tuned by seting the time pram.
-# To find and set time out of cashed data to 200ms
+# Use _time=ms where ms is the time in milliseconds to cache the data.
+# Setting ms to 0 will disable data caching and always pull new data from the sim.
+# There is still a timeout of 4 tries with a 10ms delay between checks.
+# If no data is received in 40ms the value will be set to None
+# Each request can be fine tuned by setting the time param.
 
+# To find and set timeout of cached data to 200ms:
 altitude = aq.find("PLANE_ALTITUDE")
 altitude.time = 200
 
@@ -46,7 +46,7 @@ event_to_trigger = ae.find("AP_ALT_VAR_SET_ENGLISH")  # Sets AP autopilot hold l
 event_to_trigger(target_altitude)
 sm.quit()
 exit()
-````
+```
 
 ## HTTP interface example
 
@@ -108,20 +108,20 @@ Arguments to pass:
 
 Description: Triggers an event in the simulator
 
-## Runing SimConnect on other system.
+## Running SimConnect on a separate system.
 
 #### Note: At this time SimConnect can only run on Windows hosts.
 
-Creat a file called SimConnect.cfg in the same folder as your script.
+Create a file called SimConnect.cfg in the same folder as your script.
 #### Sample SimConnect.cfg:
-```
+```ini
 ; Example SimConnect client configurations
 [SimConnect]
 Protocol=IPv4
 Address=<ip of server>
 Port=500
 ```
-To enable the host running the sim to share over network, 
+To enable the host running the sim to share over network,
 
 add \<Address\>0.0.0.0\</Address\>
 
@@ -131,7 +131,7 @@ SimConnect.xml can be located at
 #### `%AppData%\Microsoft Flight Simulator\SimConnect.xml`
 
 #### Sample SimConnect.xml:
-```
+```xml
 <?xml version="1.0" encoding="Windows-1252"?>
 
 <SimBase.Document Type="SimConnect" version="1,0">
@@ -158,12 +158,10 @@ Python 64-bit is needed. You may see this Error if running 32-bit python:
 
 ## Events and Variables
 
-Below are links to the Microsoft documentation 
+Below are links to the Microsoft documentation
 
 [Function](https://docs.microsoft.com/en-us/previous-versions/microsoft-esp/cc526983(v=msdn.10))
 
 [Event IDs](https://docs.microsoft.com/en-us/previous-versions/microsoft-esp/cc526980(v=msdn.10))
 
 [Simulation Variables](https://docs.microsoft.com/en-us/previous-versions/microsoft-esp/cc526981(v=msdn.10))
-
-

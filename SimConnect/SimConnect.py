@@ -8,7 +8,7 @@ from .Attributes import *
 import os
 import threading
 
-_library_path = os.path.abspath(__file__).replace(".py", ".dll")
+_library_path = os.path.splitext(os.path.abspath(__file__))[0] + '.dll'
 
 LOGGER = logging.getLogger(__name__)
 

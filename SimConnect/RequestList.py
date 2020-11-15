@@ -6,18 +6,29 @@ import asyncio
 
 class Request(object):
 
-	async def get(self):
+	def get(self):
 		return self.value
 
 	def set(self, _value):
 		self.value = _value
 
 	@property
-	async def value(self):
+	async def avalue(self):
 		if self._deff_test():
 			# self.sm.run()
 			if (self.LastData + self.time) < millis():
 				await self.sm.get_data(self)
+				self.LastData = millis()
+			return self.outData
+		else:
+			raise Exception(self.definitions[0][0])
+
+	@property
+	def value(self):
+		if self._deff_test():
+			# self.sm.run()
+			if (self.LastData + self.time) < millis():
+				asyncio.run(self.sm.get_data(self))
 				self.LastData = millis()
 			return self.outData
 		else:
@@ -131,10 +142,15 @@ class RequestHelper:
 			return ne
 		return None
 
-	async def get(self, _name):
+	def get(self, _name):
 		if getattr(self, _name) is None:
 			return None
-		return await getattr(self, _name).value
+		return getattr(self, _name).value
+
+	async def aget(self, _name):
+		if getattr(self, _name) is None:
+			return None
+		return await getattr(self, _name).avalue
 
 	def set(self, _name, _value=0):
 		temp = getattr(self, _name)

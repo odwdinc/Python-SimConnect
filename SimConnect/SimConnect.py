@@ -9,7 +9,7 @@ import os
 import threading
 import asyncio
 
-_library_path = os.path.abspath(__file__).replace(".py", ".dll")
+_library_path = os.path.splitext(os.path.abspath(__file__))[0] + '.dll'
 
 LOGGER = logging.getLogger(__name__)
 
@@ -436,3 +436,16 @@ class SimConnect:
 						temp = line.split("=")
 						dic[index][temp[0]] = temp[1].strip()
 		return dic
+
+	def sendText(self, text, timeSeconds=5, TEXT_TYPE=SIMCONNECT_TEXT_TYPE.SIMCONNECT_TEXT_TYPE_PRINT_WHITE):
+		pyarr = bytearray(text.encode())
+		dataarray = (ctypes.c_char * len(pyarr))(*pyarr)
+		pObjData = cast(dataarray, c_void_p)
+		self.dll.Text(
+			self.hSimConnect,
+			TEXT_TYPE,
+			timeSeconds,
+			0,
+			sizeof(ctypes.c_double) * len(pyarr),
+			pObjData
+		)

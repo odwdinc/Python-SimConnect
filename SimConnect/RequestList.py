@@ -9,6 +9,9 @@ class Request(object):
 	def get(self):
 		return self.value
 
+	async def aget(self):
+		return await self.avalue
+
 	def set(self, _value):
 		self.value = _value
 
@@ -196,6 +199,12 @@ class AircraftRequests():
 		if request is None:
 			return None
 		return request.value
+
+	async def aget(self, key):
+		request = self.find(key)
+		if request is None:
+			return None
+		return await request.avalue
 
 	def set(self, key, _value):
 		request = self.find(key)

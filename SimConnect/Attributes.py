@@ -15,7 +15,7 @@ class SimConnectDll(object):
 		self.CLIENT_DATA_ID = SIMCONNECT_CLIENT_DATA_ID
 		self.CLIENT_DATA_DEFINITION_ID = SIMCONNECT_CLIENT_DATA_DEFINITION_ID
 
-		self.SimConnect = cdll.LoadLibrary(library_path)
+		self.SimConnect = windll.LoadLibrary(library_path)
 		# SIMCONNECTAPI SimConnect_Open(
 		# 	HANDLE * phSimConnect,
 		# 	LPCSTR szName,
@@ -72,7 +72,7 @@ class SimConnectDll(object):
 		# 	DispatchProc pfcnDispatch,
 		# 	void * pContext);
 
-		self.DispatchProc = CFUNCTYPE(c_void_p, POINTER(SIMCONNECT_RECV), DWORD, c_void_p)
+		self.DispatchProc = WINFUNCTYPE(None, POINTER(SIMCONNECT_RECV), DWORD, c_void_p)
 
 		self.CallDispatch = self.SimConnect.SimConnect_CallDispatch
 		self.CallDispatch.restype = HRESULT

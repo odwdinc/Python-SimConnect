@@ -45,6 +45,7 @@ class Request(object):
 		self.settable = _settable
 		self.LastData = 0
 		self.LastID = 0
+		self.OBJECT_ID = None
 		if ':index' in str(self.definitions[0][0]):
 			self.lastIndex = b':index'
 

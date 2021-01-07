@@ -201,13 +201,28 @@ class SimConnect:
 
 	def request_data(self, _Request):
 		_Request.outData = None
-		self.dll.RequestDataOnSimObjectType(
-			self.hSimConnect,
-			_Request.DATA_REQUEST_ID.value,
-			_Request.DATA_DEFINITION_ID.value,
-			0,
-			SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER,
-		)
+
+		if _Request.OBJECT_ID is not None:
+			self.dll.RequestDataOnSimObject(
+				self.hSimConnect,
+				_Request.DATA_REQUEST_ID.value,
+				_Request.DATA_DEFINITION_ID.value,
+				_Request.OBJECT_ID,
+				SIMCONNECT_PERIOD.SIMCONNECT_PERIOD_ONCE,  # Period
+				SIMCONNECT_DATA_REQUEST_FLAG.SIMCONNECT_DATA_REQUEST_FLAG_DEFAULT,
+				0,  # origin
+				0,  # interval
+				1,  # limit
+			)
+		else:
+			self.dll.RequestDataOnSimObjectType(
+				self.hSimConnect,
+				_Request.DATA_REQUEST_ID.value,
+				_Request.DATA_DEFINITION_ID.value,
+				0,
+				SIMCONNECT_SIMOBJECT_TYPE.SIMCONNECT_SIMOBJECT_TYPE_USER,
+			)
+
 		temp = DWORD(0)
 		self.dll.GetLastSentPacketID(self.hSimConnect, temp)
 		_Request.LastID = temp.value

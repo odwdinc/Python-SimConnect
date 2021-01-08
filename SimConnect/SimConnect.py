@@ -90,6 +90,11 @@ class SimConnect:
 				pData, POINTER(SIMCONNECT_RECV_SIMOBJECT_DATA_BYTYPE)
 			).contents
 			self.handle_simobject_event(pObjData)
+		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_SIMOBJECT_DATA:
+			pObjData = cast(
+				pData, POINTER(SIMCONNECT_RECV_SIMOBJECT_DATA)
+			).contents
+			self.handle_simobject_event(pObjData)
 
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_OPEN:
 			LOGGER.info("SIM OPEN")
@@ -209,7 +214,7 @@ class SimConnect:
 				_Request.DATA_DEFINITION_ID.value,
 				_Request.OBJECT_ID,
 				SIMCONNECT_PERIOD.SIMCONNECT_PERIOD_ONCE,  # Period
-				SIMCONNECT_DATA_REQUEST_FLAG.SIMCONNECT_DATA_REQUEST_FLAG_DEFAULT,
+				0,  # Flags = 0
 				0,  # origin
 				0,  # interval
 				1,  # limit

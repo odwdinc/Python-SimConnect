@@ -9,6 +9,27 @@ It also includes, as an example, "Cockpit Companion", a flask mini http server w
 
 Full documentation for this example can be found at [https://msfs2020.cc](https://msfs2020.cc) and it is included in a standalone repo here on Github as [MSFS2020-cockpit-companion](https://github.com/hankhank10/MSFS2020-cockpit-companion).
 
+
+## Mobiflight Simconnect events:
+
+Yes this supports the new [SimConnect commands that DocMoebiuz](https://forums.flightsimulator.com/t/full-g1000-control-now-with-mobiflight/348509) of [MobiFlight](https://www.mobiflight.com/en/index.html) developped. 
+A full list of [commands and install instructions](https://pastebin.com/fMdB7at2)
+
+At this time MobiFlight SimConnect commands are not include in the AircraftEvents class and as so the AircraftEvents.find() and AircraftEvents.get() will not work. You will need to pass the Event ID to a new Event class as the Example below shows.
+
+
+```py
+from SimConnect import *
+# Create SimConnect link
+sm = SimConnect()
+# Creat a function to call the MobiFlight AS1000_MFD_SOFTKEYS_3 event.
+Sk3 = Event(b'MobiFlight.AS1000_MFD_SOFTKEYS_3', sm)
+# Call the Event.
+Sk3()
+sm.exit()
+quit()
+```
+
 ## Python interface example
 
 ```py

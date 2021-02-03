@@ -342,7 +342,7 @@ class SimConnect:
 		Init.Airspeed = _Airspeed
 
 		if self.DEFINITION_POS is None:
-			self.DEFINITION_POS = self.new_def_id("DEFINITION_POS")
+			self.DEFINITION_POS = self.new_def_id()
 			err = self.dll.AddToDataDefinition(
 				self.hSimConnect,
 				self.DEFINITION_POS.value,

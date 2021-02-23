@@ -175,6 +175,12 @@ Python 64-bit is needed. You may see this Error if running 32-bit python:
 
 ```OSError: [WinError 193] %1 is not a valid Win32 application```
 
+Per mracko on COM_RADIO_SET:
+
+    MSFS uses the European COM frequency spacing of 8.33kHz for all default aircraft. 
+    This means that in practice, you increment the frequency by 0.005 MHz and 
+    skip x.x20, x.x45, x.x70, and x.x95 MHz frequencies. 
+    Have a look here http://g3asr.co.uk/calculators/833kHz.htm
 
 
 ## Events and Variables

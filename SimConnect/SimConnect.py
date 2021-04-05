@@ -7,6 +7,7 @@ from .Constants import *
 from .Attributes import *
 import os
 import threading
+import asyncio
 
 _library_path = os.path.splitext(os.path.abspath(__file__))[0] + '.dll'
 
@@ -239,18 +240,13 @@ class SimConnect:
 		else:
 			return False
 
-	def get_data(self, _Request):
-		self.request_data(_Request)
-		# self.run()
-		attemps = 0
-		while _Request.outData is None and attemps < _Request.attemps:
-			# self.run()
-			time.sleep(.01)
-			attemps += 1
-		if _Request.outData is None:
-			return False
+	async def get_return_data(self, _Request):
+		while _Request.outData is None:
+			await asyncio.sleep(0.01)
 
-		return True
+	async def get_data(self, _Request):
+		self.request_data(_Request)
+		await self.get_return_data(_Request)
 
 	def send_event(self, evnt, data=DWORD(0)):
 		err = self.dll.TransmitClientEvent(

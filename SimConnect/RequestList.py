@@ -1,6 +1,7 @@
 from SimConnect import *
 from .Enum import *
 from .Constants import *
+import asyncio
 
 
 class Request(object):
@@ -8,21 +9,33 @@ class Request(object):
 	def get(self):
 		return self.value
 
+	async def aget(self):
+		return await self.avalue
+
 	def set(self, _value):
 		self.value = _value
+
+	@property
+	async def avalue(self):
+		if self._deff_test():
+			# self.sm.run()
+			if (self.LastData + self.time) < millis():
+				await self.sm.get_data(self)
+				self.LastData = millis()
+			return self.outData
+		else:
+			raise Exception(self.definitions[0][0])
 
 	@property
 	def value(self):
 		if self._deff_test():
 			# self.sm.run()
 			if (self.LastData + self.time) < millis():
-				if self.sm.get_data(self):
-					self.LastData = millis()
-				else:
-					return None
+				asyncio.run(self.sm.get_data(self))
+				self.LastData = millis()
 			return self.outData
 		else:
-			return None
+			raise Exception(self.definitions[0][0])
 
 	@value.setter
 	def value(self, val):
@@ -69,9 +82,9 @@ class Request(object):
 			)
 			self.defined = False
 			# self.sm.run()
-		if self._deff_test():
-			# self.sm.run()
-			self.sm.get_data(self)
+		# if self._deff_test():
+		# 	# self.sm.run()
+		# 	self.sm.get_data(self)
 
 	def _deff_test(self):
 		if ':index' in str(self.definitions[0][0]):
@@ -137,6 +150,11 @@ class RequestHelper:
 			return None
 		return getattr(self, _name).value
 
+	async def aget(self, _name):
+		if getattr(self, _name) is None:
+			return None
+		return await getattr(self, _name).avalue
+
 	def set(self, _name, _value=0):
 		temp = getattr(self, _name)
 		if temp is None:
@@ -170,6 +188,8 @@ class AircraftRequests():
 			if key in clas.list:
 				rqest = getattr(clas, key)
 				if index is not None:
+					if 'index' in index:
+						index = 0
 					rqest.setIndex(index)
 				return rqest
 		return None
@@ -179,6 +199,12 @@ class AircraftRequests():
 		if request is None:
 			return None
 		return request.value
+
+	async def aget(self, key):
+		request = self.find(key)
+		if request is None:
+			return None
+		return await request.avalue
 
 	def set(self, key, _value):
 		request = self.find(key)

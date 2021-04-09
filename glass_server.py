@@ -3,6 +3,21 @@ from SimConnect import *
 from time import sleep
 import random
 
+#
+# glass_server.py is an example web app which demonstrates how data can be read and set in the simulator
+#
+# When run this code will start an http server running on http://localhost:5000/ which can be accessed. It includes both
+# an HTML/JS front end which can be accessed through a browser and the ability to read/write datapoints and datasets
+# via API requests using JSON
+#
+# The server runs using Flask: https://flask.palletsprojects.com/en/1.1.x/
+#
+# This is intended to be a demonstration of the Python-SimConnect library rather than a fully fledged implementation.
+# This code has been forked into more fully worked projects including:
+# - MSFS 2020 Cockpit Companion: https://msfs2020.cc/
+# - MSFS Mobile Companion App: https://github.com/mracko/MSFS-Mobile-Companion-App
+#
+
 
 app = Flask(__name__)
 
@@ -14,41 +29,7 @@ ae = AircraftEvents(sm)
 aq = AircraftRequests(sm, _time=10)
 
 # Create request holders
-
-# Note: I have commented out request_ui as I don't think it makes sense to replicate the ui interface through JSON given the /ui endpoint returns a duplicate of this anyway
-# I have not deleted it yet as it's handy to have this list of helpful variables here
-#
-#request_ui = [
-#	'PLANE_ALTITUDE',
-#	'PLANE_LATITUDE',
-#	'PLANE_LONGITUDE',
-#	'AIRSPEED_INDICATED',
-#	'MAGNETIC_COMPASS',  # Compass reading
-#	'VERTICAL_SPEED',  # Vertical speed indication
-#	'FLAPS_HANDLE_PERCENT',  # Percent flap handle extended
-#	'FUEL_TOTAL_QUANTITY',  # Current quantity in volume
-#	'FUEL_TOTAL_CAPACITY',  # Total capacity of the aircraft
-#	'GEAR_HANDLE_POSITION',  # True if gear handle is applied
-#	'AUTOPILOT_MASTER',
-#	'AUTOPILOT_NAV_SELECTED',
-#	'AUTOPILOT_WING_LEVELER',
-#	'AUTOPILOT_HEADING_LOCK',
-#	'AUTOPILOT_HEADING_LOCK_DIR',
-#	'AUTOPILOT_ALTITUDE_LOCK',
-#	'AUTOPILOT_ALTITUDE_LOCK_VAR',
-#	'AUTOPILOT_ATTITUDE_HOLD',
-#	'AUTOPILOT_GLIDESLOPE_HOLD',
-#	'AUTOPILOT_PITCH_HOLD_REF',
-#	'AUTOPILOT_APPROACH_HOLD',
-#	'AUTOPILOT_BACKCOURSE_HOLD',
-#	'AUTOPILOT_VERTICAL_HOLD',
-#	'AUTOPILOT_VERTICAL_HOLD_VAR',
-#	'AUTOPILOT_PITCH_HOLD',
-#	'AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE',
-#	'AUTOPILOT_AIRSPEED_HOLD',
-#	'AUTOPILOT_AIRSPEED_HOLD_VAR'
-#]
-
+# These are groups of datapoints which it is convenient to call as a group because they fulfill a specific function
 request_location = [
 	'ALTITUDE',
 	'LATITUDE',
@@ -264,7 +245,8 @@ request_cabin = [
 	'CABIN_NO_SMOKING_ALERT_SWITCH'
 ]
 
-
+# This is a helper function which just adds a comma in the right place for readability,
+# for instance converting 30000 to 30,000
 def thousandify(x):
 	return f"{x:,}"
 
@@ -291,21 +273,24 @@ def get_dataset(data_type):
 	if data_type == "trim": request_to_action = request_trim
 	if data_type == "autopilot": request_to_action = request_autopilot
 	if data_type == 'cabin': request_to_action = request_cabin
-	#if data_type == "ui": request_to_action = request_ui   # see comment above as to why I've removed this
 
 	return request_to_action
 
 
+# In addition to the datapoints which can be pulled individually or as groups via JSON, the UI endpoint returns JSON
+# with the datapoints which the HTML / JS uses in a friendly format
 @app.route('/ui')
 def output_ui_variables():
 
-	# Initialise dictionaru
+	# Initialise dictionary
 	ui_friendly_dictionary = {}
 	ui_friendly_dictionary["STATUS"] = "success"
 
 	# Fuel
 	fuel_percentage = (aq.get("FUEL_TOTAL_QUANTITY") / aq.get("FUEL_TOTAL_CAPACITY")) * 100
 	ui_friendly_dictionary["FUEL_PERCENTAGE"] = round(fuel_percentage)
+
+	# Airspeed and altitude
 	ui_friendly_dictionary["AIRSPEED_INDICATE"] = round(aq.get("AIRSPEED_INDICATED"))
 	ui_friendly_dictionary["ALTITUDE"] = thousandify(round(aq.get("PLANE_ALTITUDE")))
 
@@ -355,15 +340,20 @@ def output_ui_variables():
 
 @app.route('/dataset/<dataset_name>/', methods=["GET"])
 def output_json_dataset(dataset_name):
-	dataset_map = {}  #I have renamed map to dataset_map as map is used elsewhere
+	dataset_map = {}
+
+	# This uses get_dataset() to pull in a bunch of different datapoint names into a dictionary which means they can
+	# then be requested from the sim
 	data_dictionary = get_dataset(dataset_name)
+
 	for datapoint_name in data_dictionary:
 		dataset_map[datapoint_name] = aq.get(datapoint_name)
+
 	return jsonify(dataset_map)
 
 
+# This function actually does the work of getting an individual datapoint from the sim
 def get_datapoint(datapoint_name, index=None):
-	# This function actually does the work of getting the datapoint
 
 	if index is not None and ':index' in datapoint_name:
 		dp = aq.find(datapoint_name)
@@ -373,9 +363,9 @@ def get_datapoint(datapoint_name, index=None):
 	return aq.get(datapoint_name)
 
 
+# This is the http endpoint wrapper for getting an individual datapoint
 @app.route('/datapoint/<datapoint_name>/get', methods=["GET"])
 def get_datapoint_endpoint(datapoint_name):
-	# This is the http endpoint wrapper for getting a datapoint
 
 	ds = request.get_json() if request.is_json else request.form
 	index = ds.get('index')
@@ -388,8 +378,8 @@ def get_datapoint_endpoint(datapoint_name):
 	return jsonify(output)
 
 
+# This function actually does the work of setting an individual datapoint
 def set_datapoint(datapoint_name, index=None, value_to_use=None):
-	# This function actually does the work of setting the datapoint
 
 	if index is not None and ':index' in datapoint_name:
 		clas = aq.find(datapoint_name)
@@ -410,9 +400,9 @@ def set_datapoint(datapoint_name, index=None, value_to_use=None):
 	return status
 
 
+# This is the http endpoint wrapper for setting a datapoint
 @app.route('/datapoint/<datapoint_name>/set', methods=["POST"])
 def set_datapoint_endpoint(datapoint_name):
-	# This is the http endpoint wrapper for setting a datapoint
 
 	ds = request.get_json() if request.is_json else request.form
 	index = ds.get('index')
@@ -423,8 +413,8 @@ def set_datapoint_endpoint(datapoint_name):
 	return jsonify(status)
 
 
+# This function actually does the work of triggering an event
 def trigger_event(event_name, value_to_use = None):
-	# This function actually does the work of triggering the event
 
 	EVENT_TO_TRIGGER = ae.find(event_name)
 	if EVENT_TO_TRIGGER is not None:
@@ -440,9 +430,9 @@ def trigger_event(event_name, value_to_use = None):
 	return status
 
 
+# This is the http endpoint wrapper for triggering an event
 @app.route('/event/<event_name>/trigger', methods=["POST"])
 def trigger_event_endpoint(event_name):
-	# This is the http endpoint wrapper for triggering an event
 
 	ds = request.get_json() if request.is_json else request.form
 	value_to_use = ds.get('value_to_use')
@@ -471,4 +461,5 @@ def custom_emergency(emergency_type):
 	return text_to_return
 
 
+# Main loop to run the flask app
 app.run(host='0.0.0.0', port=5000, debug=True)

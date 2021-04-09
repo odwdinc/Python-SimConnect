@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, render_template, request
 from SimConnect import *
-from time import sleep
 import random
 
 #

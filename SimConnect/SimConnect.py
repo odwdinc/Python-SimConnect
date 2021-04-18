@@ -170,8 +170,11 @@ class SimConnect:
 
 	def _run(self):
 		while self.quit == 0:
-			self.dll.CallDispatch(self.hSimConnect, self.my_dispatch_proc_rd, None)
-			time.sleep(.002)
+			try:
+				self.dll.CallDispatch(self.hSimConnect, self.my_dispatch_proc_rd, None)
+				time.sleep(.002)
+			except OSError as err:
+        			print("OS error: {0}".format(err))
 
 	def exit(self):
 		self.quit = 1

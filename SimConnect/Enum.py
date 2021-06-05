@@ -1,4 +1,4 @@
-from enum import IntEnum, Enum, auto
+from enum import IntEnum, IntFlag, Enum, auto
 from ctypes.wintypes import *
 from ctypes import *
 from .Constants import *
@@ -22,7 +22,7 @@ class CtypesEnum(IntEnum):
 
 
 # Define the types we need.
-class CtypesEn(Enum):
+class CtypesFlagEnum(IntFlag):
 	"""A ctypes-compatible Enum superclass."""
 
 	@classmethod
@@ -226,123 +226,75 @@ class SIMCONNECT_FACILITY_LIST_TYPE(CtypesEnum):  #
 	SIMCONNECT_FACILITY_LIST_TYPE_COUNT = 4  # invalid
 
 
-class SIMCONNECT_VOR_FLAGS(CtypesEn):  # flags for SIMCONNECT_RECV_ID_VOR_LIST
-	SIMCONNECT_RECV_ID_VOR_LIST_HAS_NAV_SIGNAL = DWORD(0x00000001)  # Has Nav signal
-	SIMCONNECT_RECV_ID_VOR_LIST_HAS_LOCALIZER = DWORD(0x00000002)  # Has localizer
-	SIMCONNECT_RECV_ID_VOR_LIST_HAS_GLIDE_SLOPE = DWORD(0x00000004)  # Has Nav signal
-	SIMCONNECT_RECV_ID_VOR_LIST_HAS_DME = DWORD(0x00000008)  # Station has DME
+class SIMCONNECT_VOR_FLAGS(CtypesFlagEnum):  # flags for SIMCONNECT_RECV_ID_VOR_LIST
+	SIMCONNECT_RECV_ID_VOR_LIST_HAS_NAV_SIGNAL = 0x00000001  # Has Nav signal
+	SIMCONNECT_RECV_ID_VOR_LIST_HAS_LOCALIZER = 0x00000002  # Has localizer
+	SIMCONNECT_RECV_ID_VOR_LIST_HAS_GLIDE_SLOPE = 0x00000004  # Has Nav signal
+	SIMCONNECT_RECV_ID_VOR_LIST_HAS_DME = 0x00000008  # Station has DME
 
 
 # bits for the Waypoint Flags field: may be combined
-class SIMCONNECT_WAYPOINT_FLAGS(CtypesEn):  #
-	SIMCONNECT_WAYPOINT_NONE = DWORD(0x00)  #
-	SIMCONNECT_WAYPOINT_SPEED_REQUESTED = DWORD(
-		0x04
-	)  # requested speed at waypoint is valid
-	SIMCONNECT_WAYPOINT_THROTTLE_REQUESTED = DWORD(
-		0x08
-	)  # request a specific throttle percentage
-	SIMCONNECT_WAYPOINT_COMPUTE_VERTICAL_SPEED = DWORD(
-		0x10
-	)  # compute vertical to speed to reach waypoint altitude when crossing the waypoint
-	SIMCONNECT_WAYPOINT_ALTITUDE_IS_AGL = DWORD(0x20)  # AltitudeIsAGL
-	SIMCONNECT_WAYPOINT_ON_GROUND = DWORD(
-		0x00100000
-	)  # place this waypoint on the ground
-	SIMCONNECT_WAYPOINT_REVERSE = DWORD(
-		0x00200000
-	)  # Back up to this waypoint. Only valid on first waypoint
-	SIMCONNECT_WAYPOINT_WRAP_TO_FIRST = DWORD(
-		0x00400000
-	)  # Wrap around back to first waypoint. Only valid on last waypoint.
+class SIMCONNECT_WAYPOINT_FLAGS(CtypesFlagEnum):  #
+	SIMCONNECT_WAYPOINT_NONE = 0x00  #
+	SIMCONNECT_WAYPOINT_SPEED_REQUESTED = 0x04 # requested speed at waypoint is valid
+	SIMCONNECT_WAYPOINT_THROTTLE_REQUESTED = 0x08 # request a specific throttle percentage
+	SIMCONNECT_WAYPOINT_COMPUTE_VERTICAL_SPEED = 0x10 # compute vertical to speed to reach waypoint altitude when crossing the waypoint
+	SIMCONNECT_WAYPOINT_ALTITUDE_IS_AGL = 0x20  # AltitudeIsAGL
+	SIMCONNECT_WAYPOINT_ON_GROUND = 0x00100000 # place this waypoint on the ground
+	SIMCONNECT_WAYPOINT_REVERSE = 0x00200000 # Back up to this waypoint. Only valid on first waypoint
+	SIMCONNECT_WAYPOINT_WRAP_TO_FIRST = 0x00400000
 
 
-class SIMCONNECT_EVENT_FLAG(CtypesEn):  #
-	SIMCONNECT_EVENT_FLAG_DEFAULT = DWORD(0x00000000)  #
-	SIMCONNECT_EVENT_FLAG_FAST_REPEAT_TIMER = DWORD(
-		0x00000001
-	)  # set event repeat timer to simulate fast repeat
-	SIMCONNECT_EVENT_FLAG_SLOW_REPEAT_TIMER = DWORD(
-		0x00000002
-	)  # set event repeat timer to simulate slow repeat
-	SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY = DWORD(
-		0x00000010
-	)  # interpret GroupID parameter as priority value
+class SIMCONNECT_EVENT_FLAG(CtypesFlagEnum):  #
+	SIMCONNECT_EVENT_FLAG_DEFAULT = 0x00000000  #
+	SIMCONNECT_EVENT_FLAG_FAST_REPEAT_TIMER = 0x00000001 # set event repeat timer to simulate fast repeat
+	SIMCONNECT_EVENT_FLAG_SLOW_REPEAT_TIMER = 0x00000002 # set event repeat timer to simulate slow repeat
+	SIMCONNECT_EVENT_FLAG_GROUPID_IS_PRIORITY = 0x00000010 # interpret GroupID parameter as priority value
 
 
-class SIMCONNECT_DATA_REQUEST_FLAG(CtypesEn):  #
-	SIMCONNECT_DATA_REQUEST_FLAG_DEFAULT = DWORD(0x00000000)
-	SIMCONNECT_DATA_REQUEST_FLAG_CHANGED = DWORD(
-		0x00000001
-	)  # send requested data when value(s) change
-	SIMCONNECT_DATA_REQUEST_FLAG_TAGGED = DWORD(
-		0x00000002
-	)  # send requested data in tagged format
+class SIMCONNECT_DATA_REQUEST_FLAG(CtypesFlagEnum):  #
+	SIMCONNECT_DATA_REQUEST_FLAG_DEFAULT = 0x00000000
+	SIMCONNECT_DATA_REQUEST_FLAG_CHANGED = 0x00000001 # send requested data when value(s) change
+	SIMCONNECT_DATA_REQUEST_FLAG_TAGGED = 0x00000002 # send requested data in tagged format
 
 
-class SIMCONNECT_DATA_SET_FLAG(CtypesEn):  #
-	SIMCONNECT_DATA_SET_FLAG_DEFAULT = DWORD(0x00000000)
-	SIMCONNECT_DATA_SET_FLAG_TAGGED = DWORD(0x00000001)  # data is in tagged format
+class SIMCONNECT_DATA_SET_FLAG(CtypesFlagEnum):  #
+	SIMCONNECT_DATA_SET_FLAG_DEFAULT = 0x00000000
+	SIMCONNECT_DATA_SET_FLAG_TAGGED = 0x00000001  # data is in tagged format
 
 
-class SIMCONNECT_CREATE_CLIENT_DATA_FLAG(CtypesEn):  #
-	SIMCONNECT_CREATE_CLIENT_DATA_FLAG_DEFAULT = DWORD(0x00000000)  #
-	SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY = DWORD(
-		0x00000001
-	)  # permit only ClientData creator to write into ClientData
+class SIMCONNECT_CREATE_CLIENT_DATA_FLAG(CtypesFlagEnum):  #
+	SIMCONNECT_CREATE_CLIENT_DATA_FLAG_DEFAULT = 0x00000000  #
+	SIMCONNECT_CREATE_CLIENT_DATA_FLAG_READ_ONLY = 0x00000001 # permit only ClientData creator to write into ClientData
 
 
-class SIMCONNECT_CLIENT_DATA_REQUEST_FLAG(CtypesEn):  #
-	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_DEFAULT = DWORD(0x00000000)  #
-	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_CHANGED = DWORD(
-		0x00000001
-	)  # send requested ClientData when value(s) change
-	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_TAGGED = DWORD(
-		0x00000002
-	)  # send requested ClientData in tagged format
+class SIMCONNECT_CLIENT_DATA_REQUEST_FLAG(CtypesFlagEnum):  #
+	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_DEFAULT = 0x00000000  #
+	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_CHANGED = 0x00000001 # send requested ClientData when value(s) change
+	SIMCONNECT_CLIENT_DATA_REQUEST_FLAG_TAGGED = 0x00000002 # send requested ClientData in tagged format
 
 
-class SIMCONNECT_CLIENT_DATA_SET_FLAG(CtypesEn):  #
-	SIMCONNECT_CLIENT_DATA_SET_FLAG_DEFAULT = DWORD(0x00000000)  #
-	SIMCONNECT_CLIENT_DATA_SET_FLAG_TAGGED = DWORD(
-		0x00000001
-	)  # data is in tagged format
+class SIMCONNECT_CLIENT_DATA_SET_FLAG(CtypesFlagEnum):  #
+	SIMCONNECT_CLIENT_DATA_SET_FLAG_DEFAULT = 0x00000000  #
+	SIMCONNECT_CLIENT_DATA_SET_FLAG_TAGGED = 0x00000001 # data is in tagged format
 
 
-class SIMCONNECT_VIEW_SYSTEM_EVENT_DATA(
-	CtypesEn
-):  # dwData contains these flags for the "View" System Event
-	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_COCKPIT_2D = DWORD(
-		0x00000001
-	)  # 2D Panels in cockpit view
-	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_COCKPIT_VIRTUAL = DWORD(
-		0x00000002
-	)  # Virtual (3D) panels in cockpit view
-	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_ORTHOGONAL = DWORD(
-		0x00000004
-	)  # Orthogonal (Map) view
+class SIMCONNECT_VIEW_SYSTEM_EVENT_DATA(CtypesFlagEnum):  # dwData contains these flags for the "View" System Event
+	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_COCKPIT_2D = 0x00000001 # 2D Panels in cockpit view
+	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_COCKPIT_VIRTUAL = 0x00000002 # Virtual (3D) panels in cockpit view
+	SIMCONNECT_VIEW_SYSTEM_EVENT_DATA_ORTHOGONAL = 0x00000004 # Orthogonal (Map) view
 
 
-class SIMCONNECT_SOUND_SYSTEM_EVENT_DATA(
-	CtypesEn
-):  # dwData contains these flags for the "Sound" System Event
-	SIMCONNECT_SOUND_SYSTEM_EVENT_DATA_MASTER = DWORD(0x00000001)  # Sound Master
+class SIMCONNECT_SOUND_SYSTEM_EVENT_DATA(CtypesFlagEnum):  # dwData contains these flags for the "Sound" System Event
+	SIMCONNECT_SOUND_SYSTEM_EVENT_DATA_MASTER = 0x00000001# Sound Master
 
 
-class SIMCONNECT_PICK_FLAGS(CtypesEn):
-	SIMCONNECT_PICK_GROUND = DWORD(
-		0x01
-	)  # pick ground/ pick result item is ground location
-	SIMCONNECT_PICK_AI = DWORD(
-		0x02
-	)  # pick AI    / pick result item is AI, (dwSimObjectID is valid)
-	SIMCONNECT_PICK_SCENERY = DWORD(
-		0x04
-	)  # pick scenery/ pick result item is scenery object (hSceneryObject is valid)
-	SIMCONNECT_PICK_ALL = DWORD(
-		0x04 | 0x02 | 0x01
-	)  # pick all / (not valid on pick result item)
-	SIMCONNECT_PICK_COORDSASPIXELS = DWORD(0x08)  #
+class SIMCONNECT_PICK_FLAGS(CtypesFlagEnum):
+	SIMCONNECT_PICK_GROUND = 0x01 # pick ground/ pick result item is ground location
+	SIMCONNECT_PICK_AI = 0x02 # pick AI    / pick result item is AI, (dwSimObjectID is valid)
+	SIMCONNECT_PICK_SCENERY = 0x04 # pick scenery/ pick result item is scenery object (hSceneryObject is valid)
+	SIMCONNECT_PICK_ALL = 0x04 | 0x02 | 0x01 # pick all / (not valid on pick result item)
+	SIMCONNECT_PICK_COORDSASPIXELS = 0x08  #
 
 
 # ----------------------------------------------------------------------------

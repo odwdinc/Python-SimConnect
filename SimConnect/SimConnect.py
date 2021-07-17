@@ -1,3 +1,4 @@
+import ctypes
 from ctypes import *
 from ctypes.wintypes import *
 import logging
@@ -53,6 +54,12 @@ class SimConnect:
 				).contents[0]
 		else:
 			LOGGER.warn("Event ID: %d Not Handled." % (dwRequestID))
+
+	def handle_mission_object_count(self, ObjData):
+		dwRequestID = ObjData.dwRequestID
+
+	def handle_goal_object(self, ObjData):
+		dwRequestID = ObjData.dwRequestID
 
 	def handle_exception_event(self, exc):
 		_exception = SIMCONNECT_EXCEPTION(exc.dwException).name
@@ -111,7 +118,16 @@ class SimConnect:
 				if dwRequestID == _facilitie.REQUEST_ID.value:
 					_facilitie.parent.dump(pData)
 					_facilitie.dump(pData)
-
+		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_MISSION_OBJECT_COUNT:
+			pObjData = cast(
+				pData, POINTER(SIMCONNECT_RECV_MISSION_OBJECT_COUNT)
+			).contents
+			self.handle_mission_object_count(pObjData)
+		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_GOAL:
+			pObjData = cast(
+				pData, POINTER(SIMCONNECT_RECV_GOAL)
+			).contents
+			self.handle_goal_object(pObjData)
 		elif dwID == SIMCONNECT_RECV_ID.SIMCONNECT_RECV_ID_QUIT:
 			self.quit = 1
 		else:

@@ -944,3 +944,29 @@ class SimConnectDll(object):
 			SIMCONNECT_FACILITY_LIST_TYPE,
 			self.DATA_REQUEST_ID,
 		]
+
+		# SIMCONNECTAPI SimConnect_RequestGoalCount(
+		#   HANDLE hSimConnect,
+		#   SIMCONNECT_DATA_REQUEST_ID RequestID);
+		self.RequestGoalCount = (
+			self.SimConnect.SimConnect_RequestGoalCount
+		)
+		self.RequestGoalCount.restype = HRESULT
+		self.RequestGoalCount.argtypes = [
+			HANDLE,
+			self.DATA_REQUEST_ID,
+		]
+
+		# SIMCONNECTAPI SimConnect_RequestGoalDataByIndex(
+		#   HANDLE hSimConnect,
+		#   SIMCONNECT_DATA_REQUEST_ID RequestID,
+		#   int  goalIndex);
+		self.RequestGoalDataByIndex = (
+			self.SimConnect.SimConnect_RequestGoalDataByIndex
+		)
+		self.RequestGoalDataByIndex.restype = HRESULT
+		self.RequestGoalDataByIndex.argtypes = [
+			HANDLE,
+			self.DATA_REQUEST_ID,
+			c_int,
+		]

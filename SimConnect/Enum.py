@@ -622,7 +622,7 @@ class SIMCONNECT_RECV_SYSTEM_STATE(
 class SIMCONNECT_RECV_MISSION_OBJECT_COUNT(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_MISSION_OBJECT_COUNT
 	_fields_ = [
 		("dwRequestID", DWORD),
-		("eMissionObjectType", SIMCONNECT_MISSION_OBJECT_TYPE),
+		("eMissionObjectType", DWORD),
 		("dwCount", DWORD),
 	]
 
@@ -634,7 +634,7 @@ class SIMCONNECT_RECV_GOAL(SIMCONNECT_RECV):  # when dwID == SIMCONNECT_RECV_ID_
 		("isOptional", c_bool),
 		("dwOrder", DWORD),
 		("dwPointValue", DWORD),
-		("eGoalState", SIMCONNECT_GOAL_STATE),
+		("eGoalState", DWORD),
 		("dwChildGoalCount", DWORD),
 		("szGoalText", c_char * 256),
 		("szGoalSucceededText", c_char * 256),

@@ -16,11 +16,10 @@ class ScenarioRequest(object):
 		self.outData = None
 		self.sm.Requests[self.DATA_REQUEST_ID.value] = self
 
-	@property
-	def value(self):
+	def get_value(self, *args):
 		if (self.LastData + self.time) < millis():
 			self.setup_request()
-			if self.fetch_data(self):
+			if self.get_data(*args):
 				self.LastData = millis()
 			else:
 				return None
@@ -40,15 +39,15 @@ class ScenarioRequest(object):
 
 
 class GoalRequests(object):
-	def getGoalCount(self):
-		return ScenarioRequest(self.sm, 'RequestGoalCount').value
+	def get_goal_count(self):
+		return ScenarioRequest(self.sm, 'RequestGoalCount').get_value()
 
-	def getGoalByIndex(self, index):
-		return ScenarioRequest(self.sm, 'RequestGoalDataByIndex').value
+	def get_goal_by_index(self, index):
+		return ScenarioRequest(self.sm, 'RequestGoalDataByIndex').get_value(index)
 
 	def get_goals(self):
-		count = self.getGoalCount()
-		return [self.getGoalByIndex(index) for index in range(0, count)]
+		count = self.get_goal_count()
+		return [self.get_goal_by_index(index) for index in range(0, count)]
 
 	def __init__(self, _sm, _time=10, _attemps=10):
 		self.sm = _sm

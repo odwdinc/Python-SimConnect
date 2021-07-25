@@ -59,7 +59,7 @@ class SimConnect:
 		dwRequestID = ObjData.dwRequestID
 		if dwRequestID in self.Requests:
 			_request = self.Requests[dwRequestID]
-			_request.outData = cast(ObjData.dwCount, c_int)
+			_request.outData = ObjData.dwCount
 
 	def handle_goal_object(self, ObjData):
 		dwRequestID = ObjData.dwRequestID
@@ -69,15 +69,13 @@ class SimConnect:
 			goal['guidInstanceId'] = ObjData.guidInstanceId
 			goal['isOptional'] = ObjData.isOptional
 			goal['priority'] = ObjData.dwOrder
-			goal['pointValue'] = cast(ObjData.dwPointValue, c_int64)
+			goal['pointValue'] = ObjData.dwPointValue
 			goal['goalState'] = ObjData.eGoalState
 			goal['childGoalCount'] = ObjData.dwChildGoalCount
 			goal['goalText'] = ObjData.szGoalText
 			goal['goalSucceededText'] = ObjData.szGoalSucceededText
 			goal['goalFailedText'] = ObjData.szGoalFailedText
 			_request.outData = goal
-
-
 
 	def handle_exception_event(self, exc):
 		_exception = SIMCONNECT_EXCEPTION(exc.dwException).name

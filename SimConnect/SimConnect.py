@@ -57,9 +57,27 @@ class SimConnect:
 
 	def handle_mission_object_count(self, ObjData):
 		dwRequestID = ObjData.dwRequestID
+		if dwRequestID in self.Requests:
+			_request = self.Requests[dwRequestID]
+			_request.outData = cast(ObjData.dwCount, c_int)
 
 	def handle_goal_object(self, ObjData):
 		dwRequestID = ObjData.dwRequestID
+		if dwRequestID in self.Requests:
+			_request = self.Requests[dwRequestID]
+			goal = dict()
+			goal['guidInstanceId'] = ObjData.guidInstanceId
+			goal['isOptional'] = ObjData.isOptional
+			goal['priority'] = ObjData.dwOrder
+			goal['pointValue'] = cast(ObjData.dwPointValue, c_int64)
+			goal['goalState'] = ObjData.eGoalState
+			goal['childGoalCount'] = ObjData.dwChildGoalCount
+			goal['goalText'] = ObjData.szGoalText
+			goal['goalSucceededText'] = ObjData.szGoalSucceededText
+			goal['goalFailedText'] = ObjData.szGoalFailedText
+			_request.outData = goal
+
+
 
 	def handle_exception_event(self, exc):
 		_exception = SIMCONNECT_EXCEPTION(exc.dwException).name
@@ -231,6 +249,14 @@ class SimConnect:
 		self.dll.GetLastSentPacketID(self.hSimConnect, temp)
 		_Request.LastID = temp.value
 
+	def request_simple_data(self, _Request, *extra_args):
+		_Request.outData = None
+		method = getattr(self.dll, _Request.requestName)
+		method(self.hSimConnect, _Request.DATA_REQUEST_ID.value, *extra_args)
+		temp = DWORD(0)
+		self.dll.GetLastSentPacketID(self.hSimConnect, temp)
+		_Request.LastID = temp.value
+
 	def set_data(self, _Request):
 		rtype = _Request.definitions[0][1].decode()
 		if 'string' in rtype.lower():
@@ -260,6 +286,19 @@ class SimConnect:
 
 	def get_data(self, _Request):
 		self.request_data(_Request)
+		# self.run()
+		attemps = 0
+		while _Request.outData is None and attemps < _Request.attemps:
+			# self.run()
+			time.sleep(.01)
+			attemps += 1
+		if _Request.outData is None:
+			return False
+
+		return True
+
+	def get_simple_data(self, _Request, *args):
+		self.request_simple_data(_Request, *args)
 		# self.run()
 		attemps = 0
 		while _Request.outData is None and attemps < _Request.attemps:

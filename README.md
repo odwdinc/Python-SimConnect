@@ -12,7 +12,7 @@ Full documentation for this example can be found at [https://msfs2020.cc](https:
 
 ## Mobiflight Simconnect events:
 
-Yes this supports the new [SimConnect commands that DocMoebiuz](https://forums.flightsimulator.com/t/full-g1000-control-now-with-mobiflight/348509) of [MobiFlight](https://www.mobiflight.com/en/index.html) developped. 
+Yes this supports the new [SimConnect commands that DocMoebiuz](https://forums.flightsimulator.com/t/full-g1000-control-now-with-mobiflight/348509) of [MobiFlight](https://www.mobiflight.com/en/index.html) developed. 
 A full list of [commands and install instructions](https://pastebin.com/fMdB7at2)
 
 At this time MobiFlight SimConnect commands are not include in the AircraftEvents class and as so the AircraftEvents.find() and AircraftEvents.get() will not work. You will need to pass the Event ID to a new Event class as the Example below shows.

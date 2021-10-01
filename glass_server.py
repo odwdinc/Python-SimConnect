@@ -21,7 +21,6 @@ import random
 app = Flask(__name__)
 
 # SIMCONNECTION RELATED STARTUPS
-
 # Create simconnection
 sm = SimConnect()
 ae = AircraftEvents(sm)
@@ -275,6 +274,14 @@ def get_dataset(data_type):
 
 	return request_to_action
 
+
+@app.route('/data')
+def get_data():
+	dataset_map = {}
+	data_point_names = request.get_json() if request.is_json else request.form
+	for datapoint_name in data_point_names:
+		dataset_map[datapoint_name] = aq.get(datapoint_name)
+	return jsonify(dataset_map)
 
 # In addition to the datapoints which can be pulled individually or as groups via JSON, the UI endpoint returns JSON
 # with the datapoints which the HTML / JS uses in a friendly format

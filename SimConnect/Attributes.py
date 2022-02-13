@@ -582,8 +582,8 @@ class SimConnectDll(object):
 		self.AICreateNonATCAircraft.restype = HRESULT
 		self.AICreateNonATCAircraft.argtypes = [
 			HANDLE,
-			c_double,
-			c_double,
+			c_char_p,
+			c_char_p,
 			SIMCONNECT_DATA_INITPOSITION,
 			self.DATA_REQUEST_ID,
 		]

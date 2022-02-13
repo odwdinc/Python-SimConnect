@@ -755,7 +755,7 @@ class SimConnectDll(object):
 		#   const char * szState);
 		self.RequestSystemState = self.SimConnect.SimConnect_RequestSystemState
 		self.RequestSystemState.restype = HRESULT
-		self.RequestSystemState.argtypes = []
+		self.RequestSystemState.argtypes = [HANDLE,SIMCONNECT_DATA_REQUEST_ID, c_char_p]
 
 		# SIMCONNECTAPI SimConnect_SetSystemState(
 		#   HANDLE hSimConnect,

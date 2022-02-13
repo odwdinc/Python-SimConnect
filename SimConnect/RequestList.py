@@ -210,7 +210,7 @@ class AircraftRequests():
 		self.list.append(self.AutopilotData)
 		self.LandingGearData = self.__AircraftLandingGearData(_sm, _time, _attemps)
 		self.list.append(self.LandingGearData)
-		self.EnvironmentData = self.__AircraftEnvironmentData(_sm, _time, _attemps)
+		self.AircraftEnvironmentData = self.__AircraftEnvironmentData(_sm, _time, _attemps)
 		self.list.append(self.EnvironmentData)
 		self.HelicopterSpecificData = self.__HelicopterSpecificData(_sm, _time, _attemps)
 		self.list.append(self.HelicopterSpecificData)

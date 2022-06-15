@@ -6,17 +6,24 @@ from .Constants import *
 class Request(object):
 
 	def get(self):
-		return self.value
+		return self.sm.async_loop.execute(self.async_get())
+		
+	async def async_get(self):
+		return await self.async_value
 
 	def set(self, _value):
 		self.value = _value
 
 	@property
 	def value(self):
+		return self.sm.async_loop.execute(self.async_value)
+
+	@property
+	async def async_value(self):
 		if self._deff_test():
 			# self.sm.run()
 			if (self.LastData + self.time) < millis():
-				if self.sm.get_data(self):
+				if await self.sm.async_get_data(self):
 					self.LastData = millis()
 				else:
 					return None
@@ -133,9 +140,12 @@ class RequestHelper:
 		return None
 
 	def get(self, _name):
+		return self.sm.async_loop.execute(self.async_get(_name))
+
+	async def async_get(self, _name):
 		if getattr(self, _name) is None:
 			return None
-		return getattr(self, _name).value
+		return await getattr(self, _name).async_value
 
 	def set(self, _name, _value=0):
 		temp = getattr(self, _name)
@@ -175,10 +185,13 @@ class AircraftRequests():
 		return None
 
 	def get(self, key):
+		return self.sm.async_loop.execute(self.async_get(key))
+
+	async def async_get(self, key):
 		request = self.find(key)
 		if request is None:
 			return None
-		return request.value
+		return await request.async_value
 
 	def set(self, key, _value):
 		request = self.find(key)

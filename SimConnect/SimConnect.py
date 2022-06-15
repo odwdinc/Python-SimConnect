@@ -1,3 +1,4 @@
+import ctypes
 from ctypes import *
 from ctypes.wintypes import *
 import logging
@@ -7,6 +8,8 @@ from .Constants import *
 from .Attributes import *
 import os
 import threading
+import asyncio
+from .AsyncLoop import *
 
 _library_path = os.path.splitext(os.path.abspath(__file__))[0] + '.dll'
 
@@ -129,6 +132,8 @@ class SimConnect:
 
 		self.Requests = {}
 		self.Facilities = []
+		self.async_loop = AsyncLoop()
+		self.async_loop.start()
 		self.dll = SimConnectDll(library_path)
 		self.hSimConnect = HANDLE()
 		self.quit = 0
@@ -185,6 +190,7 @@ class SimConnect:
 
 	def exit(self):
 		self.quit = 1
+		self.async_loop.stop()
 		self.timerThread.join()
 		self.dll.Close(self.hSimConnect)
 
@@ -209,7 +215,7 @@ class SimConnect:
 			self.hSimConnect, group, evnt, bMaskable
 		)
 
-	def request_data(self, _Request):
+	async def request_data(self, _Request):
 		_Request.outData = None
 		self.dll.RequestDataOnSimObjectType(
 			self.hSimConnect,
@@ -250,16 +256,18 @@ class SimConnect:
 			return False
 
 	def get_data(self, _Request):
-		self.request_data(_Request)
+		return self.async_loop.execute(self.async_get_data(_Request))
+
+	async def async_get_data(self, _Request):
+		await self.request_data(_Request)
 		# self.run()
 		attemps = 0
 		while _Request.outData is None and attemps < _Request.attemps:
 			# self.run()
-			time.sleep(.01)
+			await asyncio.sleep(.01)
 			attemps += 1
 		if _Request.outData is None:
 			return False
-
 		return True
 
 	def send_event(self, evnt, data=DWORD(0)):

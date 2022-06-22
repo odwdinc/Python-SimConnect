@@ -7,7 +7,7 @@ This library allows Python scripts to read and set variables within MSFS2020 and
 
 It also includes, as an example, "Cockpit Companion", a flask mini http server which runs locally. It provides a web UI with a moving map and simulation variables. It also provides simulation data in JSON format in response to REST API requests.
 
-Full documentation for this example can be found at [https://msfs2020.cc](https://msfs2020.cc) and it is included in a standalone repo here on Github as [MSFS2020-cockpit-companion](https://github.com/hankhank10/MSFS2020-cockpit-companion).
+Full documentation for this example can be found [here](https://github.com/hankhank10/MSFS2020-cockpit-companion/blob/gh-pages/index.md) and it is included in a standalone repo here on Github as [MSFS2020-cockpit-companion](https://github.com/hankhank10/MSFS2020-cockpit-companion).
 
 
 ## Mobiflight Simconnect events:

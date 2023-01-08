@@ -38,7 +38,7 @@ class Request(object):
 		self._name = None
 		self.definitions.append(_deff)
 		self.outData = None
-		self.attemps = _attempts
+		self.attempts = _attempts
 		self.sm = _sm
 		self.time = _time
 		self.defined = False
@@ -116,7 +116,7 @@ class RequestHelper:
 		self.sm = _sm
 		self.dic = []
 		self.time = _time
-		self.attemps = _attempts
+		self.attempts = _attempts
 
 	def __getattribute__(self, _name):
 		return super().__getattribute__(_name)
@@ -127,7 +127,7 @@ class RequestHelper:
 			setable = False
 			if key[3] == 'Y':
 				setable = True
-			ne = Request((key[1], key[2]), self.sm, _dec=key[0], _settable=setable, _time=self.time, _attempts=self.attemps)
+			ne = Request((key[1], key[2]), self.sm, _dec=key[0], _settable=setable, _time=self.time, _attempts=self.attempts)
 			setattr(self, _name, ne)
 			return ne
 		return None

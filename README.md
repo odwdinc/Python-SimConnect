@@ -12,7 +12,7 @@ Full documentation for this example can be found at [https://msfs2020.cc](https:
 
 ## Mobiflight Simconnect events:
 
-Yes this supports the new [SimConnect commands that DocMoebiuz](https://forums.flightsimulator.com/t/full-g1000-control-now-with-mobiflight/348509) of [MobiFlight](https://www.mobiflight.com/en/index.html) developed. 
+Yes this supports the new [SimConnect commands that DocMoebiuz](https://forums.flightsimulator.com/t/full-g1000-control-now-with-mobiflight/348509) of [MobiFlight](https://www.mobiflight.com/en/index.html) developed.
 A full list of [commands and install instructions](https://pastebin.com/fMdB7at2)
 
 At this time MobiFlight SimConnect commands are not include in the AircraftEvents class and as so the AircraftEvents.find() and AircraftEvents.get() will not work. You will need to pass the Event ID to a new Event class as the Example below shows.
@@ -69,66 +69,6 @@ sm.exit()
 quit()
 ```
 
-## HTTP interface example
-
-Run `glass_server.py` using Python 3.
-
-#### `http://localhost:5000`
-Method: GET
-
-Variables: None
-
-Output: Web interface with moving map and aircraft information
-
-#### `http://localhost:5000/dataset/<dataset_name>`
-Method: GET
-
-Arguments to pass:
-
-|Argument|Location|Description|
-|---|---|---|
-|dataset_name|in path|can be navigation, airspeed compass, vertical_speed, fuel, flaps, throttle, gear, trim, autopilot, cabin|
-
-Description: Returns set of variables from simulator in JSON format
-
-
-#### `http://localhost:5000/datapoint/<datapoint_name>/get`
-Method: GET
-
-Arguments to pass:
-
-|Argument|Location|Description|
-|---|---|---|
-|datapoint_name|in path|any variable name from MS SimConnect documentation|
-
-Description: Returns individual variable from simulator in JSON format
-
-
-#### `http://localhost:5000/datapoint/<datapoint_name>/set`
-Method: POST
-
-Arguments to pass:
-
-|Argument|Location|Description|
-|---|---|---|
-|datapoint_name|in path|any variable name from MS SimConnect documentation|
-|index (optional)|form or json|the relevant index if required (eg engine number) - if not passed defaults to None|
-|value_to_use (optional)|value to set variable to - if not passed defaults to 0|
-
-Description: Sets datapoint in the simulator
-
-#### `http://localhost:5000/event/<event_name>/trigger`
-Method: POST
-
-Arguments to pass:
-
-|Argument|Location|Description|
-|---|---|---|
-|event_name|in path|any event name from MS SimConnect documentation|
-|value_to_use (optional)|value to pass to the event|
-
-Description: Triggers an event in the simulator
-
 ## Running SimConnect on a separate system.
 
 #### Note: At this time SimConnect can only run on Windows hosts.
@@ -177,9 +117,9 @@ Python 64-bit is needed. You may see this Error if running 32-bit python:
 
 Per mracko on COM_RADIO_SET:
 
-    MSFS uses the European COM frequency spacing of 8.33kHz for all default aircraft. 
-    This means that in practice, you increment the frequency by 0.005 MHz and 
-    skip x.x20, x.x45, x.x70, and x.x95 MHz frequencies. 
+    MSFS uses the European COM frequency spacing of 8.33kHz for all default aircraft.
+    This means that in practice, you increment the frequency by 0.005 MHz and
+    skip x.x20, x.x45, x.x70, and x.x95 MHz frequencies.
     Have a look here http://g3asr.co.uk/calculators/833kHz.htm
 
 

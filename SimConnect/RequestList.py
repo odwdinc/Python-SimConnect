@@ -31,14 +31,14 @@ class Request(object):
 			self.sm.set_data(self)
 			# self.sm.run()
 
-	def __init__(self, _deff, _sm, _time=10, _dec=None, _settable=False, _attemps=10):
+	def __init__(self, _deff, _sm, _time=10, _dec=None, _settable=False, _attempts=10):
 		self.DATA_DEFINITION_ID = None
 		self.definitions = []
 		self.description = _dec
 		self._name = None
 		self.definitions.append(_deff)
 		self.outData = None
-		self.attemps = _attemps
+		self.attemps = _attempts
 		self.sm = _sm
 		self.time = _time
 		self.defined = False
@@ -112,11 +112,11 @@ class Request(object):
 
 
 class RequestHelper:
-	def __init__(self, _sm, _time=10, _attemps=10):
+	def __init__(self, _sm, _time=10, _attempts=10):
 		self.sm = _sm
 		self.dic = []
 		self.time = _time
-		self.attemps = _attemps
+		self.attemps = _attempts
 
 	def __getattribute__(self, _name):
 		return super().__getattribute__(_name)
@@ -127,7 +127,7 @@ class RequestHelper:
 			setable = False
 			if key[3] == 'Y':
 				setable = True
-			ne = Request((key[1], key[2]), self.sm, _dec=key[0], _settable=setable, _time=self.time, _attemps=self.attemps)
+			ne = Request((key[1], key[2]), self.sm, _dec=key[0], _settable=setable, _time=self.time, _attempts=self.attemps)
 			setattr(self, _name, ne)
 			return ne
 		return None
@@ -187,56 +187,64 @@ class AircraftRequests():
 		request.value = _value
 		return True
 
-	def __init__(self, _sm, _time=10, _attemps=10):
+	def __init__(self, _sm, _time=10, _attempts=10):
 		self.sm = _sm
 		self.list = []
-		self.EngineData = self.__AircraftEngineData(_sm, _time, _attemps)
+		self.MSFSEngineData = self.__MSFSAircraftEngineData(_sm, _time, _attempts)
+		self.list.append(self.MSFSEngineData)
+		self.EngineData = self.__AircraftEngineData(_sm, _time, _attempts)
 		self.list.append(self.EngineData)
-		self.FuelTankSelection = self.__FuelTankSelection(_sm, _time, _attemps)
+		self.FuelTankSelection = self.__FuelTankSelection(_sm, _time, _attempts)
 		self.list.append(self.FuelTankSelection)
-		self.FuelData = self.__AircraftFuelData(_sm, _time, _attemps)
+		self.FuelData = self.__AircraftFuelData(_sm, _time, _attempts)
 		self.list.append(self.FuelData)
-		self.LightsData = self.__AircraftLightsData(_sm, _time, _attemps)
+		self.LightsData = self.__AircraftLightsData(_sm, _time, _attempts)
 		self.list.append(self.LightsData)
-		self.PositionandSpeedData = self.__AircraftPositionandSpeedData(_sm, _time, _attemps)
+		self.PositionandSpeedData = self.__AircraftPositionandSpeedData(_sm, _time, _attempts)
 		self.list.append(self.PositionandSpeedData)
-		self.FlightInstrumentationData = self.__AircraftFlightInstrumentationData(_sm, _time, _attemps)
+		self.FlightInstrumentationData = self.__AircraftFlightInstrumentationData(_sm, _time, _attempts)
 		self.list.append(self.FlightInstrumentationData)
-		self.AvionicsData = self.__AircraftAvionicsData(_sm, _time, _attemps)
+		self.AvionicsData = self.__AircraftAvionicsData(_sm, _time, _attempts)
 		self.list.append(self.AvionicsData)
-		self.ControlsData = self.__AircraftControlsData(_sm, _time, _attemps)
+		self.ControlsData = self.__AircraftControlsData(_sm, _time, _attempts)
 		self.list.append(self.ControlsData)
-		self.AutopilotData = self.__AircraftAutopilotData(_sm, _time, _attemps)
+		self.AutopilotData = self.__AircraftAutopilotData(_sm, _time, _attempts)
 		self.list.append(self.AutopilotData)
-		self.LandingGearData = self.__AircraftLandingGearData(_sm, _time, _attemps)
+		self.LandingGearData = self.__AircraftLandingGearData(_sm, _time, _attempts)
 		self.list.append(self.LandingGearData)
-		self.AircraftEnvironmentData = self.__AircraftEnvironmentData(_sm, _time, _attemps)
+		self.AircraftEnvironmentData = self.__AircraftEnvironmentData(_sm, _time, _attempts)
 		self.list.append(self.AircraftEnvironmentData)
-		self.HelicopterSpecificData = self.__HelicopterSpecificData(_sm, _time, _attemps)
+		self.HelicopterSpecificData = self.__HelicopterSpecificData(_sm, _time, _attempts)
 		self.list.append(self.HelicopterSpecificData)
-		self.MiscellaneousSystemsData = self.__AircraftMiscellaneousSystemsData(_sm, _time, _attemps)
+		self.MiscellaneousSystemsData = self.__AircraftMiscellaneousSystemsData(_sm, _time, _attempts)
 		self.list.append(self.MiscellaneousSystemsData)
-		self.MiscellaneousData = self.__AircraftMiscellaneousData(_sm, _time, _attemps)
+		self.MiscellaneousData = self.__AircraftMiscellaneousData(_sm, _time, _attempts)
 		self.list.append(self.MiscellaneousData)
-		self.StringData = self.__AircraftStringData(_sm, _time, _attemps)
+		self.StringData = self.__AircraftStringData(_sm, _time, _attempts)
 		self.list.append(self.StringData)
-		self.AIControlledAircraft = self.__AIControlledAircraft(_sm, _time, _attemps)
+		self.AIControlledAircraft = self.__AIControlledAircraft(_sm, _time, _attempts)
 		self.list.append(self.AIControlledAircraft)
-		self.CarrierOperations = self.__CarrierOperations(_sm, _time, _attemps)
+		self.CarrierOperations = self.__CarrierOperations(_sm, _time, _attempts)
 		self.list.append(self.CarrierOperations)
-		self.Racing = self.__Racing(_sm, _time, _attemps)
+		self.Racing = self.__Racing(_sm, _time, _attempts)
 		self.list.append(self.Racing)
-		self.EnvironmentData = self.__EnvironmentData(_sm, _time, _attemps)
+		self.EnvironmentData = self.__EnvironmentData(_sm, _time, _attempts)
 		self.list.append(self.EnvironmentData)
-		self.SlingsandHoists = self.__SlingsandHoists(_sm, _time, _attemps)
+		self.CameraData = self.__Camera(_sm, _time, _attempts)
+		self.list.append(self.CameraData)
+		self.SlingsandHoists = self.__SlingsandHoists(_sm, _time, _attempts)
 		self.list.append(self.SlingsandHoists)
+
+	class __MSFSAircraftEngineData(RequestHelper):
+		list = {
+			"ENG_COMBUSTION:index": ["Combustion flag", b'ENG COMBUSTION:index', b'Bool', 'Y'],
+		}
 
 	class __AircraftEngineData(RequestHelper):
 		list = {
 			"NUMBER_OF_ENGINES": ["Number of engines (minimum 0, maximum 4)", b'NUMBER OF ENGINES', b'Number', 'N'],
 			"ENGINE_CONTROL_SELECT": ["Selected engines (combination of bit flags); 1 = Engine 1; 2 = Engine 2; 4 = Engine 3; 8 = Engine 4", b'ENGINE CONTROL SELECT', b'Mask', 'Y'],
 			"THROTTLE_LOWER_LIMIT": ["Percent throttle defining lower limit (negative for reverse thrust equipped airplanes)", b'THROTTLE LOWER LIMIT', b'Percent', 'N'],
-			"ENGINE_TYPE": ["Engine type:; 0 = Piston; 1 = Jet; 2 = None; 3 = Helo(Bell) turbine; 4 = Unsupported; 5 = Turboprop", b'ENGINE TYPE', b'Enum', 'N'],
 			"MASTER_IGNITION_SWITCH": ["Aircraft master ignition switch (grounds all engines magnetos)", b'MASTER IGNITION SWITCH', b'Bool', 'N'],
 			"GENERAL_ENG_COMBUSTION:index": ["Combustion flag", b'GENERAL ENG COMBUSTION:index', b'Bool', 'Y'],
 			"GENERAL_ENG_MASTER_ALTERNATOR:index": ["Alternator (generator) switch", b'GENERAL ENG MASTER ALTERNATOR:index', b'Bool', 'N'],
@@ -281,7 +289,6 @@ class AircraftRequests():
 			"RECIP_ENG_FUEL_AVAILABLE:index": ["True if fuel is available", b'RECIP ENG FUEL AVAILABLE:index', b'Bool', 'Y'],
 			"RECIP_ENG_FUEL_FLOW:index": ["Engine fuel flow", b'RECIP ENG FUEL FLOW:index', b'Pounds per hour', 'Y'],
 			"RECIP_ENG_FUEL_TANK_SELECTOR:index": ["Fuel tank selected for engine. See fuel tank list.", b'RECIP ENG FUEL TANK SELECTOR:index', b'Enum', 'N'],
-			"ENGINE_TYPE": ["Engine type:; 0 = Piston; 1 = Jet; 2 = None; 3 = Helo(Bell) turbine; 4 = Unsupported; 5 = Turboprop", b'ENGINE TYPE', b'Enum', 'N'],
 			"RECIP_ENG_FUEL_NUMBER_TANKS_USED:index": ["Number of tanks currently being used", b'RECIP ENG FUEL NUMBER TANKS USED:index', b'Number', 'N'],
 			"RECIP_CARBURETOR_TEMPERATURE:index": ["Carburetor temperature", b'RECIP CARBURETOR TEMPERATURE:index', b'Celsius', 'Y'],
 			"RECIP_MIXTURE_RATIO:index": ["Fuel / Air mixture ratio", b'RECIP MIXTURE RATIO:index', b'Ratio', 'Y'],
@@ -468,18 +475,6 @@ class AircraftRequests():
 			"INCIDENCE_ALPHA": ["Angle of attack", b'INCIDENCE ALPHA', b'Radians', 'N'],
 			"INCIDENCE_BETA": ["Sideslip angle", b'INCIDENCE BETA', b'Radians', 'N'],
 			"WING_FLEX_PCT:index": ["The current wing flex. Different values can be set for each wing (for example, during banking). Set an index of 1 for the left wing, and 2 for the right wing.", b'WING FLEX PCT:index', b'Percent over 100', 'Y'],
-			# "STRUCT_LATLONALT": ["Returns the latitude, longitude and altitude of the user aircraft.", b'STRUCT LATLONALT', b'SIMCONNECT_DATA_LATLONALT', 'N'],
-			# "STRUCT_LATLONALTPBH": ["Returns the pitch, bank and heading of the user aircraft.", b'STRUCT LATLONALTPBH', b'SIMCONNECT_DATA_LATLONALT', 'N'],
-			# "STRUCT_SURFACE_RELATIVE_VELOCITY": ["The relative surface velocity.", b'STRUCT SURFACE RELATIVE VELOCITY', b'SIMCONNECT_DATA_XYZ', 'N'],
-			# "STRUCT_WORLDVELOCITY": ["The world velocity.", b'STRUCT WORLDVELOCITY', b'SIMCONNECT_DATA_XYZ', 'N'],
-			# "STRUCT_WORLD_ROTATION_VELOCITY": ["The world rotation velocity.", b'STRUCT WORLD ROTATION VELOCITY', b'SIMCONNECT_DATA_XYZ', 'N'],
-			# "STRUCT_BODY_VELOCITY": ["The object body velocity.", b'STRUCT BODY VELOCITY', b'SIMCONNECT_DATA_XYZ', 'N'],
-			# "STRUCT_BODY_ROTATION_VELOCITY": ["The body rotation velocity. Individual body rotation values are in the Aircraft Position and Speed section.", b'STRUCT BODY ROTATION VELOCITY', b'SIMCONNECT_DATA_XYZ', 'N'],
-			# "STRUCT_WORLD_ACCELERATION": ["The world acceleration for each axis. Individual world acceleration values are in the Aircraft Position and Speed section.", b'STRUCT WORLD ACCELERATION', b'SIMCONNECT_DATA_XYZ', 'N'],
-			# "STRUCT_ENGINE_POSITION:index": ["The engine position relative to the reference datum position for the aircraft.", b'STRUCT ENGINE POSITION:index', b'SIMCONNECT_DATA_XYZ.', 'N'],
-			# "STRUCT_EYEPOINT_DYNAMIC_ANGLE": ["The angle of the eyepoint view. Zero, zero, zero is straight ahead.", b'STRUCT EYEPOINT DYNAMIC ANGLE', b'SIMCONNECT_DATA_XYZ', 'N'],
-			# "STRUCT_EYEPOINT_DYNAMIC_OFFSET": ["A variable offset away from the EYEPOINT POSITION", b'STRUCT EYEPOINT DYNAMIC OFFSET', b'SIMCONNECT_DATA_XYZ', 'N'],
-			# "EYEPOINT_POSITION": ["The eyepoint position relative to the reference datum position for the aircraft.", b'EYEPOINT POSITION', b'SIMCONNECT_DATA_XYZ', 'N'],
 		}
 
 	class __AircraftFlightInstrumentationData(RequestHelper):
@@ -648,13 +643,6 @@ class AircraftRequests():
 			"GPS_WP_PREV_ID": ["ID of previous GPS waypoint", b'GPS WP PREV ID', b'String', 'N'],
 			"GPS_TARGET_DISTANCE": ["Distance to target", b'GPS TARGET DISTANCE', b'Meters', 'N'],
 			"GPS_TARGET_ALTITUDE": ["Altitude of GPS target", b'GPS TARGET ALTITUDE', b'Meters', 'N'],
-			# "ADF_LATLONALT:index": ["Returns the latitude, longitude and altitude of the station the radio equipment is currently tuned to, or zeros if the radio is not tuned to any ADF station. Index of 1 or 2 for ADF 1 and ADF 2.", b'ADF LATLONALT:index', b'SIMCONNECT_DATA_LATLONALT', 'N'],
-			# "NAV_VOR_LATLONALT:index": ["Returns the VOR station latitude, longitude and altitude.", b'NAV VOR LATLONALT:index', b'SIMCONNECT_DATA_LATLONALT', 'N'],
-			# "NAV_GS_LATLONALT:index": ["Returns the glide slope.", b'NAV GS LATLONALT:index', b'SIMCONNECT_DATA_LATLONALT', 'N'],
-			# "NAV_DME_LATLONALT:index": ["Returns the DME station.", b'NAV DME LATLONALT:index', b'SIMCONNECT_DATA_LATLONALT', 'N'],
-			# "INNER_MARKER_LATLONALT": ["Returns the latitude, longitude and altitude of the inner marker of an approach to a runway, if the aircraft is within the required proximity, otherwise it will return zeros.", b'INNER MARKER LATLONALT', b'SIMCONNECT_DATA_LATLONALT', 'N'],
-			# "MIDDLE_MARKER_LATLONALT": ["Returns the latitude, longitude and altitude of the middle marker.", b'MIDDLE MARKER LATLONALT', b'SIMCONNECT_DATA_LATLONALT', 'N'],
-			# "OUTER_MARKER_LATLONALT": ["Returns the latitude, longitude and altitude of the outer marker.", b'OUTER MARKER LATLONALT', b'SIMCONNECT_DATA_LATLONALT', 'N'],
 		}
 
 	class __AircraftControlsData(RequestHelper):
@@ -713,45 +701,46 @@ class AircraftRequests():
 
 	class __AircraftAutopilotData(RequestHelper):
 		list = {
-			"AUTOPILOT_AVAILABLE": ["Available flag", b'AUTOPILOT AVAILABLE', b'Bool', 'N'],
-			"AUTOPILOT_MASTER": ["On/off flag", b'AUTOPILOT MASTER', b'Bool', 'N'],
-			"AUTOPILOT_NAV_SELECTED": ["Index of Nav radio selected", b'AUTOPILOT NAV SELECTED', b'Number', 'N'],
-			"AUTOPILOT_WING_LEVELER": ["Wing leveler active", b'AUTOPILOT WING LEVELER', b'Bool', 'N'],
-			"AUTOPILOT_NAV1_LOCK": ["Lateral nav mode active", b'AUTOPILOT NAV1 LOCK', b'Bool', 'N'],
-			"AUTOPILOT_HEADING_LOCK": ["Heading mode active", b'AUTOPILOT HEADING LOCK', b'Bool', 'N'],
-			"AUTOPILOT_HEADING_LOCK_DIR": ["Selected heading", b'AUTOPILOT HEADING LOCK DIR', b'Degrees', 'N'],
-			"AUTOPILOT_ALTITUDE_LOCK": ["Altitude hole active", b'AUTOPILOT ALTITUDE LOCK', b'Bool', 'N'],
-			"AUTOPILOT_ALTITUDE_LOCK_VAR": ["Selected altitude", b'AUTOPILOT ALTITUDE LOCK VAR', b'Feet', 'N'],
-			"AUTOPILOT_ATTITUDE_HOLD": ["Attitude hold active", b'AUTOPILOT ATTITUDE HOLD', b'Bool', 'N'],
-			"AUTOPILOT_GLIDESLOPE_HOLD": ["GS hold active", b'AUTOPILOT GLIDESLOPE HOLD', b'Bool', 'N'],
-			"AUTOPILOT_PITCH_HOLD_REF": ["Current reference pitch", b'AUTOPILOT PITCH HOLD REF', b'Radians', 'N'],
-			"AUTOPILOT_APPROACH_HOLD": ["Approach mode active", b'AUTOPILOT APPROACH HOLD', b'Bool', 'N'],
-			"AUTOPILOT_BACKCOURSE_HOLD": ["Back course mode active", b'AUTOPILOT BACKCOURSE HOLD', b'Bool', 'N'],
-			"AUTOPILOT_VERTICAL_HOLD_VAR": ["Selected vertical speed", b'AUTOPILOT VERTICAL HOLD VAR', b'Feet/minute', 'N'],
-			"AUTOPILOT_PITCH_HOLD": ["Set to True if the autopilot pitch hold has is engaged.", b'AUTOPILOT PITCH HOLD', b'Bool', 'N'],
-			"AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE": ["Flight director active", b'AUTOPILOT FLIGHT DIRECTOR ACTIVE', b'Bool', 'N'],
-			"AUTOPILOT_FLIGHT_DIRECTOR_PITCH": ["Reference pitch angle", b'AUTOPILOT FLIGHT DIRECTOR PITCH', b'Radians', 'N'],
-			"AUTOPILOT_FLIGHT_DIRECTOR_BANK": ["Reference bank angle", b'AUTOPILOT FLIGHT DIRECTOR BANK', b'Radians', 'N'],
-			"AUTOPILOT_AIRSPEED_HOLD": ["Airspeed hold active", b'AUTOPILOT AIRSPEED HOLD', b'Bool', 'N'],
 			"AUTOPILOT_AIRSPEED_HOLD_VAR": ["Selected airspeed", b'AUTOPILOT AIRSPEED HOLD VAR', b'Knots', 'N'],
-			"AUTOPILOT_MACH_HOLD": ["Mach hold active", b'AUTOPILOT MACH HOLD', b'Bool', 'N'],
-			"AUTOPILOT_MACH_HOLD_VAR": ["Selected mach", b'AUTOPILOT MACH HOLD VAR', b'Number', 'N'],
-			"AUTOPILOT_YAW_DAMPER": ["Yaw damper active", b'AUTOPILOT YAW DAMPER', b'Bool', 'N'],
-			"AUTOPILOT_RPM_HOLD_VAR": ["Selected rpm", b'AUTOPILOT RPM HOLD VAR', b'Number', 'N'],
-			"AUTOPILOT_THROTTLE_ARM": ["Autothrottle armed", b'AUTOPILOT THROTTLE ARM', b'Bool', 'N'],
-			"AUTOPILOT_TAKEOFF_POWER_ACTIVE": ["Takeoff / Go Around power mode active", b'AUTOPILOT TAKEOFF POWER ACTIVE', b'Bool', 'N'],
-			"AUTOTHROTTLE_ACTIVE": ["Auto-throttle active", b'AUTOTHROTTLE ACTIVE', b'Bool', 'N'],
-			"AUTOPILOT_NAV1_LOCK": ["True if autopilot nav1 lock applied", b'AUTOPILOT NAV1 LOCK', b'Bool', 'N'],
-			"AUTOPILOT_VERTICAL_HOLD": ["True if autopilot vertical hold applied", b'AUTOPILOT VERTICAL HOLD', b'Bool', 'N'],
-			"AUTOPILOT_RPM_HOLD": ["True if autopilot rpm hold applied", b'AUTOPILOT RPM HOLD', b'Bool', 'N'],
-			"AUTOPILOT_MAX_BANK": ["True if autopilot max bank applied", b'AUTOPILOT MAX BANK', b'Radians', 'N'],
-			"FLY_BY_WIRE_ELAC_SWITCH": ["True if the fly by wire Elevators and Ailerons computer is on.", b'FLY BY WIRE ELAC SWITCH', b'Bool', 'N'],
-			"FLY_BY_WIRE_FAC_SWITCH": ["True if the fly by wire Flight Augmentation computer is on.", b'FLY BY WIRE FAC SWITCH', b'Bool', 'N'],
-			"FLY_BY_WIRE_SEC_SWITCH": ["True if the fly by wire Spoilers and Elevators computer is on.", b'FLY BY WIRE SEC SWITCH', b'Bool', 'N'],
-			"FLY_BY_WIRE_ELAC_FAILED": ["True if the Elevators and Ailerons computer has failed.", b'FLY BY WIRE ELAC FAILED', b'Bool', 'N'],
-			"FLY_BY_WIRE_FAC_FAILED": ["True if the Flight Augmentation computer has failed.", b'FLY BY WIRE FAC FAILED', b'Bool', 'N'],
-			"FLY_BY_WIRE_SEC_FAILED": ["True if the Spoilers and Elevators computer has failed.", b'FLY BY WIRE SEC FAILED', b'Bool', 'N'],
+			"AUTOPILOT_AIRSPEED_HOLD": ["Airspeed hold active", b'AUTOPILOT AIRSPEED HOLD', b'Bool', 'N'],
+			"AUTOPILOT_ALTITUDE_LOCK_VAR": ["Selected altitude", b'AUTOPILOT ALTITUDE LOCK VAR', b'Feet', 'N'],
+			"AUTOPILOT_ALTITUDE_LOCK": ["Altitude hole active", b'AUTOPILOT ALTITUDE LOCK', b'Bool', 'N'],
+			"AUTOPILOT_APPROACH_HOLD": ["Approach mode active", b'AUTOPILOT APPROACH HOLD', b'Bool', 'N'],
+			"AUTOPILOT_ATTITUDE_HOLD": ["Attitude hold active", b'AUTOPILOT ATTITUDE HOLD', b'Bool', 'N'],
+			"AUTOPILOT_AVAILABLE": ["Available flag", b'AUTOPILOT AVAILABLE', b'Bool', 'N'],
+			"AUTOPILOT_BACKCOURSE_HOLD": ["Back course mode active", b'AUTOPILOT BACKCOURSE HOLD', b'Bool', 'N'],
+			"AUTOPILOT_FLIGHT_DIRECTOR_ACTIVE": ["Flight director active", b'AUTOPILOT FLIGHT DIRECTOR ACTIVE', b'Bool', 'N'],
+			"AUTOPILOT_FLIGHT_DIRECTOR_BANK": ["Reference bank angle", b'AUTOPILOT FLIGHT DIRECTOR BANK', b'Radians', 'N'],
+			"AUTOPILOT_FLIGHT_DIRECTOR_PITCH": ["Reference pitch angle", b'AUTOPILOT FLIGHT DIRECTOR PITCH', b'Radians', 'N'],
 			"AUTOPILOT_FLIGHT_LEVEL_CHANGE": ["True if autopilot FLC mode applied", b'AUTOPILOT FLIGHT LEVEL CHANGE', b'Bool', 'N'],
+			"AUTOPILOT_GLIDESLOPE_HOLD": ["GS hold active", b'AUTOPILOT GLIDESLOPE HOLD', b'Bool', 'N'],
+			"AUTOPILOT_HEADING_LOCK": ["Heading mode active", b'AUTOPILOT HEADING LOCK', b'Bool', 'N'],
+			"AUTOPILOT_HEADING_LOCK_DIR": ["Selected heading", b'AUTOPILOT HEADING LOCK DIR', b'Degrees', 'Y'],
+			"AUTOPILOT_HEADING_MANUALLY_TUNABLE": ["Whether or not the autopilot heading is manually tunable.", b'AUTOPILOT HEADING MANUALLY TUNABLE', b'Bool', 'Y'],
+			"AUTOPILOT_MACH_HOLD_VAR": ["Selected mach", b'AUTOPILOT MACH HOLD VAR', b'Number', 'N'],
+			"AUTOPILOT_MACH_HOLD": ["Mach hold active", b'AUTOPILOT MACH HOLD', b'Bool', 'N'],
+			"AUTOPILOT_MASTER": ["On/off flag", b'AUTOPILOT MASTER', b'Bool', 'N'],
+			"AUTOPILOT_MAX_BANK": ["True if autopilot max bank applied", b'AUTOPILOT MAX BANK', b'Radians', 'N'],
+			"AUTOPILOT_NAV_SELECTED": ["Index of Nav radio selected", b'AUTOPILOT NAV SELECTED', b'Number', 'N'],
+			"AUTOPILOT_NAV1_LOCK": ["Lateral nav mode active", b'AUTOPILOT NAV1 LOCK', b'Bool', 'N'],
+			"AUTOPILOT_NAV1_LOCK": ["True if autopilot nav1 lock applied", b'AUTOPILOT NAV1 LOCK', b'Bool', 'N'],
+			"AUTOPILOT_PITCH_HOLD_REF": ["Current reference pitch", b'AUTOPILOT PITCH HOLD REF', b'Radians', 'N'],
+			"AUTOPILOT_PITCH_HOLD": ["Set to True if the autopilot pitch hold has is engaged.", b'AUTOPILOT PITCH HOLD', b'Bool', 'N'],
+			"AUTOPILOT_RPM_HOLD_VAR": ["Selected rpm", b'AUTOPILOT RPM HOLD VAR', b'Number', 'N'],
+			"AUTOPILOT_RPM_HOLD": ["True if autopilot rpm hold applied", b'AUTOPILOT RPM HOLD', b'Bool', 'N'],
+			"AUTOPILOT_TAKEOFF_POWER_ACTIVE": ["Takeoff / Go Around power mode active", b'AUTOPILOT TAKEOFF POWER ACTIVE', b'Bool', 'N'],
+			"AUTOPILOT_THROTTLE_ARM": ["Autothrottle armed", b'AUTOPILOT THROTTLE ARM', b'Bool', 'N'],
+			"AUTOPILOT_VERTICAL_HOLD_VAR": ["Selected vertical speed", b'AUTOPILOT VERTICAL HOLD VAR', b'Feet/minute', 'N'],
+			"AUTOPILOT_VERTICAL_HOLD": ["True if autopilot vertical hold applied", b'AUTOPILOT VERTICAL HOLD', b'Bool', 'N'],
+			"AUTOPILOT_WING_LEVELER": ["Wing leveler active", b'AUTOPILOT WING LEVELER', b'Bool', 'N'],
+			"AUTOPILOT_YAW_DAMPER": ["Yaw damper active", b'AUTOPILOT YAW DAMPER', b'Bool', 'N'],
+			"AUTOTHROTTLE_ACTIVE": ["Auto-throttle active", b'AUTOTHROTTLE ACTIVE', b'Bool', 'N'],
+			"FLY_BY_WIRE_ELAC_FAILED": ["True if the Elevators and Ailerons computer has failed.", b'FLY BY WIRE ELAC FAILED', b'Bool', 'N'],
+			"FLY_BY_WIRE_ELAC_SWITCH": ["True if the fly by wire Elevators and Ailerons computer is on.", b'FLY BY WIRE ELAC SWITCH', b'Bool', 'N'],
+			"FLY_BY_WIRE_FAC_FAILED": ["True if the Flight Augmentation computer has failed.", b'FLY BY WIRE FAC FAILED', b'Bool', 'N'],
+			"FLY_BY_WIRE_FAC_SWITCH": ["True if the fly by wire Flight Augmentation computer is on.", b'FLY BY WIRE FAC SWITCH', b'Bool', 'N'],
+			"FLY_BY_WIRE_SEC_FAILED": ["True if the Spoilers and Elevators computer has failed.", b'FLY BY WIRE SEC FAILED', b'Bool', 'N'],
+			"FLY_BY_WIRE_SEC_SWITCH": ["True if the fly by wire Spoilers and Elevators computer is on.", b'FLY BY WIRE SEC SWITCH', b'Bool', 'N'],
 		}
 
 	class __AircraftLandingGearData(RequestHelper):
@@ -1037,8 +1026,6 @@ class AircraftRequests():
 			"DISK_PITCH_PCT": ["Main rotor pitch percent (helicopters only)", b'DISK PITCH PCT', b'Percent over 100', 'N'],
 			"DISK_BANK_PCT": ["Main rotor bank percent (helicopters only)", b'DISK BANK PCT', b'Percent over 100', 'N'],
 			"DISK_CONING_PCT": ["Main rotor coning percent (helicopters only)", b'DISK CONING PCT', b'Percent over 100', 'N'],
-			# "NAV_VOR_LLAF64": ["Nav VOR latitude, longitude, altitude", b'NAV VOR LLAF64', b'SIMCONNECT_DATA_LATLONALT', 'N'],
-			# "NAV_GS_LLAF64": ["Nav GS latitude, longitude, altitude", b'NAV GS LLAF64', b'SIMCONNECT_DATA_LATLONALT', 'N'],
 			"STATIC_CG_TO_GROUND": ["Static CG to ground", b'STATIC CG TO GROUND', b'Feet', 'N'],
 			"STATIC_PITCH": ["Static pitch", b'STATIC PITCH', b'Radians', 'N'],
 			"CRASH_SEQUENCE": ["One of:; 0: off; 1: complete; 3: reset; 4: pause; 11: start", b'CRASH SEQUENCE', b'Enum', 'N'],
@@ -1169,4 +1156,16 @@ class AircraftRequests():
 			"LOCAL_DAY_OF_YEAR": ["Local day of year", b'LOCAL DAY OF YEAR', b'Number', 'N'],
 			"LOCAL_YEAR": ["Local year", b'LOCAL YEAR', b'Number', 'N'],
 			"TIME_ZONE_OFFSET": ["Local time difference from GMT", b'TIME ZONE OFFSET', b'Seconds', 'N'],
+		}
+
+	class __Camera(RequestHelper):
+		list = {
+			"CAMERA_GAMEPLAY_PITCH_YAW:index": ["Returns either the pitch (index 0) or the yaw (index 1) of the current gameplay camera.", b'CAMERA GAMEPLAY PITCH YAW:index', b'Radians', 'N'],
+			"CAMERA_REQUEST_ACTION": ["This can be used to have the currently active camera perform a predefined action.", b'CAMERA REQUEST ACTION', b'Enum', 'Y'],
+			"CAMERA_STATE": ["This can be used to get or set the camera 'state', which will be one of the listed enum values.", b'CAMERA STATE', b'Enum', 'Y'],
+			"CAMERA_SUBSTATE": ["This variable can be used to get or set the camera 'sub-state'.", b'CAMERA SUBSTATE', b'Enum', 'Y'],
+			"CAMERA_VIEW_TYPE_AND_INDEX:index": ["Get or set both the type of view for the current camera, as well as the option index.", b'CAMERA VIEW TYPE AND INDEX:index', b'Enum', 'Y'],
+			"CAMERA_VIEW_TYPE_AND_INDEX_MAX:index": ["Get the number of option indices related to a specific camera view type.", b'CAMERA VIEW TYPE AND INDEX MAX:index', b'Number', 'Y'],
+			"GAMEPLAY_CAMERA_FOCUS": ["This gets/sets the focus for the camera zoom.", b'GAMEPLAY CAMERA FOCUS', b'Number', 'Y'],
+			"IS_CAMERA_RAY_INTERSECT_WITH_NODE": ["Check for a collision along a ray from the center of the user FOV and a model node.", b'IS CAMERA RAY INTERSECT WITH NODE', b'Bool', 'N'],
 		}

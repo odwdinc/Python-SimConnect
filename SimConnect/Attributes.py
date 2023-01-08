@@ -692,8 +692,8 @@ class SimConnectDll(object):
 		self.RequestResponseTimes = self.SimConnect.SimConnect_RequestResponseTimes
 		self.RequestResponseTimes.restype = HRESULT
 		self.RequestResponseTimes.argtypes = [
-			HANDLE, 
-			DWORD, 
+			HANDLE,
+			DWORD,
 			c_float
 		]
 
@@ -812,8 +812,8 @@ class SimConnectDll(object):
 		self.MapClientDataNameToID = self.SimConnect.SimConnect_MapClientDataNameToID
 		self.MapClientDataNameToID.restype = HRESULT
 		self.MapClientDataNameToID.argtypes = [
-			HANDLE, 
-			c_char_p, 
+			HANDLE,
+			c_char_p,
 			SIMCONNECT_CLIENT_DATA_ID
 		]
 

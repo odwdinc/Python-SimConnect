@@ -5,9 +5,15 @@ Python interface for Microsoft Flight Simulator 2020 (MSFS2020) using SimConnect
 
 This library allows Python scripts to read and set variables within MSFS2020 and trigger events within the simulation.
 
-## Using SimConnect
+## Setup and use
 
-There are two ways to use SimConnect:
+This is a fork of the official https://github.com/odwdinc/Python-SimConnect repository, as such if you want to use this fork in your project, install this using:
+
+```
+python -m pip install git+https://github.com/pomax/python-simconnect@master#egg=simconnect
+```
+
+This fork offers two ways to make calls using SimConnect:
 
 1. the "convenient wrapper" way, and
 2. the more low level "direct simconnect instance" way.

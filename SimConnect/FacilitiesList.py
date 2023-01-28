@@ -3,7 +3,7 @@ from .Enum import *
 from .Constants import *
 
 
-class Facilitie(object):
+class Facility(object):
 	def __init__(self):
 		pass
 

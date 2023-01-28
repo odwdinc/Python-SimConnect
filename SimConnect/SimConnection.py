@@ -1,5 +1,7 @@
 from time import time
-from SimConnect import *
+from SimConnect import SimConnect
+from .RequestList import AircraftRequests
+from .EventList import AircraftEvents
 
 
 class SimConnection():
@@ -35,7 +37,7 @@ class SimConnection():
             self.connected = True
             self.aq = AircraftRequests(self.sm, _time=200)
             self.ae = AircraftEvents(self.sm)
-            camera = self.get_property_value("CAMERA_STATE")
+            camera = self.get("CAMERA_STATE")
             if camera is not None and camera <= 6:
                 self.sim_running = 3
 
@@ -47,7 +49,7 @@ class SimConnection():
     def get(self, name):
         # Special property for determining whether the user's playing the sim or not
         if name == "SIM_RUNNING":
-            camera = self.get_property_value("CAMERA_STATE")
+            camera = self.get("CAMERA_STATE")
             running = self.sim_running == 3 and camera is not None and camera <= 6
             if running:
                 return 3 + (camera) / 10
@@ -79,7 +81,7 @@ class SimConnection():
         return value
 
     def get_all(self, *args):
-        return [self.get_property_value(name) for name in args]
+        return [self.get(name) for name in args]
 
     def set(self, name, value):
         self.aq.set(name, float(value))

@@ -266,11 +266,11 @@ class SimConnect:
     def get_data(self, _Request):
         self.request_data(_Request)
         # self.run()
-        attemps = 0
-        while _Request.outData is None and attemps < _Request.attemps:
+        attempts = 0
+        while _Request.outData is None and attempts < _Request.attempts:
             # self.run()
             time.sleep(.01)
-            attemps += 1
+            attempts += 1
         if _Request.outData is None:
             return False
 

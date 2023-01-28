@@ -18,7 +18,7 @@ def millis():
 
 
 class SimConnect:
-    def __init__(self, eventListener, auto_connect=True, library_path=_library_path):
+    def __init__(self, event_listener=None, auto_connect=True, library_path=_library_path):
         self.Requests = {}
         self.Facilities = []
         self.dll = SimConnectDll(library_path)
@@ -31,7 +31,8 @@ class SimConnect:
         self.DEFINITION_POS = None
         self.DEFINITION_WAYPOINT = None
         self.my_dispatch_proc_rd = self.dll.DispatchProc(self.my_dispatch_proc)
-        self.add_event_listener(eventListener)
+        if event_listener is not None:
+            self.add_event_listener(event_listener)
         if auto_connect:
             self.connect()
 

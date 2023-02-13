@@ -3,16 +3,19 @@ from SimConnect import SimConnect
 from .RequestList import AircraftRequests
 from .EventList import AircraftEvents
 
+DEBUG = False
+
 
 class SimConnection():
     def __init__(self):
-        self.DEBUG = False
         self.connected = False
         self.sim_events = []
         self.sim_running = 0
         self.reset_position = False
 
     def handle_id_event(self, event_id):
+        if DEBUG:
+            print(f'sim event: {event_id}')
         self.sim_events.append(event_id)
         self.sim_running = event_id
         sequence = self.sim_events[-3:]
@@ -30,7 +33,7 @@ class SimConnection():
         pass
 
     def connect(self):
-        if self.DEBUG is True:
+        if DEBUG is True:
             print("Connecting to simulator...")
         try:
             self.sm = SimConnect(self)
@@ -38,12 +41,13 @@ class SimConnection():
             self.aq = AircraftRequests(self.sm, _time=200)
             self.ae = AircraftEvents(self.sm)
             camera = self.get("CAMERA_STATE")
+
             if camera is not None and camera <= 6:
                 self.sim_running = 3
 
         except ConnectionError:
             seconds = 5.0
-            if self.DEBUG is True:
+            if DEBUG is True:
                 print(f'No simulator found, retrying in {seconds}s')
 
     def get(self, name):
@@ -51,9 +55,11 @@ class SimConnection():
         if name == "SIM_RUNNING":
             camera = self.get("CAMERA_STATE")
             running = self.sim_running == 3 and camera is not None and camera <= 6
+            if DEBUG:
+                print(f'camera: {camera}, running: {self.sim_running}')
             if running:
-                return 3 + (camera) / 10
-            return 0
+                return 3 + camera / 10
+            return self.sim_running + (camera / 10 if camera is not None else 0)
 
         # Special property for determining whether the user's paused on the menu
         if name == "SIM_PAUSED":
@@ -69,8 +75,10 @@ class SimConnection():
     def get_standard_property_value(self, name):
         try:
             value = self.aq.get(name)
-        except OSError:
-            self.disconnect()
+        except OSError as error:
+            print(error)
+            # assume the DLL had a hiccup and just build a new connection, 
+            self.connect()
             return None
 
         try:

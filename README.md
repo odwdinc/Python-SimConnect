@@ -24,6 +24,7 @@ Use the `SimConnection` wrapper object:
 
 ```python
 from SimConnect import SimConnection
+from math import degrees
 
 
 connection = SimConnection()
@@ -51,7 +52,7 @@ if running >= 3 and not paused:
             'INDICATED_ALTITUDE',
             'PLANE_HEADING_DEGREES_MAGNETIC',
         )
-        print(f'Going {speed}kts at {alt}\' heading {heading} degrees.')
+        print(f'Going {speed}kts at {alt}\' heading {degrees(heading)} degrees.')
 
 
         print('Enabling autopilot and setting alt hold to 1500 feet')
@@ -60,7 +61,7 @@ if running >= 3 and not paused:
         if ap_enabled == 0:
             connection.trigger('AP_MASTER')
 
-        connection.trigger('AP_ALT_VAR_SET_ENGLISH', 15000)
+        connection.trigger('AP_ALT_VAR_SET_ENGLISH', 1500)
 
 connection.disconnect()
 ```
